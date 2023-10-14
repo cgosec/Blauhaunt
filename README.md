@@ -32,6 +32,7 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
 ### Client Info
      {
         "os_info": {
+             "hostname": "Desti-LAPTOP"
              "release": "Windows 10"
         },
         "labels": [
