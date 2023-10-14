@@ -25,7 +25,7 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
         "LogonType":"-",
         "SourceIP":"-",
         "SourceHostname":"Sourci-LAPTOP",
-        "LogonCount":3  # optional
+        "LogonCount":3
         }
 
 
