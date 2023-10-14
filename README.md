@@ -49,6 +49,6 @@ Can be any CSV File. Delimiter can be specified and cols for Hostname and IP can
 
 ## Acknowledgements
  - [SEC Consult](https://sec-consult.com/de/) This work was massively motivated by my work in and with the SEC Defence team
+ - [Velociraptor](https://github.com/Velocidex/velociraptor/) is the game changer making it possible to collect the data to display at scale (tested with > 6000k Systems already!) 
  - [LogonTracer](https://github.com/JPCERTCC/LogonTracer) inspired the layout and part of the techstack of this project
  - [CyberChef](https://gchq.github.io/CyberChef/) inspired the idea of creating a version of Blauhaunt running without backend system all browser based
-
