@@ -7,7 +7,9 @@ A tool collection for filtering and visualizing logon events. Designed to help a
 ## Architekture
 Blauhaunt is designed to run entirely without a backend system.
 I suggest simply starting a python http server on the local system from a shell in the directory where the index.html is in with this command:
+
      python -m http.server
+     
 if you are using linux likely you have the type python3 instead of python - but if you are using this tool you sould be technical skilled enough to figure that out yourself ;)
 
 *Some day I will create a backend in Django with an API to get realtime data to display for better threat hunting*
