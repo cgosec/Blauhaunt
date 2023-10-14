@@ -27,6 +27,7 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
         "SourceHostname":"Sourci-LAPTOP",
         "LogonCount":3
         }
+***To correctly process the files each starting with { and ending with } must be in a new line***
 
 
 ### Client Info
@@ -35,3 +36,8 @@ Comming soon
 
 ### Host IP Mapping
 Can be any CSV File. Delimiter can be specified and cols for Hostname and IP can be choosen
+
+## Acknowledgements
+ - [SEC Consult](https://sec-consult.com/de/) This work was massively motivated by my work in and with the SEC Defence team
+ - [LogonTracer](https://github.com/JPCERTCC/LogonTracer) inspired the layout and part of the techstack of this project
+
