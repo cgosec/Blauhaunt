@@ -1,0 +1,6 @@
+Host, Ip
+a, 10.10.10.1
+b, 10.10.10.2
+c, 10.10.10.3
+wrong, abcd
+exclude, bad

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>BlauHaunt</title>
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+          integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/basic/jquery.qtip.min.css" rel="stylesheet">
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.6/css/bootstrap5-toggle.min.css"
+            rel="stylesheet"/>
+    <link crossorigin="anonymous"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css"
+          integrity="sha512-SgaqKKxJDQ/tAUAAXzvxZz33rmn7leYDYfBP+YoMRSENhf3zJyx3SBASt/OfeQwBHA1nxMis7mM3EV/oYT6Fdw=="
+          referrerpolicy="no-referrer" rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/css/tempusdominus-bootstrap-4.min.css"
+          integrity="sha384-8wYGNo4TwC9xzqNRdt7OUN789eBPzNQlO/sxIKaJR1gkX0+Ok1kXxhHR4pZU+gP2" crossorigin="anonymous">
+    <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          referrerpolicy="no-referrer" rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-BxJRFdTKV85fhFUw+olPr0B+UEzk8FTLxRB7dAdhoQ7SXmwMECj1I4BlSmZfeoSfy0OVA8xFLTDyObu3Nv1FoQ=="
+            referrerpolicy="no-referrer"
+            src="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.6/js/bootstrap5-toggle.jquery.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-TPh2Oxlg1zp+kz3nFA0C5vVC6leG/6mm1z9+mA81MI5eaUVqasPLO8Cuk4gMF4gUfP5etR73rgU/8PNMsSesoQ=="
+            referrerpolicy="no-referrer"
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-3dZ9wIrMMij8rOH7X3kLfXAzwtcHpuYpEgQg1OA4QAob1e81H8ntUQmQm3pBudqIoySO5j0tHN4ENzA6+n2r4w=="
+            referrerpolicy="no-referrer"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha512-QWYhhlZXfhMzyiML+xSFHYINwLvLsVd2Ex6QKA4JQzulKAsXiHoNXN1gCgB7GUaVL8xGI9L6XXyqPJVLASVP7g=="
+            referrerpolicy="no-referrer"
+            src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.0/cytoscape.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-jJ6MCpnkaa5gDX4/qEUeKZ6SOfPAa+hfjLifoOrfDehIF0VTqdPA6sqrkWRYJIGi"
+            src="https://cdn.jsdelivr.net/npm/cytoscape-qtip@2.8.0/cytoscape-qtip.min.js"></script>
+
+    <script crossorigin="anonymous"
+            integrity="sha384-sIzeKWIAHvT0Vm8QbfLCqZwBG0WMCkWVAOYd/330YSNeeQ1Y57N3T9lQz5Ry/EHH"
+            src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.1/js/tempusdominus-bootstrap-4.min.js"
+            integrity="sha384-hzexvprs0k2Q/IHSJOfegsjdg6kTcTTVxQdgHiB4+I/915hcvse9v42LLVVM5K4e"
+            crossorigin="anonymous"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-J1rV4940pYhBtFhx6SqDEMJP35rgSVSVx+44+TPf67jyXL8dsBtYMZeBCNLf/2zk"
+            src="https://cdn.jsdelivr.net/npm/desvg@1.0.2/desvg.min.js"></script>
+    <link href="static/css/style.css" rel="stylesheet">
+    <link href="static/css/dark-mode.css" rel="stylesheet">
+
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light p-1 shadow">
+    <a class="navbar-brand" href="#"><img alt="top" class="my_svg" src="static/images/blauhaunt.png"
+                                          style="width: 80px"></a>
+    <div class="collapse navbar-collapse">
+        <form class="navbar-nav" role="search">
+            <button class="btn btn-secondary me-2" data-bs-target="#UploadEVTX" data-bs-toggle="modal" type="button">
+                Upload Files
+            </button>
+            <div class="btn-group ms-1 me-2 ">
+                <button class="btn btn-outline-secondary" type="button">Cases</button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="casesDropdown" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <ul aria-labelledby="navbarDropdown" class="dropdown-menu" id="caseDropdown">
+                    <li class=" dropdown-item">
+                        <div class="row">
+                            <label for="newCaseName"><input id="newCaseName" placeholder="Case Name"
+                                                            type="text"></label>
+                            <button class="btn btn-outline-secondary ms-2  h-75"
+                                    onclick="storeDataToIndexDB(document.getElementById('newCaseName').value)"
+                                    type="button">Save
+                            </button>
+                            <hr>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <form name="graphStyle">
+                <div class="btn-group" role="group">
+                    <input autocomplete="off" checked="checked" class="btn-check graphStyle" id="modeSystem"
+                           name="btnradio2"
+                           type="radio">
+                    <label class="btn btn-outline-secondary" for="modeSystem">System</label>
+                    <input autocomplete="off" class="btn-check graphStyle" id="modeUser" name="btnradio2" type="radio">
+                    <label class="btn btn-outline-secondary" for="modeUser">User</label>
+                </div>
+            </form>
+            <div class="row ms-2 mt-1 h-50">
+                <div>Nodes:&nbsp<a id="nodesConter">0</a></div>
+                <div>Edges:&nbsp&nbsp<a id="edgesCounter">0</a></div>
+            </div>
+            <button class="btn btn-outline-primary mt-2 h-25" onclick="{
+                              document.getElementById('filterSideBar').classList.toggle('show')
+                    }" type="button">
+                Filters
+            </button>
+            <!-- <button class="btn btn-outline-primary mt-2 h-25" disabled id="renderGraphBtn"
+                    onclick="renderGraphBtnClick()"
+                    type="button">Render
+            </button> -->
+            <div class="btn-group ms-5 mt-2 h-25">
+                <button class="btn btn-outline-secondary" type="button" id="currentDisplayBtn"
+                        onclick="renderGraphBtnClick()">Render
+                </button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="currentDisplay" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div aria-labelledby="currentDisplay" class="dropdown-menu">
+                    <input autocomplete="off" checked="checked" class="btn-check render-radios" id="renderGraph"
+                           name="renderradio"
+                           type="radio" value="graph">
+                    <label class="btn btn-outline-secondary dropdown-item" for="renderGraph">Graph</label>
+                    <input autocomplete="off" class="btn-check render-radios" id="renderTimeline" name="renderradio"
+                           type="radio" value="timeline">
+                    <label class="btn btn-outline-secondary dropdown-item" for="renderTimeline">Timeline</label>
+                    <input autocomplete="off" class="btn-check render-radios" id="renderHeatmap" name="renderradio"
+                           type="radio" value="heatmap">
+                    <label class="btn btn-outline-secondary dropdown-item" for="renderHeatmap">Heatmap</label>
+                    <!--
+                    <a class="dropdown-item"
+                       onclick="{currentDisplay = 'graph'; document.getElementById('currentDisplayBtn').innerText = 'Graph'}">Graph</a>
+                    <a class="dropdown-item"
+                       onclick="{currentDisplay = 'timeline'; document.getElementById('currentDisplayBtn').innerText = 'Timeline'}">Timeline</a>
+                    <a class="dropdown-item"
+                       onclick="{currentDisplay = 'heatmap'; document.getElementById('currentDisplayBtn').innerText = 'HeatMap'}">HeatMap</a>
+                       -->
+                </div>
+            </div>
+            <div class="btn-group ms-4 mt-2 h-25" role="group">
+                <button class="btn btn-outline-secondary" type="button" id="currentGraphBtn"
+                >GraphStyle
+                </button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="currentGraph" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div class="dropdown-menu">
+                    <input autocomplete="off" checked="checked" class="btn-check" id="modeGrid" name="btnradio"
+                           type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item" for="modeGrid">grid</label>
+                    <input autocomplete="off" class="btn-check" id="modeCose" name="btnradio" type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item" for="modeCose">cose</label>
+                    <input autocomplete="off" class="btn-check" id="modeCircle" name="btnradio" type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item" for="modeCircle">circle</label>
+                    <input autocomplete="off" class="btn-check" id="modeTree" name="btnradio" type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item" for="modeTree">tree</label>
+                    <input autocomplete="off" class="btn-check" id="modeConcentric" name="btnradio" type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item" for="modeConcentric">concentric</label>
+                </div>
+            </div>
+            <div class="form-check form-switch ms-2 mt-2 h-25">
+                <input class="form-check-input" id="darkSwitch" type="checkbox">
+                <label class="form-check-label" for="darkSwitch">Dark Mode</label>
+            </div>
+            <script src="static/js/dark-mode-switch.min.js"></script>
+            <div class="btn-group ms-5 mt-2 h-25">
+                <button class="btn btn-outline-secondary" type="button">Tags</button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="tagColorDropdown" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div aria-labelledby="navbarDropdown" class="dropdown-menu cleanOnLoad" id="tagColorList">
+                </div>
+            </div>
+            <div class="btn-group ms-5 mt-2 h-25">
+                <button class="btn btn-outline-secondary" type="button">Export</button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="navbarDropdown" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                    <a class="dropdown-item" href="#" onclick="exportCSV()">Timeline</a>
+                    <a class="dropdown-item" download="image.json" href="#" id="export-json"
+                       onclick="exportJSON()">GraphJSON</a>
+                    <!--    <a class="dropdown-item" download="case.json" href="#" id="caseexport-json"
+                           onclick="exportCaseJSON()">CaseJSON</a> -->
+                    <a class="dropdown-item" download="image.png" href="#" id="export-png" onclick="exportPNG()">PNG</a>
+                    <a class="dropdown-item" download="image.jpeg" href="#" id="export-jpeg"
+                       onclick="exportJPEG()">JPEG</a>
+                </div>
+            </div>
+            <button class="btn btn-outline-primary ms-5 mt-2 h-25" onclick="{
+              document.getElementById('statsSideBar').classList.toggle('show')
+                    }" type="button">
+                Stats
+            </button>
+        </form>
+    </div>
+</nav>
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-2 sidebar dropdown-menu position-absolute collapse" id="filterSideBar">
+            <div class="row ps-3 pe-3">
+                <button class="btn btn-secondary" data-bs-placement="bottom"
+                        data-bs-toggle="tooltip"
+                        onclick="createQuery()" title="Apply all selected filters below"
+                        type="button">
+                    Apply
+                </button>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="row">
+                    <div id="itemFormUser">
+                        <div class="row">
+                            <label>
+                                <input class="form-control" id="queryUser" placeholder="User RegEx (history CTRL + Q)"
+                                       type="text"
+                                       value=""></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="itemFormSrc">
+                        <div class="row">
+                            <label>
+                                <input class="form-control" id="queryHostSrc"
+                                       placeholder="Src Host RegEx (history CTRL + B)"
+                                       type="text"
+                                       value=""></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div id="itemFormDest">
+                        <div class="row">
+                            <label>
+                                <input class="form-control" id="queryHostDst"
+                                       placeholder="Dst Host RegEx (history CTRL + Y)"
+                                       type="text"
+                                       value=""></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <a data-bs-placement="bottom" data-bs-toggle="tooltip"
+                   title="Specify a timeframe you want to filter for">Time Frame</a><br>
+                <div class="form-group col-auto">
+                    <div class="input-group fromdate" data-target-input="nearest" id="datetimepicker1">
+                        <input class="form-control datetimepicker-input" data-target="#datetimepicker1" id="from-date"
+                               placeholder="From"
+                               type="text"/>
+                        <div class="input-group-text" data-target="#datetimepicker1"
+                             data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
+                    </div>
+                </div>
+                <div class="col-auto mt-2">
+                </div>
+                <div class="form-group col-auto">
+                    <div class="input-group todate" data-target-input="nearest" id="datetimepicker2">
+                        <input class="form-control datetimepicker-input" data-target="#datetimepicker2" id="to-date"
+                               placeholder="To"
+                               type="text"/>
+                        <div class="input-group-text" data-target="#datetimepicker2"
+                             data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <a data-bs-placement="bottom" data-bs-toggle="tooltip"
+                   title="Filter for events that happened during selected hours regardless of the day">Daily
+                    times</a><br>
+                <div class="form-group col-auto">
+                    <input class="form-control" id="from-clock" placeholder="From"
+                           type="time"/>
+                </div>
+                <div class="col-auto mt-2">
+                </div>
+                <div class="form-group col-auto">
+                    <input class="form-control" id="to-clock" placeholder="To"
+                           type="time"/>
+                </div>
+            </div>
+            <hr>
+            <a data-bs-placement="top" data-bs-toggle="tooltip" title="Minimum of outgoing connections from a node">Outgoing
+                connections</a><br>
+            <div class="row-8">
+                <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                       title="Can only be enabled whe data is available">
+                    <input class="btn-check " disabled id="conMinSwitch" type="checkbox">
+                    <label class="btn btn-outline-secondary" for="conMinSwitch" onclick="{
+                        if (this.innerText === 'Enable'){
+                        document.getElementById('minConRange').disabled = false;
+                        this.innerText = 'Disable'
+                        }
+                        else {
+                            document.getElementById('minConRange').disabled = true;
+                            this.innerText = 'Enable'
+                        }
+                    }">Enable</label>
+                </label>
+                <label><input class="form-control" id="minConRange" disabled min="0" step="10" type="number" value="0"/></label>
+            </div>
+            <hr>
+            <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                   title="Decide if edges with same source and targed are displayed">
+                <input class="btn-check " id="selfCon" type="checkbox">
+                <label class="btn btn-outline-secondary" for="selfCon">Show connections to own System</label>
+            </label>
+            <hr>
+            <!--   <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                      title="Decide if edges with same source and targed are displayed">
+                   <input class="btn-check " id="joinEdges" type="checkbox">
+                   <label class="btn btn-outline-secondary" for="joinEdges">Join Edges</label>
+               </label>
+               <hr>
+               -->
+            <a data-bs-placement="bottom" data-bs-toggle="tooltip" title="Select Event IDs to display">Event
+                IDs</a><br>
+            <form name="EventIDs">
+                <!--this is created via JS -->
+            </form>
+            <form name="LogonTypes" style="display: none">
+                <a>Logon Types</a>
+                <div class="row">
+                </div>
+            </form>
+
+            <hr>
+            <a data-bs-placement="bottom" data-bs-toggle="tooltip" title="Select Tags to display.">
+                <a data-bs-placement="bottom" data-bs-toggle="tooltip" title="Select Event IDs to display">Tags</a><br>
+                <form name="Tags">
+                    <div class="row">
+                        <label data-bs-placement="top" data-bs-toggle="tooltip" title="Apply for all Tags">
+                            <input checked="checked" class="btn-check" id="applyAllTags" onclick="{
+                            this.value = this.value === 'checked' ? 'unchecked' : 'checked'
+                            for (const b of document.getElementsByClassName('tagBtns'))
+                                b.checked = (this.value === 'checked')
+                            document.getElementById('labelApplyAllTags').innerText = this.value === 'checked' ? 'Unselect all Tags' : 'Select all Tags'
+                        }" type="checkbox"
+                                   value="checked">
+                            <label class="btn btn-outline-secondary" for="applyAllTags" id="labelApplyAllTags">Unselect
+                                all Tags</label>
+                        </label>
+                    </div>
+                    <div class="row cleanOnLoad" id="tagFilterFow"></div>
+                </form>
+            </a>
+        </div>
+        <div class="col main" id="stage">
+            <div id="timespan" style="height: 90vh; z-index: 1"
+                 class="d-flex position-absolute align-items-start flex-column dynamic-display"></div>
+            <div id="timeline" style="height: 90vh"
+                 class="d-flex position-absolute container dynamic-display"></div>
+            <div id="heatmap" style="height: 90vh"
+                 class="d-flex position-absolute container dynamic-display"></div>
+            <div class="col-3 dropdown-menu position-absolute end-0 collapse" style="height: 90vh; z-index: 1"
+                 id="statsSideBar">
+                <div class="container"></div>
+                <br>
+                <details>
+                    <summary><b>System Stats</b></summary>
+                    <div class="scrollbar-young-passion overflow-auto">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">To Systems</th>
+                                <th scope="col">From Systems</th>
+                                <th scope="col">Users out</th>
+                                <th scope="col">Users in</th>
+                            </tr>
+                            </thead>
+                            <tbody id="sysTable"></tbody>
+                        </table>
+                    </div>
+                </details>
+                <div class="container"></div>
+                <br>
+                <details>
+                    <summary><b>User Stats</b></summary>
+                    <table class="table table-hover scrollbar-young-passion">
+                        <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">To Systems</th>
+                        </tr>
+                        </thead>
+                        <tbody id="userTable"></tbody>
+                    </table>
+                </details>
+            </div>
+            <div id="innerStage" class="dynamic-display" style="height: 92vh">
+                <div id="cy" style="height: 92vh">
+                </div>
+            </div>
+            <div id="loading">
+                <span class="fa fa-refresh fa-spin"></span>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="IP2HostConflict" role="dialog"
+         tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="hostConflictModalLabel"></h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row" id="hostSelectionDiv">
+                        <div aria-label="Basic radio toggle button group" class="btn-group" id="hostSelectionRadioGroup"
+                             role="group">
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input class="form-control" id="customHost" placeholder="Custom Hostname" type="text">
+                    <button class="btn btn-primary" id="selectHostBtn" type="button">Set</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="searchHistory" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Search History</h5>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="searchHistoryList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Upload -->
+<div class="modal fade" id="UploadEVTX" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Upload Event Log File</h4>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body" id="uploadBox">
+                <p>Import the JSON file exported from the Lateral Movement Artefact.</p>
+                <div class="row">
+                    <div class="col-8">
+                        <div class="input-group">
+                            <input id="lefile" multiple style="display:none" type="file" onchange='{
+                                let inFile = "";
+                                let fileList = document.getElementById("lefile").files;
+                                if (1 < fileList.length) {
+                                    inFile += "selected " + fileList.length + " files."
+                                } else {
+                                    inFile += fileList[0].name
+                                }
+                                document.getElementById("evtx_name").value = inFile.replace("C:\\fakepath\\", "");
+                            }'>
+                            <input class="form-control" id="evtx_name" placeholder="select file (multi files) ..."
+                                   type="text">
+                            <span class="input-group-btn"><button class="btn btn-info"
+                                                                  onclick="document.getElementById('lefile').click();"
+                                                                  type="button">Browse</button></span>
+                        </div>
+                    </div>
+                    <div id="uploadBar"></div>
+                    <div id="status"></div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-8">
+                        <div class="input-group">
+                            <input id="clientInfoUpload" style="display:none" type="file" onchange='{
+                              let inFile = "";
+                                    let fileList = document.getElementById("clientInfoUpload").files;
+                                    if (1 < fileList.length) {
+                                        inFile += "selected " + fileList.length + " files."
+                                    } else {
+                                        inFile += fileList[0].name
+                                    }
+                                    document.getElementById("clientInfoFile").value = inFile.replace("C:\\fakepath\\", "");
+                                                    }'>
+                            <input class="form-control" id="clientInfoFile"
+                                   placeholder="select client() output from velo"
+                                   type="text">
+                            <span class="input-group-btn"><button class="btn btn-info"
+                                                                  onclick="document.getElementById('clientInfoUpload').click();"
+                                                                  type="button">Browse</button></span>
+                        </div>
+                    </div>
+                    <div id="uploadBarClient"></div>
+                    <div id="statusClient"></div>
+                </div>
+                <hr>
+
+                <p>Upload CSV with Hostname IP Mapping (optional).</p>
+                <div class="row">
+                    <div class="col-5">
+                        <div class="input-group">
+                            <input id="hostipmap" onchange="{
+                                    if (this.files)
+                                   document.getElementById('mapProcessBtn').disabled = false
+
+                            let inFile ='';
+                            let fileList = document.getElementById('hostipmap').files;
+                            if (1 < fileList.length) {
+                            inFile += 'selected ' + fileList.length + ' files.'
+                            } else {
+                            inFile += fileList[0].name
+                            }
+                            document.getElementById('mapname').value = inFile.replace('C:\\fakepath\\', '');
+                            }" style="display:none" type="file">
+                            <input class="form-control" id="mapname" placeholder="select file ..."
+                                   type="text">
+                            <span class="input-group-btn"><button class="btn btn-info" id="mapnameBtn"
+                                                                  onclick="document.getElementById('hostipmap').click();"
+                                                                  type="button">Browse</button></span>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="input-group">
+                            <input class="form-control" id="hostMapDelimiter" placeholder="Delimiter (,)" type="text">
+                            <span class="input-group-btn"><button class="btn btn-info" disabled id="mapProcessBtn"
+                                                                  onclick="mapPrePorcessBtnClick()"
+                                                                  type="button">Load Map</button></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="csvFields">
+
+                </div>
+                <div class="modal-footer" id="uploadButtons">
+                    <button class="btn btn-primary" onclick="fileUpload()" type="submit">Upload</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                    <a href="log" target="_blank">
+                        <button class="btn btn-secondary" style="display: none" type="button">Log</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Filter -->
+<!-- Warning message -->
+<div class="modal fade" id="warningMessage" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">WARNING!</h4>
+            </div>
+            <div class="modal-body">
+                <p>Web page loading slow due to large graph. Do you want to continue searching?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" onclick="contQuery()" type="button">Yes
+                </button>
+                <button class="btn btn-primary" data-bs-dismiss="modal" type="button">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+</script>
+<script src="static/js/script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+#loading {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  text-align: center;
+  margin-top: -0.5em;
+  font-size: 4em;
+  color: #000;
+}
+
+#loading.loaded {
+  display: none;
+}
+
+table.floatThead-table {
+  border-top: none;
+  border-bottom: none;
+  background-color: #efefef;
+}
+
+.dropdown-menu {
+  z-index: 10000;
+}
+
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::before {
+  background-color:blue;
+}
+
+.my_svg {
+  height: 50px;
+  width: 200px;
+}
+
+.navbar {
+  z-index: 10000;
+}
+
+.modal {
+  z-index: 100000;
+}
+
+.tooltip {
+  z-index: 110000;
+}
+
+.bgcolorSun {
+  background-color: #ff7f50 !important;
+}
+
+.bgcolorSat {
+  background-color: #b0c4de !important;
+}
+
+.bgcolorDay {
+  background-color: #efefef !important;
+}
+
+.bgcolornormal {
+  background-color: #ffeaee !important;
+}
+
+.bgcolorlow {
+  background-color: #ffbaee !important;
+}
+
+.bgcolormid {
+  background-color: #ff8aee !important;
+}
+
+.bgcolorhigh {
+  background-color: #ff5aee !important;
+}
+
+.login-form {
+  max-width: none !important;
+  width: 415px;
+}
+
+.login-form input#username, input#password, input#password1, input#password2, input#case {
+  max-width: none !important;
+  width: 370px;
+  height: 2.4em;
+  padding: 0 16px;
+  border-radius: 4px;
+  border: none;
+  box-shadow: 0 0 0 1px #ccc inset;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.drop-hover:hover > .dropdown-menu {
+  display: block !important;
+  margin-left: 100%;
+  margin-top: -22%;
+}

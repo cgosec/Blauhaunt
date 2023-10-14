@@ -1,0 +1,2 @@
+ {"os_info": {"hostname": "a", "release": "Windows 10"},"labels": ["Touched", "C2", "CredDumped", "PikaBot"]}
+ {"os_info": {"hostname": "b", "release": "Windows Server 2016"},"labels": ["Touched"]}
