@@ -29,9 +29,18 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
         }
 ***To correctly process the files each starting with { and ending with } must be in a new line***
 
-
 ### Client Info
-Comming soon
+     {
+        "os_info": {
+             "release": "Windows 10"
+        },
+        "labels": [
+             "Touched",
+             "C2",
+             "CredDumped"
+             ]
+        }
+***To correctly process the files each starting with { and ending with } must be in a new line***
 
 
 ### Host IP Mapping
