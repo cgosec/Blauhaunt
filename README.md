@@ -65,7 +65,7 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
         "SourceHostname":"Sourci-LAPTOP",
         "LogonCount":3
         }
-***To correctly process the files each starting with { and ending with } must be in a new line***
+***To correctly process the files each dataset starting with { and ending with } must be in a new line***
 
 ### Client Info
      {
@@ -79,7 +79,7 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
              "CredDumped"
              ]
         }
-***To correctly process the files each starting with { and ending with } must be in a new line***
+***To correctly process the files each dataset starting with { and ending with } must be in a new line***
 
 
 ### Host IP Mapping
