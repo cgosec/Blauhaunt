@@ -1,7 +1,7 @@
 # Blauhaunt
 A tool collection for filtering and visualizing logon events. Designed to help answering the "Cotton Eye Joe" question  (Where did you come from where did you go) in Security Incidents and Threat Hunts.
 
-***This tool is designed for expirienced DFIR specialists. You may have little to none usage from it without expirience in Threat Hunting*** 
+***This tool is designed for experienced DFIR specialists. You may have little to none usage from it without expirience in Threat Hunting*** 
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/15c59e4a-1827-4c6e-ad06-af1813966d0c)
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/a262a8f1-b6e2-418a-aa0b-c85ad7e20168)
@@ -17,7 +17,7 @@ if you are using linux likely you have the type python3 instead of python - but 
 
 *Some day I will create a backend in Django with an API to get realtime data to display for better threat hunting*
 
-## Powershell Scrpipt
+## Powershell Script
 blauhaunt_script.ps1
 If you face any issues with execution policy the easiest thing to do is to spawn a powershell with execution policy bypass like this:
 
