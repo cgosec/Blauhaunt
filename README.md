@@ -14,7 +14,33 @@ if you are using linux likely you have the type python3 instead of python - but 
 
 *Some day I will create a backend in Django with an API to get realtime data to display for better threat hunting*
 
-## Data Schema
+## Powershell Scrpipt
+blauhaunt_script.ps1
+If you face any issues with execution policy the easiest thing to do is to spawn a powershell with execution policy bypass like this:
+
+     PowerShell.exe -ExecutionPolicy Bypass powershell
+
+To get information about usage and parameters use Get-Help
+
+     Get-Help blauhaunt_script.ps1 -Detailed
+
+### Usage
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/3cbe2fc9-ccb3-411d-bccb-d46dc2a69484)
+
+Depending on the size, StartDate and EndDate this can take quiet some time so be a little patient 
+
+## Velociraptor Artefact
+This speeds up collecting the relevant data on scale. 
+I recommend creating a notebook (template may be provided soon here too) where all the results are listed.
+You can simply take the json export from this artefact to import it into Blauhaunt
+
+The client_info import is designed to work directly with the client_info from Velociraptor too. You can simply export the json file and upload it into Blauhaunt.
+
+### Usage
+Comming soon
+
+
+## General Data Schema
 There are three types of data - only the event data is mandatory
 
 ### Event Data
