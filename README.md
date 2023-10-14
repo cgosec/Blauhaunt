@@ -1,5 +1,8 @@
 # Blauhaunt
-A tool collection for filtering and visualizing logon events. Designed to help answering the "Cotton Eye Joe" question  (Where did you come from where did you go) in Security Incidents and Threat Hunts
+A tool collection for filtering and visualizing logon events. Designed to help answering the "Cotton Eye Joe" question  (Where did you come from where did you go) in Security Incidents and Threat Hunts.
+
+***This tool is designed for expirienced DFIR specialists. You may have little to none usage from it without expirience in Threat Hunting*** 
+
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/15c59e4a-1827-4c6e-ad06-af1813966d0c)
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/a262a8f1-b6e2-418a-aa0b-c85ad7e20168)
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/8add5635-1ef2-417d-93e7-2fe05b40b04d)
@@ -84,6 +87,6 @@ Can be any CSV File. Delimiter can be specified and cols for Hostname and IP can
 
 ## Acknowledgements
  - [SEC Consult](https://sec-consult.com/de/) This work was massively motivated by my work in and with the SEC Defence team
- - [Velociraptor](https://github.com/Velocidex/velociraptor/) is the game changer making it possible to collect the data to display at scale (tested with > 6000k Systems already!) 
+ - [Velociraptor](https://github.com/Velocidex/velociraptor/) is the game changer making it possible to collect the data to display at scale (tested with > 8000 Systems already!) 
  - [LogonTracer](https://github.com/JPCERTCC/LogonTracer) inspired the layout and part of the techstack of this project
  - [CyberChef](https://gchq.github.io/CyberChef/) inspired the idea of creating a version of Blauhaunt running without backend system all browser based
