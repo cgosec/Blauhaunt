@@ -40,8 +40,8 @@
 
     .NOTES
     Author: Christopher Golitschek
-    Version: 0.1
-    Date: 2023-10-14
+    Version: 0.2
+    Date: 2023-10-15
     GIT: https://github.com/cgosec/Blauhaunt/
 #>
 
@@ -56,6 +56,7 @@ param (
 # Specify the security event IDs to filter
 $securityEventIds = @(4624, 4625, 4648, 4776)
 $operationEventIds = @(21)
+$sessionEventIds = @(1149)
 $logontypes = @(3, 9, 10)
 $NewLine = [environment]::NewLine
 
@@ -109,15 +110,21 @@ function Write-SecurityEvents{
         Write-Debug $entry
         }
         elseif ($_.Id -eq 4776 -and (!$_.Properties[1].Value.Split(".")[0].EndsWith("$"))){
+            if (!$_.Properties[3].Value -eq 0) {
+                $EventID = "4776(0x" + $_.Properties[3].Value.ToString("X") + ")"
+                }
+            else {
+                $EventID = 4776
+            }
             $entry = [PSCustomObject]@{
                 'TimeCreated' = $_.TimeCreated
                 'UserName' = $_.Properties[1].Value.Split(".")[0]
                 'SID' = "-"
-                'Destination' = $_.Properties[2].Value.Split(".")[0]
-            'Description' = $_.Properties[3].Value
-                'EventID' = $_.Id
+                'Destination' = $_.MachineName.Split(".")[0]
+                'Description' = $_.Properties[3].Value
+                'EventID' = $EventID
                 'LogonType' = "-"
-                'SourceIP' = ""
+                'SourceIP' = $_.Properties[2].Value.Split(".")[0]
                 'SourceHostname' = ""
             }
         $entry
@@ -229,6 +236,74 @@ function Write-RDPEvents {
     $results > $file
 }
 
+function Write-RDPConnectionEvents {
+    param (
+        $Events
+    )
+    $Hostname = $Events[0].MachineName
+    $table = $Events | ForEach-Object {
+        if ((@(1149) -contains $_.Id)){
+            $user = $_.Properties[0].value.Split("\\")
+            $user = $user[$user.Count-1]
+            $ip = $_.Properties[2].value
+            $destination = $_.MachineName.Split(".")[0]
+            $source = "-"
+            if (@("LOCAL", "LOKAL", "127.0.0.1") -contains $ip){
+                $source = $destination
+                $ip = "-"
+            }
+            $entry = [PSCustomObject]@{
+                        'TimeCreated' = $_.TimeCreated
+                        'UserName' = $user
+                        'SID' = "-"
+                        'Destination' = $destination
+                'Description' = ""
+                        'EventID' = $_.Id
+                        'LogonType' = ""
+                        'SourceIP' = $ip
+                        'SourceHostname' = $source
+                    }
+        $entry
+        Write-Debug $entry
+        }
+    }
+
+    $grouped = ""
+    $grouped += $table | Group-Object -Property UserName, SID, SourceIP, EventID, LogonType, SourceIP, SourceHostname | ForEach-Object {
+        $g = $_.Group[0]
+        [System.Collections.ArrayList]$times = @()
+        $times += $table | ForEach-Object {
+                if (($g.UserName -eq $_.UserName) -and ($g.SID -eq $_.SID) -and ($g.Destination -eq $_.Destination) -and ($g.EventID -eq $_.EventID) -and ($g.LogonType -eq $_.LogonType) -and ($g.SourceIP -eq $_.SourceIP) -and ($g.SourceHostname -eq $_.SourceHostname)){
+                    $_.TimeCreated.ToString("yyyy-MM-ddTHH:mm:ssZ")
+                }
+        }
+
+        $entry = [PSCustomObject]@{
+            'LogonTimes' = $times
+                'UserName' = $g.UserName
+                'SID' = $g.SID.Value
+                'Destination' = $g.Destination
+            'Description' = $g.Description
+                'EventID' = $g.EventID
+                'LogonType' = $g.LogonType
+                'SourceIP' = $g.SourceIP
+                'SourceHostname' = $g.SourceHostname
+            'LogonCount' = $times.Count
+        }
+        $line = $entry | ConvertTo-Json -compress
+        $line += $NewLine
+        $line
+    }
+    $results = $grouped
+    $file = $OutPath + "BlauHaunt_" + $Hostname + "_RDPCon" + ".json"
+    $counter = 1
+    while  (Test-Path $file -PathType leaf) {
+        $file = $OutPath + "BlauHaunt_" + $Hostname + "_RDPCon_" + $counter + ".json"
+        $counter++
+    }
+    $results > $file
+}
+
 # Query security events using Get-WinEvent
  try{
     if ($Path.length -eq 0){
@@ -241,14 +316,14 @@ function Write-RDPEvents {
         Foreach-Object {
             Write-Output "collection Security events from "$_.FullName
             $events = Get-WinEvent -FilterHashTable @{Path=$_.FullName; StartTime=$StartDate; EndTime=$EndDate; ID=$securityEventIds}
-            Write-Debug "Security Events collected"
+            Write-Output "Security Events collected"
             Write-SecurityEvents -Events $events
         }
     }
     else {
         Write-Output ("collecting Security events from $Path" + "\Security.evtx")
         $events = Get-WinEvent -FilterHashTable @{Path=$Path + "\Security.evtx"; StartTime=$StartDate; EndTime=$EndDate; ID=$securityEventIds}
-        Write-Debug "Security Events collected"
+        Write-Output "Security Events collected"
         Write-SecurityEvents -Events $events
     }
 }
@@ -259,20 +334,42 @@ catch {
 #Query RDP Events
 try{
     if ($Recursive){
-        Get-ChildItem -Path $Path -Recurse -Filter Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx |
+        Get-ChildItem -Path $Path -Recurse -Filter "Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx" |
         Foreach-Object {
-            Write-Output "collection Security events from " + $_.FullName
+            Write-Output "collection LocalSessionManager events from "$_.FullName
             $events = Get-WinEvent -FilterHashTable @{Path=$_.FullName; StartTime=$StartDate; EndTime=$EndDate; ID=$operationEventIds}
-            Write-Debug "Security Events collected"
+            Write-Output "LocalSessionManager Events collected"
             Write-RDPEvents -Events $events
         }
     }
     else{
     Write-Output ("collecting LocalSessionManager events from $Path" + "\Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx")
     $events = Get-WinEvent -FilterHashTable @{Path = $Path + "\Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx"; StartTime=$StartDate; EndTime=$EndDate; ID=$operationEventIds}
+    Write-Output "LocalSessionManager Events collected"
     Write-RDPEvents -Events $events
     }
 }
 catch {
     Write-Output("Error on RDP Events")
+}
+# Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx
+try{
+    if ($Recursive){
+        Get-ChildItem -Path $Path -Recurse -Filter "Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx" |
+        Foreach-Object {
+            Write-Output "collection TerminalServices events from "$_.FullName
+            $events = Get-WinEvent -FilterHashTable @{Path=$_.FullName; StartTime=$StartDate; EndTime=$EndDate; ID=$sessionEventIds}
+            Write-Output "TerminalServices Events collected"
+            Write-RDPConnectionEvents -Events $events
+        }
+    }
+    else{
+    Write-Output ("collecting TerminalServices events from $Path" + "\Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx")
+    $events = Get-WinEvent -FilterHashTable @{Path = $Path + "\Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx"; StartTime=$StartDate; EndTime=$EndDate; ID=$sessionEventIds}
+    Write-Output "TerminalServices Events collected"
+    Write-RDPConnectionEvents -Events $events
+    }
+}
+catch {
+    Write-Output("Error on Terminal Events")
 }
