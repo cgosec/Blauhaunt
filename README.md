@@ -13,7 +13,7 @@ I suggest simply starting a python http server on the local system from a shell 
 
      python -m http.server
      
-if you are using linux likely you have the type python3 instead of python - but if you are using this tool you sould be technical skilled enough to figure that out yourself ;)
+if you are using linux likely you have to type python3 instead of python - but if you are using this tool you sould be technical skilled enough to figure that out yourself ;)
 
 *Some day I will create a backend in Django with an API to get realtime data to display for better threat hunting*
 
