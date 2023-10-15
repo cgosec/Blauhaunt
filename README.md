@@ -4,6 +4,7 @@ A tool collection for filtering and visualizing logon events. Designed to help a
 ***This tool is designed for experienced DFIR specialists. You may have little to none usage from it without expirience in Threat Hunting*** 
 
 ## Table of Contents  
+- [Get started](#get-started)
 - [Integration in investigation](#integration-in-investigation)
 - [Architecture](#architekture)
 - [PowerShell Script](#powershell-script)
@@ -13,6 +14,21 @@ A tool collection for filtering and visualizing logon events. Designed to help a
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/15c59e4a-1827-4c6e-ad06-af1813966d0c)
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/a262a8f1-b6e2-418a-aa0b-c85ad7e20168)
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/8add5635-1ef2-417d-93e7-2fe05b40b04d)
+
+## Get started
+Running Blauhaunt is as simple as that:
+
+run a cmd or bash or what ever you like...
+
+Then:
+
+     git clone https://github.com/cgosec/Blauhaunt
+     cd Blauhaunt/app
+     python -m http.server
+
+Now you can navigate to http://localhost:8000/ in your browser and start blau haunting the baddies.
+
+Some random test data is in the directory test_data to get started. However this is just randomly generated and nothing to start investigate with.
 
 ## Integration in investigation
 I recommend using Blauhaunt with [Velociraptor](https://github.com/Velocidex/velociraptor) since it is the fastest way to get data from multible systems. The Blauhaunt import format for event data and client info is the one that can be exported from Velo.
