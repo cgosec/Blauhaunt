@@ -133,3 +133,6 @@ Comming soon
  - [Cytoscape.js](https://js.cytoscape.org/) is the library making the interactive graph visualisation possible
  - [LogonTracer](https://github.com/JPCERTCC/LogonTracer) inspired the layout and part of the techstack of this project
  - [CyberChef](https://gchq.github.io/CyberChef/) inspired the idea of creating a version of Blauhaunt running without backend system all browser based
+
+
+(The icon is intentionally shitty - this is how I actually look while hunting... just the look in the face not the big arms though :-P )
