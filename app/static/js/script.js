@@ -628,7 +628,7 @@ function applyEventFilters() {
     let eventIdBtns = document.getElementsByClassName("eventIdBtns")
     for (const btn of eventIdBtns) {
         if (btn.checked)
-            eventFilters.push(parseInt(btn.value))
+            eventFilters.push(btn.value)
         else allChecked = false
     }
     if (allChecked)
@@ -730,7 +730,7 @@ function filter(filterObject) {
     // filter for event ids
     if (filterObject.event_ids.length > 0) {
         filtered_edges = filtered_edges.filter(edge => {
-            return filterObject.event_ids.includes(edge.data.EventID)
+            return filterObject.event_ids.includes(""+edge.data.EventID)
         })
     }
 
