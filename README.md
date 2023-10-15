@@ -32,7 +32,7 @@ To get information about usage and parameters use Get-Help
 
 Depending on the size, StartDate and EndDate this can take quiet some time so be a little patient 
 
-## Velociraptor Artefact
+## Velociraptor Artifact
 This speeds up collecting the relevant data on scale. 
 I recommend creating a notebook (template may be provided soon here too) where all the results are listed.
 You can simply take the json export from this artefact to import it into Blauhaunt
