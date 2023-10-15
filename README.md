@@ -17,6 +17,7 @@ A tool collection for filtering and visualizing logon events. Designed to help a
 
 ## Get started
 Running Blauhaunt is as simple as that:
+open https://cgosec.github.io/Blauhaunt/app/ since there is no backend no data will leave your local system. *(third party librarys integrated and I do not take any responsibilities of their communication behavior. Imports are in the index.html file on top)*
 
 run a cmd or bash or what ever you like...
 
