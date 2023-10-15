@@ -741,7 +741,7 @@ function filter(filterObject) {
         })
     }
     // reduce number of edges by joining them if selected
-    if (document.getElementById("joinEdges").checked) {
+    if (false) { // document.getElementById("joinEdges").checked when ever this is implemented
         filtered_edges = joinEdges(filtered_edges)
         rank = false
     } else rank = true
