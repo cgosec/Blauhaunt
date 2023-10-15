@@ -8,6 +8,7 @@ A tool collection for filtering and visualizing logon events. Designed to help a
 - [Architecture](#architekture)
 - [PowerShell Script](#powershell-script)
 - [Velociraptor Artifact](#velociraptor-artifact)
+- [Acknowledgements](#acknowledgements)
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/15c59e4a-1827-4c6e-ad06-af1813966d0c)
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/a262a8f1-b6e2-418a-aa0b-c85ad7e20168)
@@ -124,8 +125,6 @@ The client_info import is designed to work directly with the client_info from Ve
 
 ### Usage
 Comming soon
-
-
 
 
 ## Acknowledgements
