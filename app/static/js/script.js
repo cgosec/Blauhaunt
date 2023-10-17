@@ -174,6 +174,13 @@ function generateBlankCaseData() {
     }
 }
 
+function resetScene() {
+    // reset scene is called when a new case is loaded. simply add cleanOnLoad class to an element that needs to be cleaned
+    const toCleanList = document.getElementsByClassName("cleanOnLoad")
+    for (const element of toCleanList) {
+        element.innerHTML = ""
+    }
+}
 
 // Function to store data in IndexedDB. this is where all the data is stored for the case to be able to load it later again
 function storeDataToIndexDB(caseName) {
@@ -231,35 +238,43 @@ function getCases() {
         };
         oStoreRequest.onsuccess = function (event) {
             // create all the elements, butons, filters etc.
-            let caseDropDown = document.getElementById("caseDropdown")
+            let caseDropDown = document.getElementById("case_list")
             const keys = event.target.result;
             for (let caseName of keys) {
                 let wrapper1 = document.createElement("div")
                 let wrapper2 = document.createElement("div")
-                let load = document.createElement("a")
                 wrapper1.classList.add("dropdown-item")
                 wrapper2.classList.add("row")
                 let col1 = document.createElement("div")
                 col1.classList.add("col-8")
-                load.innerText = caseName
-                wrapper2.addEventListener("click", e => {
+                let txt = document.createElement("p")
+                txt.innerText = caseName
+                txt.classList.add("text-center")
+                txt.classList.add("fs-5")
+                wrapper2.appendChild(txt)
+
+                let loadBtn = document.createElement("button")
+                loadBtn.classList.add("btn")
+                loadBtn.classList.add("btn-success")
+                loadBtn.innerText = "Load"
+                loadBtn.addEventListener("click", e => {
+                    e.preventDefault()
                     retrieveDataFromIndexDB(caseName)
                 })
-
-                let col2 = document.createElement("div")
-                col2.classList.add("col-2")
                 let delBtn = document.createElement("button")
                 delBtn.classList.add("btn")
                 delBtn.classList.add("btn-danger")
                 delBtn.innerText = "Delete"
                 delBtn.addEventListener("click", e => {
+                    e.preventDefault()
                     deleteCasefromIdexDB(caseName)
+                    document.getElementById('case_list').innerHTML = ''
+                    getCases()
                 })
                 wrapper1.appendChild(wrapper2)
-                wrapper2.appendChild(col1)
-                wrapper2.appendChild(col2)
-                col1.appendChild(load)
-                col2.appendChild(delBtn)
+                wrapper1.appendChild(col1)
+                col1.appendChild(loadBtn)
+                col1.appendChild(delBtn)
                 caseDropDown.appendChild(wrapper1)
 
             }
@@ -349,13 +364,7 @@ function retrieveDataFromIndexDB(caseName) {
     };
 }
 
-function resetScene() {
-    // reset scene is called when a new case is loaded. simply add cleanOnLoad class to an element that needs to be cleaned
-    const toCleanList = document.getElementsByClassName("cleanOnLoad")
-    for (const element of toCleanList) {
-        element.innerHTML = ""
-    }
-}
+
 
 //function builds the modal with the user search history
 function userSearchHistory() {
@@ -472,9 +481,20 @@ function renderGraphBtnClick() {
     }
     switch (currentDisplay) {
         case "graph":
-            drawGraph({nodes: filtered_nodes, edges: filtered_edges}, "")
-            document.getElementById("innerStage").classList.remove("d-none")
-            document.getElementById("timespan").classList.remove("d-none")
+            //check if there are more than 500 nodes raise a modeal with a warning
+         /*   if (filtered_nodes.length > 500 || filtered_edges.length > 1500) {
+                let modal = new bootstrap.Modal(document.getElementById('graphWarning'), {
+                    keyboard: false
+                })
+                modal.show()
+                break
+            }*/
+            //else{
+                drawGraph({nodes: filtered_nodes, edges: filtered_edges}, "")
+                document.getElementById("innerStage").classList.remove("d-none")
+                document.getElementById("timespan").classList.remove("d-none")
+                break
+            //}
             break
         case "timeline":
             table = createTimelineSystemView(filtered_edges)
@@ -730,14 +750,14 @@ function filter(filterObject) {
     // filter for event ids
     if (filterObject.event_ids.length > 0) {
         filtered_edges = filtered_edges.filter(edge => {
-            return filterObject.event_ids.includes(""+edge.data.EventID)
+            return filterObject.event_ids.includes("" + edge.data.EventID)
         })
     }
 
     //filter for logon types
-    if ((filterObject.event_ids.length === 0 || filterObject.event_ids.includes(4624) || filterObject.event_ids.includes(4625)) && filterObject.logonTypes.length > 0) {
+    if ((filterObject.event_ids.length === 0 || filterObject.event_ids.includes(""+4624) || filterObject.event_ids.includes(""+4625)) && filterObject.logonTypes.length > 0) {
         filtered_edges = filtered_edges.filter(edge => {
-            return (edge.data.EventID !== 4624 && edge.data.EventID !== 4625) || filterObject.logonTypes.includes(edge.data.LogonType)
+            return (edge.data.EventID != 4624 && edge.data.EventID != 4625) || filterObject.logonTypes.includes(edge.data.LogonType)
         })
     }
     // reduce number of edges by joining them if selected
@@ -986,14 +1006,12 @@ function checkAndMoveObjects(oldObject, position, size, time, connections) {
         } else {
             position.x = position.x + size;
         }
-        /*
         if (oldObject.position.x - oldObject.data.nwidth < position.x &&
             oldObject.position.x + oldObject.data.nwidth > position.x &&
             oldObject.position.y - oldObject.data.nheight < position.y &&
             oldObject.position.y + oldObject.data.nheight > position.y)
             break
 
-         */
         // move second object up/down based on timestamp
         if (time < oldObject.activityStats.q2) {
             position.y = position.y - size / 2;
@@ -1952,7 +1970,7 @@ function getIPsHost(ip) {
                     backdrop: 'static', keyboard: false
                 })
                 hostSelect.show()
-            }, 150)
+            }, 10)
         } else {
             resolve(ip2HostList.length > 0 ? ip2HostList[0] : ip)
         }
@@ -2333,6 +2351,17 @@ function mapPrePorcessBtnClick() {
 
 
 function fileUpload() {
+    let uploadBtn = document.getElementById("uploadBtn")
+    uploadBtn.disabled = true
+    let spinner = document.createElement("span")
+    spinner.classList.add("spinner-grow")
+    spinner.classList.add("spinner-grow-sm")
+    spinner.setAttribute("role", "status")
+    spinner.setAttribute("aria-hidden", "true")
+    uploadBtn.innerHTML = ""
+    uploadBtn.innerText = "Loading..."
+    uploadBtn.appendChild(spinner)
+
     let clientInfoFile = document.getElementById("clientInfoUpload");
     let clientInfoReader = new FileReader()
     clientInfoReader.addEventListener('load', (ev => {
@@ -2349,6 +2378,11 @@ function fileUpload() {
         });
         reader.readAsText(file)
     }
+    //hide modal
+    let modal = bootstrap.Modal.getInstance(document.getElementById('UploadEVTX'))
+    modal.hide()
+    uploadBtn.innerText = "Upload"
+    uploadBtn.disabled = false
 }
 
 

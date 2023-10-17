@@ -77,12 +77,17 @@
                     <li class=" dropdown-item">
                         <div class="row">
                             <label for="newCaseName"><input id="newCaseName" placeholder="Case Name"
-                                                            type="text"></label>
-                            <button class="btn btn-outline-secondary ms-2  h-75"
-                                    onclick="storeDataToIndexDB(document.getElementById('newCaseName').value)"
+                                                            type="text" class="form-control"></label>
+                            <button class="btn btn-success mr-4"
+                                    onclick="{
+                                storeDataToIndexDB(document.getElementById('newCaseName').value)
+                                document.getElementById('case_list').innerHTML = ''
+                                getCases()
+                            }"
                                     type="button">Save
                             </button>
                             <hr>
+                            <div id="case_list" class="row"></div>
                         </div>
                     </li>
                 </ul>
@@ -551,29 +556,30 @@
 
                 </div>
                 <div class="modal-footer" id="uploadButtons">
-                    <button class="btn btn-primary" onclick="fileUpload()" type="submit">Upload</button>
+                    <button id="uploadBtn" class="btn btn-primary" onclick="fileUpload()" type="submit">Upload</button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
-                    <a href="log" target="_blank">
-                        <button class="btn btn-secondary" style="display: none" type="button">Log</button>
-                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Filter -->
+
 <!-- Warning message -->
-<div class="modal fade" id="warningMessage" tabindex="-1">
+<div class="modal fade" id="graphWarning" tabindex="-1">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">WARNING!</h4>
             </div>
             <div class="modal-body">
-                <p>Web page loading slow due to large graph. Do you want to continue searching?</p>
+                <p>The number of Nodes and Edges likely crashes Blauhaunt! Are you sure you want to proceed?</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal" onclick="contQuery()" type="button">Yes
+                <button class="btn btn-secondary" data-bs-dismiss="modal" onclick='{
+                drawGraph({nodes: filtered_nodes, edges: filtered_edges}, "")
+                document.getElementById("innerStage").classList.remove("d-none")
+                document.getElementById("timespan").classList.remove("d-none")
+                }' type="button">Yes
                 </button>
                 <button class="btn btn-primary" data-bs-dismiss="modal" type="button">No</button>
             </div>
