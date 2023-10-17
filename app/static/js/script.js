@@ -1058,9 +1058,9 @@ function setNodeColor(node) {
     for (tag of caseData.tags) {
         if (nodeTags.includes(tag)) {
             let colorVals = tagColorMap.get(tag)
-            if (!colorVals.default && colorVals.priority > latestPrio) {
+            if (!parseInt(colorVals.default) && parseInt(colorVals.priority) > latestPrio) {
                 node.data.nfcolor = colorVals.color
-                latestPrio = colorVals.priority
+                latestPrio = parseInt(colorVals.priority)
             }
         }
     }
