@@ -482,19 +482,19 @@ function renderGraphBtnClick() {
     switch (currentDisplay) {
         case "graph":
             //check if there are more than 500 nodes raise a modeal with a warning
-         /*   if (filtered_nodes.length > 500 || filtered_edges.length > 1500) {
+            if (filtered_nodes.length > 500 || filtered_edges.length > 1500) {
                 let modal = new bootstrap.Modal(document.getElementById('graphWarning'), {
                     keyboard: false
                 })
                 modal.show()
                 break
-            }*/
-            //else{
+            }
+            else{
                 drawGraph({nodes: filtered_nodes, edges: filtered_edges}, "")
                 document.getElementById("innerStage").classList.remove("d-none")
                 document.getElementById("timespan").classList.remove("d-none")
                 break
-            //}
+            }
             break
         case "timeline":
             table = createTimelineSystemView(filtered_edges)
