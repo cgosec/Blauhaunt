@@ -132,6 +132,15 @@ Usually I am rather focused on system -> system activitie in favour of identifyi
 When your filters are set you need to press render to display the results.
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c35535fa-4a23-4437-8abd-15c630b57050)
 
+#### Graph
+comming soon
+
+#### Timeline
+comming soon
+
+#### Heatmap
+comming soon
+
 If you want to change from one view to another: choose the view you need and then click render.
 'Be careful with Timelin! Few nodes and edges can still have a huge timeline!* Checking the Stats ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/29429607-9a31-4633-a86e-70a9b70fa5ee) is a good idea before rendering a timeline.
 
