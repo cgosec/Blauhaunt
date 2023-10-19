@@ -32,6 +32,127 @@ Now you can navigate to http://localhost:8000/ in your browser and start blau ha
 
 Some random test data is in the directory test_data to get started. However this is just randomly generated and nothing to start investigate with.
 
+### Upload Data
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c1176bd5-b3e5-4208-80d6-2bdf02e218e9)
+Kick "Upload Data" (suprising isn't it :-P)
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/23d391c9-af24-44b2-853e-cf064eb2bcb2)
+Upload the json export of the velo artifact or the result(s) of the powershell script here.
+*Do not upload the client_info.json or anything in here!*
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/68aa031e-6563-4531-9a5f-f7d14af41db4)
+This is optional and just needed for having system tags and their os info.
+Upload your client_info.json extract here. This is just an export of the Velociraptor clients() function.
+Just use this query:
+
+     SELECT * FROM clients()
+
+and export the json
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/61edef0d-96b2-40cc-ac81-2f38ada4077b)
+This is optional too.
+Upload a mapping for having IP-Adresses resolved to their hostnames. You need to have a file where there is one col for Hostnames and a col for IP-Adresses.
+If a System has multiple IP-Adresses you can have them in this one col seperated by an arbitrarily symbol e.G. "/".
+
+Example:
+| Hostname    | IP-Addresses | MaybeSomeNotNeededStuff |
+| -------- | ------- | ------- |
+| System_A  | 10.10.10.100    | bonjour |
+| System_B | 10.10.10.100 / 10.10.20.100 | hello |
+| System_C    | 10.10.10.100 | hola |
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/5abba586-b386-4af6-8085-4b1d5eb85301)
+
+Once a propper file is selected a delimiter (if non is specified a comma is expected). And click Load Map.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/086ead34-6448-48d0-8f52-7758f13cd778)
+1. Choose the name of the col where the hostname is in
+2. OPTIONAL: Specify if there are any entries you want to exclude from parsing e.g. lines having an "UNKNOWN" in the Hostname Ip Mapping.
+3. Choose the name of the col where the IP-Address is in
+4. Specify the delimiter for multiple IP-Addresses in this line
+When everything is correct click ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/79d13f20-8aa2-42c7-bbe6-fbfdeea8be79)
+
+When done click ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/014b2359-02ec-44b5-943b-28d8c5f61025)
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/993df0ce-9f77-4117-b775-23650fd0f20d)
+
+If everything was processed as intendet you should now see the number of total nodes and edges
+
+### Filtering
+
+Click ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/2df6081e-6041-46b6-b905-53e2fc5955d2) to open the sidebar.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/52d54b5d-c63e-4f6d-b379-9f645d26fe3c)
+
+The User Filter applies to the users. All Usernames are set to uppercase when parsing. This is important for filtering!
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/e898c429-7474-4814-8303-8ec091415013)
+
+The Src Host Filter specifies systems from where the user initiated the connection. Filtering for Src Hosts only works when the graph is set to System ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/37c81db6-75cb-4d87-b8ca-355314eeb0c6)
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/aee5d6bb-e1c3-4f1d-89cb-cb210208c9de)
+
+The Dst Host filter specifies systems that where target of logons.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/76cd7b27-e476-4bb5-8fe6-45d8983bb7e0)
+
+Filter for a time span for activities.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/71048d37-f979-4006-bcf9-f240d90ece02)
+
+The Daily times filter specifies from what time we are intrested in the events. This is useful if nightly user logons are not common in your environment. This is regardles of the date - that means in your timespan only events that occured during that hourly timespan are in the set. (Works over night like in the example picture too)
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/923c9522-8614-444b-86fa-b5d4cbdbf4da)
+
+This is a filter that helps to focus on the top talkers in big sets. You can specify a threshold for a minimum of outgoing connection for the source system.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/e7447115-cd1f-4455-975a-06eb066fc68c)
+
+By default events where source and destination are the same node are not displayed. If you want to display them active it by clicking.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c6cbe668-e6c8-4f54-b1a4-41e1085dc26b)
+
+Filtering for EventIDs is a good idea to reduce the data. There is no diffrence in choosing all or none.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/17da2925-65e7-4e47-8690-fff918199d5c)
+
+Logon Types are only relevant for 4624 or 4625 events. I assume you know them already when you are using this tool.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/0988ee19-1ec5-4fa5-b165-eb8f85c59e3a)
+
+Filtering for Tags only is available when client infos are uploaded. Those are your tags specified in Velociraptor for the Systems. It does not have an effect if all on none are chosen.
+Those apply only for the source not for the destination system.
+
+### Source: System or User
+Usually I am rather focused on system -> system activitie in favour of identifying the initial access. Since there are a lot of situations you want to focus on user behavior you can choose what your source should be: System or User. 
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/f14a564f-5747-4887-aa33-5b747a5a2336)
+
+### Render Graph, Timeline or Heatmap
+When your filters are set you need to press render to display the results.
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c35535fa-4a23-4437-8abd-15c630b57050)
+
+If you want to change from one view to another: choose the view you need and then click render.
+'Be careful with Timelin! Few nodes and edges can still have a huge timeline!* Checking the Stats ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/29429607-9a31-4633-a86e-70a9b70fa5ee) is a good idea before rendering a timeline.
+
+### Graph Style
+comming soon
+
+### Tag vizualisation
+comming soon
+
+### Exports
+comming soon
+
+### Stats
+comming soon
+
+### Node information
+comming soon
+
+### Edge information
+comming soon
+
 ## Integration in investigation
 I recommend using Blauhaunt with [Velociraptor](https://github.com/Velocidex/velociraptor) since it is the fastest way to get data from multible systems. The Blauhaunt import format for event data and client info is the one that can be exported from Velo.
 The blauhaunt_script.ps1 works well if you prefere working with e.g. [KAPE](https://www.kroll.com/en/insights/publications/cyber/kroll-artifact-parser-extractor-kape) triage data.
