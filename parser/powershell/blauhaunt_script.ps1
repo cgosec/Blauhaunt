@@ -5,7 +5,9 @@
     .DESCRIPTION
     https://github.com/cgosec/Blauhaunt/
     This script collects events form the local system of a given path (recursive is possible) for the use in Blauhaunt.
-    Collected Security Events: 4624, 4625, 4648, 4776
+    Collected Security Events: 4624, 4625, 4648, 4672, 4776
+    Colleced RDP Operational Events: 21
+    Collected RDP Connection Events: 1149
     LogonTypes: 3,9, 10
     Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational Events: 21
 
@@ -54,7 +56,7 @@ param (
  )
 
 # Specify the security event IDs to filter
-$securityEventIds = @(4624, 4625, 4648, 4776)
+$securityEventIds = @(4624, 4625, 4648, 4776, 4672)
 $operationEventIds = @(21)
 $sessionEventIds = @(1149)
 $logontypes = @(3, 9, 10)
@@ -65,6 +67,7 @@ Write-Output "Parameter Recursive: $Recursive"
 Write-Output "Parameter OutPath: $OutPath"
 Write-Output "Parameter StartDate: $StartDate"
 Write-Output "Parameter EndDate: $EndDate"
+Write-Verbose "running in verbose mode"
 
 function Write-SecurityEvents{
     param (
@@ -73,7 +76,7 @@ function Write-SecurityEvents{
     
     $Hostname = $Events[0].MachineName
     $table = $Events | ForEach-Object {
-        if ((@(4624, 4625) -contains $_.Id) -and ($logontypes -contains $_.Properties[8].Value) -and (!$_.Properties[5].Value.Split(".")[0].EndsWith("$"))){
+        if (($_.Id -eq 4624) -and ($logontypes -contains $_.Properties[8].Value) -and (!$_.Properties[5].Value.Split(".")[0].EndsWith("$"))){
             $entry = [PSCustomObject]@{
                 'TimeCreated' = $_.TimeCreated
                 'UserName' = $_.Properties[5].Value.Split(".")[0]
@@ -86,7 +89,20 @@ function Write-SecurityEvents{
                 'SourceHostname' = $_.Properties[11].Value.Split(".")[0]
             }
         $entry
-        Write-Debug $entry
+        }
+        elseif (($_.Id -eq 4625) -and ($logontypes -contains $_.Properties[10].Value) -and (!$_.Properties[5].Value.Split(".")[0].EndsWith("$"))){
+            $entry = [PSCustomObject]@{
+                'TimeCreated' = $_.TimeCreated
+                'UserName' = $_.Properties[5].Value.Split(".")[0]
+                'SID' = $_.Properties[4].Value
+                'Destination' = $_.MachineName.Split(".")[0]
+            'Description' = ""
+                'EventID' = $_.Id
+                'LogonType' = $_.Properties[10].Value
+                'SourceIP' = $_.Properties[19].Value
+                'SourceHostname' = $_.Properties[13].Value.Split(".")[0]
+            }
+        $entry
         }
         elseif ($_.Id -eq 4648 -and (!$_.Properties[5].Value.Split(".")[0].EndsWith("$"))){
             if ($_.Properties[8].Value -eq "localhost"){
@@ -107,7 +123,6 @@ function Write-SecurityEvents{
                 'SourceHostname' = $_.MachineName.Split(".")[0]
             }
         $entry
-        Write-Debug $entry
         }
         elseif ($_.Id -eq 4776 -and (!$_.Properties[1].Value.Split(".")[0].EndsWith("$"))){
             if (!$_.Properties[3].Value -eq 0) {
@@ -124,13 +139,26 @@ function Write-SecurityEvents{
                 'Description' = $_.Properties[3].Value
                 'EventID' = $EventID
                 'LogonType' = "-"
-                'SourceIP' = $_.Properties[2].Value.Split(".")[0]
-                'SourceHostname' = ""
+                'SourceIP' = ""
+                'SourceHostname' = $_.Properties[2].Value.Split(".")[0]
             }
         $entry
-        Write-Debug $entry
         }
+    elseif ($_.Id -eq 4672 -and (!$_.Properties[1].Value.Split(".")[0].EndsWith("$"))){
+        $entry = [PSCustomObject]@{
+            'TimeCreated' = $_.TimeCreated
+            'UserName' = $_.Properties[1].Value.Split(".")[0]
+            'SID' = $_.Properties[0].Value
+            'Destination' = $_.MachineName.Split(".")[0]
+            'Description' = $_.Properties[4].Value
+            'EventID' = $_.Id
+            'LogonType' = "-"
+            'SourceIP' = ""
+            'SourceHostname' = ""
+        }
+    $entry
     }
+}
     $grouped = ""
     $grouped += $table | Group-Object -Property UserName, SID, SourceIP, EventID, LogonType, SourceIP, SourceHostname | ForEach-Object {
         $g = $_.Group[0]
@@ -197,7 +225,6 @@ function Write-RDPEvents {
                         'SourceHostname' = $source
                     }
         $entry
-        Write-Debug $entry
         }
     }
 
@@ -266,7 +293,6 @@ function Write-RDPConnectionEvents {
                         'SourceHostname' = $source
                     }
         $entry
-        Write-Debug $entry
         }
     }
 
