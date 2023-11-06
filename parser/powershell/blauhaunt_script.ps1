@@ -154,6 +154,7 @@ function Write-SecurityEvents{
             'LogonCount' = $times.Count
         }
         $line = $entry | ConvertTo-Json -compress
+        $line = $line.Trim()
         $line += $NewLine
         $line
     }
@@ -164,7 +165,7 @@ function Write-SecurityEvents{
         $file = $OutPath + "BlauHaunt_" + $Hostname + "_Security_" + $counter + ".json"
         $counter++
     }
-    $results > $file
+    $results | Out-File -FilePath $file -Encoding ascii
 }
 
 function Write-RDPEvents {
@@ -223,6 +224,7 @@ function Write-RDPEvents {
             'LogonCount' = $times.Count
         }
         $line = $entry | ConvertTo-Json -compress
+        $line = $line.Trim()
         $line += $NewLine
         $line
     }
@@ -233,7 +235,7 @@ function Write-RDPEvents {
         $file = $OutPath + "BlauHaunt_" + $Hostname + "_RDP_" + $counter + ".json"
         $counter++
     }
-    $results > $file
+    $results | Out-File -FilePath $file -Encoding ascii
 }
 
 function Write-RDPConnectionEvents {
@@ -291,6 +293,7 @@ function Write-RDPConnectionEvents {
             'LogonCount' = $times.Count
         }
         $line = $entry | ConvertTo-Json -compress
+        $line = $line.Trim()
         $line += $NewLine
         $line
     }
@@ -301,7 +304,7 @@ function Write-RDPConnectionEvents {
         $file = $OutPath + "BlauHaunt_" + $Hostname + "_RDPCon_" + $counter + ".json"
         $counter++
     }
-    $results > $file
+    $results | Out-File -FilePath $file -Encoding ascii
 }
 
 # Query security events using Get-WinEvent
