@@ -1,0 +1,45 @@
+name: Custom.Server.Monitoring.Blauhaunt.Clients
+description: |
+   This artifact pushes the results of the clients() method to your blauhaunt server. This is needed for having the os info 
+   and lables available in blauhaunt.
+
+# Can be CLIENT, CLIENT_EVENT, SERVER, SERVER_EVENT
+# toDo: make send data as list an not every entry as single event
+type: SERVER_EVENT
+
+parameters:
+   - name: blauhaunt_url
+     default: "http://127.0.0.1:8082"
+     description: url to your blauhaunt server
+   - name: blauhaunt_token
+     description: token from your case with write permission
+   - name: push_interval
+     description: intervall when the server will push the data in seconds
+     default: 300
+     type: int
+
+
+sources:
+  - precondition:
+      SELECT OS From info() where OS = 'windows' OR OS = 'linux' OR OS = 'darwin'
+
+    query: |
+        LET clients = SELECT _value as data FROM items(item={SELECT * FROM clients()})
+        LET b_url = blauhaunt_url + "/app/api/v1/push_client_info/"
+        LET send_massage = SELECT * FROM foreach(row=clients,
+            query={
+                SELECT client_id, Hostname, LastSeen, Content, Response
+                FROM http_client(
+                    method="POST",
+                    url=b_url,
+                    headers=dict(`Content-Type`="application/json"),
+                    data=serialize(item=dict(case_token=blauhaunt_token,
+                        clients=data),
+                        format="json")
+                    )
+            })
+        
+        SELECT * FROM foreach(
+           row={SELECT * FROM clock(period=push_interval)},
+           query=send_massage)
+        

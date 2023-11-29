@@ -1,0 +1,87 @@
+name: Custom.Windows.Events.Blauhaunt_Dev
+description: |
+        Blauhaunt Monitoring Artifact
+author: cgo SEC Consult
+# toDo: make sent as list and add more relevant events
+type: CLIENT_EVENT
+
+parameters:
+  - name: eventLog
+    description: Path to the Security.evtx file.
+    default: C:\Windows\System32\winevt\Logs\Security.evtx
+  - name: LogonTypeRegex
+    description: Specify LogonTypes to monitor
+    type: json_array
+    default: '[1,2,3,4,5,6,7,8,9,9,10,11,12]'
+
+sources:
+  - precondition:
+      SELECT OS From info() where OS = 'windows'
+    query: |
+        LET files = SELECT * FROM glob(globs=eventLog)
+        LET logon = SELECT timestamp(epoch=System.TimeCreated.SystemTime) As LogonTimes,
+            System.EventID.Value as EventID,
+            System.Computer as Destination,
+            EventData.TargetUserName as UserName,
+            EventData.LogonType as LogonType,
+            EventData.IpAddress as SourceIP,
+            EventData.WorkstationName as SourceHostname
+        
+              FROM foreach(
+                row=files,
+                async=TRUE,
+                query={
+                  SELECT *
+                  FROM watch_evtx(filename=OSPath)
+                  WHERE System.EventID.Value in (4624, 4625)
+                      AND EventData.LogonType in LogonTypeRegex
+              })
+        
+        LET explicit =  SELECT timestamp(epoch=System.TimeCreated.SystemTime) As LogonTimes,
+                System.EventID.Value as EventID,
+                System.Computer as Destination,
+                EventData.TargetUserName as UserName,
+                EventData.LogonType as LogonType,
+                EventData.IpAddress as SourceIP,
+                EventData.WorkstationName as SourceHostname
+        
+              FROM foreach(
+                row=files,
+                async=TRUE,
+                query={
+                  SELECT *
+                  FROM watch_evtx(filename=OSPath)
+                  WHERE System.EventID.Value = 4648
+              })
+        
+        LET results = SELECT * FROM chain(
+        	a=logon,
+        	b=explicit)
+
+        LET package = SELECT array(a=array(a=LogonTimes)[9]) as LogonTimes, EventID, Destination, UserName, LogonType, SourceHostname, SourceIP FROM results
+        
+        LET response = 
+        SELECT * FROM http_client(
+          url='http://127.0.0.1:8082/app/blauhaunt/',
+          method='POST',
+          headers=dict(
+          `Content-Type`="multipart/form-data;boundary=83fcda3640aca670"
+          ),
+          data='test'
+          )
+          
+        
+        //LET package_zwo = 
+        SELECT * FROM 
+        if(condition=response,
+        then={
+        SELECT * FROM 
+        package
+            
+        },
+        else={
+        SELECT * FROM package
+            
+        })
+        //SELECT * FROM 
+        //package_zwo
