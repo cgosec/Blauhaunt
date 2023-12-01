@@ -35,7 +35,7 @@ let tagColorMap = new Map()  // holds the color for each tag
 let userStatistics = {}  // used for the stats
 let systemStatisics = {}  // used for the stats
 
-let bad_ips = ['-', "127.0.0.1", "::1"]  // for filtering in Event processing
+let bad_ips = ["LOCAL", '-', "127.0.0.1", "::1"]  // for filtering in Event processing
 let bad_hostnames = ["-"]  // for filtering in Event processing
 let objects = []  // here all the single objects will be in from the processed lines of the event file
 let rank = true // rank is a needed indication for the custom sorting algorithm for the nodes
@@ -57,15 +57,21 @@ for (const btn of graphStyle) {
         switch (mode) {
             case "modeUser":
                 // user --event--> system
-                current_nodes = caseData.userNodes
-                current_edges = caseData.userEdges
+                prepareUserNodesAndEdges(caseData.userEdges).then(data => {
+                    current_nodes = data.nodes
+                    current_edges = data.edges
+                    setNodesAndEdges(current_nodes, current_edges)
+                })
                 break
             default :
                 // system --user(event)--> system
-                current_nodes = caseData.hostNodes
-                current_edges = caseData.hostEdges
+
+                prepareHostNodesAndEdges(caseData.hostEdges).then(data => {
+                    current_nodes = data.nodes
+                    current_edges = data.edges
+                    setNodesAndEdges(current_nodes, current_edges)
+                })
         }
-        setNodesAndEdges(current_nodes, current_edges)
     })
 }
 
@@ -140,6 +146,9 @@ function generateBlankCaseData() {
         userEdges: new Set(),
         nodesName: new Set(),
         edgesName: new Set(),
+        nodeTranslation: new Map(),
+        userEdgesLogonTimes: new Map(),
+        hostEdgesLogonTimes: new Map(),
         userNodeNames: new Set(),
         ip2hostMapper: {},
         ip2hostMapperFromFile: {},
@@ -331,8 +340,7 @@ function retrieveDataFromIndexDB(caseName) {
         const getRequest = objectStore.get(caseName);
 
         getRequest.onsuccess = function (event) {
-            const data = event.target.result;
-            caseData = data
+            let caseData = event.target.result
             console.log(caseData)
             let eventSetNew = new Set()
             let tagSetNew = new Set()
@@ -351,21 +359,29 @@ function retrieveDataFromIndexDB(caseName) {
                 tagSetNew.add(tag)
             })
             minConSwitch.disabled = false
-            current_nodes = caseData.hostNodes
-            current_edges = caseData.hostEdges
-            setNodesAndEdges(caseData.hostNodes, caseData.hostEdges)
-            document.getElementById("newCaseName").value = caseName
-        };
+            let userModGraph = document.getElementById("modeUser").checked
+            if (userModGraph) {
+                prepareUserNodesAndEdges(caseData.userEdges).then(nande => {
+                    setNodesAndEdges(nande.nodes, nande.edges)
+                })
+            } else {
+                prepareHostNodesAndEdges(caseData.hostEdges).then(nande => {
+                    setNodesAndEdges(nande.nodes, nande.edges)
+                })
+                document.getElementById("newCaseName").value = caseName
+            }
+        }
 
         getRequest.onerror = function (event) {
             console.error('Error retrieving data:', event.target.error);
             generateBlankCaseData()
-        };
-    };
+        }
+    }
 }
 
-
-
+// #####################################################################################################################
+// #####################################################################################################################
+// ###########################################HISTORIES #######################################################
 //function builds the modal with the user search history
 function userSearchHistory() {
     // Check if Ctrl key and R key are pressed simultaneously
@@ -488,8 +504,7 @@ function renderGraphBtnClick() {
                 })
                 modal.show()
                 break
-            }
-            else{
+            } else {
                 drawGraph({nodes: filtered_nodes, edges: filtered_edges}, "")
                 document.getElementById("innerStage").classList.remove("d-none")
                 document.getElementById("timespan").classList.remove("d-none")
@@ -512,8 +527,7 @@ function renderGraphBtnClick() {
 
 function createEventIDBtn(eventID, description) {
     // this function creates the buttons dynamically to filter for eventIDs
-    if (caseData.eventIDs.has(eventID))
-        return
+    if (caseData.eventIDs.has(eventID)) return
     caseData.eventIDs.add(eventID)
     let eventBtnGroups = document.getElementsByClassName("eventBtnGroup")
     let currentBtnGroupForEventBtns;
@@ -551,8 +565,7 @@ function createEventIDBtn(eventID, description) {
 
 function createLogonTypeBtn(logonType) {
     // create filter buttions for logon types (only has effect on 4624 and 4625 events)
-    if (logonTypes.has(logonType))
-        return
+    if (logonTypes.has(logonType)) return
     logonTypes.add(logonType)
     let newLogonTypeBtn = `<label>
                     <label data-bs-toggle="tooltip" data-bs-placement="top" title="LogonType ${logonType}">
@@ -613,8 +626,7 @@ function createTagColorPicker(tag) {
 
 function createTagBtn(tag) {
     // create filter buttons for tags
-    if (caseData.tags.has(tag) || ipRegex.test(tag))
-        return
+    if (caseData.tags.has(tag) || ipRegex.test(tag)) return
     caseData.tags.add(tag)
     createTagColorPicker(tag)
     let tagBtnGroup = document.getElementsByClassName("tagBtnGroup")
@@ -649,7 +661,8 @@ function applyEventFilters() {
     for (const btn of eventIdBtns) {
         if (btn.checked)
             eventFilters.push(btn.value)
-        else allChecked = false
+        else
+            allChecked = false
     }
     if (allChecked)
         return []
@@ -663,10 +676,10 @@ function applyLogonTypesFilter() {
     for (const btn of eventIdBtns) {
         if (btn.checked)
             logonTypes.push(parseInt(btn.value))
-        else allChecked = false
+        else
+            allChecked = false
     }
-    if (allChecked)
-        return []
+    if (allChecked) return []
     return logonTypes
 }
 
@@ -710,8 +723,7 @@ function _getNeededNode(edges) {
         edgeIds.push(e.data.target)
     }
     for (const n of current_nodes) {
-        if (edgeIds.includes(n.data.id))
-            retNodes.push(n)
+        if (edgeIds.includes(n.data.id)) retNodes.push(n)
     }
     return retNodes
 }
@@ -730,6 +742,7 @@ function filter(filterObject) {
      *              {node_types: ["Host", "User"]}
      *        event_ids: ["eventID"]
      *        }
+     *        DOCTRIN FOR DEVELPOING: APPLY FILTERS ALWAYS OUTGOING FROM THE EDGES NOT FROM NODES - NODES SHOULD BE CREATED AS NEEDED FROM THE EDGES
      */
     filterObject.event_ids = applyEventFilters()
     filterObject.logonTypes = applyLogonTypesFilter().map(type => {
@@ -737,13 +750,37 @@ function filter(filterObject) {
     })
     filterObject.tags = applyTagFilters()
     filtered_edges = [...current_edges]
-    filtered_nodes = [...current_nodes]
-
+    filtered_edges.map(async edge => {
+        edge.data.source = (caseData.nodeTranslation.get(edge.data.source) || edge.data.source)
+        edge.data.target = (caseData.nodeTranslation.get(edge.data.target) || edge.data.target)
+    })
 
     // filter out same origin and target
     if (!document.getElementById("selfCon").checked) {
         filtered_edges = filtered_edges.filter(edge => {
             return (edge.data.target !== edge.data.source)
+        })
+    }
+    let userModGraph = document.getElementById("modeUser").checked
+
+    // filter for source hosts
+    if (!userModGraph && filterObject.srcHosts) {
+        filtered_edges = filtered_edges.filter(edge => {
+            return filterObject.srcHosts.test(edge.data.source)
+        })
+    }
+
+    // filter for users
+    if (filterObject.users) {
+        filtered_edges = filtered_edges.filter(event => {
+            return filterObject.users.test(event.data.UserName)
+        })
+    }
+
+    // filter for destination hosts
+    if (filterObject.dstHosts) {
+        filtered_edges = filtered_edges.filter(edge => {
+            return filterObject.dstHosts.test(edge.data.target)
         })
     }
 
@@ -755,7 +792,7 @@ function filter(filterObject) {
     }
 
     //filter for logon types
-    if ((filterObject.event_ids.length === 0 || filterObject.event_ids.includes(""+4624) || filterObject.event_ids.includes(""+4625)) && filterObject.logonTypes.length > 0) {
+    if ((filterObject.event_ids.length === 0 || filterObject.event_ids.includes("" + 4624) || filterObject.event_ids.includes("" + 4625)) && filterObject.logonTypes.length > 0) {
         filtered_edges = filtered_edges.filter(edge => {
             return (edge.data.EventID != 4624 && edge.data.EventID != 4625) || filterObject.logonTypes.includes(edge.data.LogonType)
         })
@@ -829,90 +866,34 @@ function filter(filterObject) {
         })
     }
 
-    // filter for what was searched for or if filter for was clicked
-    let tmpNodesForSrcHosts = []
-    let tmpNodesForDstHosts = []
-
-    if (filterObject.srcHosts) {
-        tmpNodesForSrcHosts = filtered_nodes.filter(node => {
-            return (node.data.label === "Host" && filterObject.srcHosts.test(node.data.nlabel))
-        })
-    }
-    if (filterObject.dstHosts) {
-        tmpNodesForDstHosts = filtered_nodes.filter(node => {
-            return (node.data.label === "Host" && filterObject.dstHosts.test(node.data.nlabel))
-        })
-    }
-    if (filterObject.users) {
-        // filter for usernodes
-        tmpNodesForSrcHosts = tmpNodesForSrcHosts.concat(filtered_nodes.filter(node => {
-                return (node.data.label === "User" && filterObject.users.test(node.data.nlabel))
-            })
-        )
-        // add system nodes when a user is searched and it has connections from or with this user
-        let tmpNodesForSrcHostsStage2 = []
-        let tmpNodesForDstHostsStage2 = []
-        if (document.getElementById("modeSystem").checked) {
-            let searchMatechesUser;
-            let userFilteredEdges = filtered_edges.filter(event => {
-                if (filterObject.users.test(event.data.UserName)) {
-                    searchMatechesUser = true
-                    if (!tmpNodesForSrcHostsStage2.includes(caseData.nodeMap.get(event.data.source)))
-                        if (!filterObject.srcHosts || filterObject.srcHosts.test(event.data.source)) {
-                            tmpNodesForSrcHostsStage2.push(caseData.nodeMap.get(event.data.source))
-                        }
-                    return true
-                }
-                return false
-            })
-            // just apply when the users are found in the events
-            if (searchMatechesUser) {
-                if (filterObject.dstHosts)
-                    userFilteredEdges = userFilteredEdges.filter(event => {
-                        return filterObject.dstHosts.test(event.data.target)
-                    })
-                filtered_edges = userFilteredEdges
-                tmpNodesForSrcHosts = tmpNodesForSrcHostsStage2
-                tmpNodesForDstHosts = tmpNodesForDstHostsStage2
-            }
-        }
-    }
-
     if (filterObject.srcHosts && filterObject.dstHosts && !filterObject.users) {
         filtered_edges = filtered_edges.filter(edge => {
             return (filterObject.srcHosts.test(edge.data.source) && filterObject.dstHosts.test(edge.data.target))
         })
     }
 
-    if (filterObject.users || filterObject.srcHosts || filterObject.dstHosts) {
-        filtered_nodes = tmpNodesForSrcHosts
-    }
 
-// filter for minimum of outgoing conntections for src hosts:
-    if (minConSwitch.checked) {
-        let minLogon = minConRange.value
-        filtered_nodes = filtered_nodes.filter(node => {
-            return node.data.LogonCount >= minLogon
-        })
-    }
-
-//filter for tags for src hosts
     if (filterObject.tags && filterObject.tags.length > 0) {
-        filtered_nodes = filtered_nodes.filter(node => {
+        filtered_edges = filtered_edges.filter(event => {
             try {
-                return (caseData.hostInfo.get(node.data.id).tags.filter(tag => {
+                return ((caseData.hostInfo.get(event.data.source).tags.filter(tag => {
                     return filterObject.tags.includes(tag)
-                }).length > 0)
+                }).length > 0) || (caseData.hostInfo.get(event.data.target).tags.filter(tag => {
+                    return filterObject.tags.includes(tag)
+                }).length > 0))
             } catch (error) {
                 return false
             }
         })
     }
-    let graphData = filterByNodes(filtered_nodes, tmpNodesForDstHosts, filtered_edges)
-    graphData.edges = graphData.edges = [...new Set(graphData.edges)]
-    graphData.nodes = graphData.nodes = [...new Set(graphData.nodes)]
-    filtered_nodes = graphData.nodes
-    setNodesAndEdges(graphData.nodes, graphData.edges)
+    if (!userModGraph) prepareHostNodesAndEdges(filtered_edges).then(nande => {
+        setNodesAndEdges(nande.nodes, nande.edges)
+    })
+    else {
+        prepareUserNodesAndEdges(filtered_edges).then(nande => {
+            setNodesAndEdges(nande.nodes, nande.edges)
+        })
+    }
 }
 
 function joinEdges(edges) {
@@ -964,6 +945,9 @@ function joinEdges(edges) {
     return ret_edges
 }
 
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### GRAPH PREPARATION ###############################################
 function calcGraphSize() {
     // this function calculates the overall width and height of the graph based on the number of nodes
     let nodeCount = parseInt(nodesCounter.innerText)
@@ -983,19 +967,13 @@ function checkAndMoveObjects(oldObject, position, size, time, connections) {
     let yDirection;
     size = size * 5
     let moved = false
-    while (
-        oldObject.position.x - oldObject.data.nwidth < position.x &&
-        oldObject.position.x + oldObject.data.nwidth > position.x &&
-        oldObject.position.y - oldObject.data.nheight < position.y &&
-        oldObject.position.y + oldObject.data.nheight > position.y
-        ) {
+    while (oldObject.position.x - oldObject.data.nwidth < position.x && oldObject.position.x + oldObject.data.nwidth > position.x && oldObject.position.y - oldObject.data.nheight < position.y && oldObject.position.y + oldObject.data.nheight > position.y) {
         moved = true
         // move second object left/right based on number
         if (connections.out < oldObject.connections.out) {
             position.x = position.x - size;
         } else if (connections.out === oldObject.connections.out) {
-            if (connections.in < oldObject.connections.in)
-                position.x = position.x - size
+            if (connections.in < oldObject.connections.in) position.x = position.x - size
             else if (connections.in === oldObject.connections.in && !xDirection) {
                 lastMovementLeft = !lastMovementLeft
                 xDirection = xDirection || ((lastMovementLeft ? size * -1 : size))
@@ -1041,6 +1019,131 @@ function checkOccupation(positionsOccupied, position, size, time, rank) {
     }
 }
 
+
+function createHostNode(node) {
+    let nsub = "";
+    let ncategory = "";
+    let nshape = "rectangle"
+    let nfsize = "8"
+    let ncolor = ncolor_host
+    let nbcolor = nbcolor_host
+    let nfcolor = nfcolor_host
+    let ntype = "Host"
+    let new_node = {
+        "data": {
+            "id": node,
+            "objid": node,
+            "nlabel": node,
+            "ncolor": ncolor,
+            "nbcolor": nbcolor,
+            "nfcolor": nfcolor,
+            "nwidth": default_size,
+            "nheight": default_size,
+            "nfsize": nfsize,
+            "nshape": nshape,
+            "label": "Host",
+            "ntype": ntype,
+            "nhostname": node,
+            "ips": (caseData.host2ipMapper[node] || []).join(", "),
+            "nsub": nsub,
+            "ncategory": ncategory,
+            "nid": node,
+            "Tags": (caseData.hostInfo.get(node) || {tags: []}).tags,
+            "os": (caseData.hostInfo.get(node) || {os: "Unknown"}).os,
+        }, "position": 0,
+    }
+    setNodeColor(new_node)
+    restyleNode(new_node)
+    return new_node
+}
+
+function createUserNode(node) {
+    let nsub = "";
+    let ncategory = "";
+    let nfsize = "10"
+    let nshape = "ellipse"
+    let ntype = "User"
+    let ncolor
+    let nbcolor
+    let nfcolor
+    ncolor = ncolor_user
+    nbcolor = nbcolor_user
+    nfcolor = nfcolor_user
+    let new_node = {
+        "data": {
+            "id": node,
+            "objid": node,
+            "nlabel": node,
+            "ncolor": ncolor,
+            "nbcolor": nbcolor,
+            "nfcolor": nfcolor,
+            "nwidth": default_size,
+            "nheight": default_size,
+            "nfsize": nfsize,
+            "nshape": nshape,
+            "label": "User",
+            "ntype": ntype,
+            "nhostname": node,
+            "nsub": nsub,
+            "ncategory": ncategory,
+            "nid": node,
+        }, "position": 0,
+    }
+    setNodeColor(new_node)
+    restyleNode(new_node)
+    return new_node
+}
+
+async function prepareHostNodesAndEdges(hostEdges) {
+    let ret_edges = []
+    let step_nodes = new Set()
+    for (const edge of hostEdges) {
+
+        let new_edge = {...edge}
+        edge.data.edge_color = edge_color
+        edge.data.ecolor = ecolor
+        edge.data.nfcolor = "#ff9797"
+        ret_edges.push(new_edge)
+        step_nodes.add(edge.data.source)
+        step_nodes.add(edge.data.target)
+    }
+    let ret_nodes = []
+    for (const node of step_nodes) {
+        let new_node = createHostNode(node)
+        ret_nodes.push(new_node)
+    }
+
+    return {nodes: ret_nodes, edges: ret_edges}
+}
+
+async function prepareUserNodesAndEdges(userEdges) {
+    let ret_edges = []
+    let step_user_nodes = new Set()
+    let step_host_nodes = new Set()
+    for (const edge of userEdges) {
+
+        let new_edge = {...edge}
+        edge.data.edge_color = edge_color
+        edge.data.ecolor = ecolor
+        edge.data.nfcolor = "#ff9797"
+        ret_edges.push(new_edge)
+        step_user_nodes.add(edge.data.source)
+        step_host_nodes.add(edge.data.target)
+    }
+
+    let ret_nodes = []
+
+    for (const node of step_host_nodes) {
+        let new_node = createHostNode(node)
+        ret_nodes.push(new_node)
+    }
+    for (const node of step_user_nodes) {
+        let new_node = createUserNode(node)
+        ret_nodes.push(new_node)
+    }
+    return {nodes: ret_nodes, edges: ret_edges}
+}
+
 function setNodeColor(node) {
     // this function sets the color of the node based on the tags and the color of the tag. also the node stype is adapeted according to darkmode settings
     let nodeTags = node.data.Tags
@@ -1070,10 +1173,8 @@ function restyleNode(node) {
     // this function sets the style and image of the node based on the node type
     switch (node.data.ntype) {
         case "Host":
-            if (node.data.os.toLowerCase().includes("server"))
-                node.data.nimage = "static/images/font-awesome/server.svg"
-            else
-                node.data.nimage = "static/images/font-awesome/desktop.svg"
+            if (node.data.os.toLowerCase().includes("server")) node.data.nimage = "static/images/font-awesome/server.svg"
+            else node.data.nimage = "static/images/font-awesome/desktop.svg"
             node.data.opacity = "0"
             node.data.nshape = "roundrectangle"
             break
@@ -1082,13 +1183,6 @@ function restyleNode(node) {
             node.data.opacity = "0"
             break
     }
-}
-
-function restyleEdge(edge) {
-    // this function sets the style of the edge based on the darmkode setting
-    edge.data.edge_color = edge_color
-    edge.data.ecolor = ecolor
-    edge.data.nfcolor = "#ff9797"
 }
 
 function prepareNodes(nodes, edges) {
@@ -1157,22 +1251,19 @@ function prepareNodes(nodes, edges) {
                     nodeMaxTime = nodeMaxTime > edgeMaxTime ? nodeMaxTime : edgeMaxTime
                     timeList = timeList.concat(edgeTimeList)
                     systemToSet.add(edge.data.target)
-                    if (userModGraph)
-                        systemToSet.add(edge.data.source) // the user connected to this system
+                    if (userModGraph) systemToSet.add(edge.data.source) // the user connected to this system
                     if (!userModGraph) {
                         let us = userStatistics[edge.data.elabel]
                         if (!us) {
                             userStatistics[edge.data.elabel] = {
-                                connections: {in: 0, out: edge.data.count},
-                                toSystems: new Set([edge.data.target])
+                                connections: {in: 0, out: edge.data.count}, toSystems: new Set([edge.data.target])
                             }
                         } else if (us && us.connections && us.connections.out) {
                             userStatistics[edge.data.UserName].connections.out += edge.data.count
                             userStatistics[edge.data.elabel].toSystems.add(edge.data.target)
                         } else if (us && !us.connections) {
                             userStatistics[edge.data.UserName].connections = {
-                                in: 0,
-                                out: edge.data.count
+                                in: 0, out: edge.data.count
                             } // the user had that many connections
                             userStatistics[edge.data.elabel].toSystems.add(edge.data.target)
                         } else {
@@ -1182,7 +1273,6 @@ function prepareNodes(nodes, edges) {
                         outUsersSet.add(edge.data.UserName)
                     }
                 }
-                restyleEdge(edge)
             }
             earliestTime = earliestTime < nodeMinTime ? earliestTime : nodeMinTime
             latestTime = latestTime > nodeMaxTime ? latestTime : nodeMaxTime
@@ -1190,8 +1280,7 @@ function prepareNodes(nodes, edges) {
             consOut.push(conOut)
             node.connections = {in: conIn, out: conOut}
             if (node.data.ntype === "User") {
-                if (!userStatistics[node.data.nlabel])
-                    userStatistics[node.data.nlabel] = {}
+                if (!userStatistics[node.data.nlabel]) userStatistics[node.data.nlabel] = {}
                 userStatistics[node.data.nlabel] = {connections: node.connections}
                 userStatistics[node.data.nlabel].toSystems = systemToSet
             } else {
@@ -1199,8 +1288,7 @@ function prepareNodes(nodes, edges) {
                 systemStatisics[node.data.nlabel].toSystems = systemToSet
                 systemStatisics[node.data.nlabel].fromSystems = systemFromSet
                 systemStatisics[node.data.nlabel].users = {
-                    in: {count: inUsersSet.size, set: inUsersSet},
-                    out: {count: outUsersSet.size, set: outUsersSet}
+                    in: {count: inUsersSet.size, set: inUsersSet}, out: {count: outUsersSet.size, set: outUsersSet}
                 }
                 systemStatisics[node.data.nlabel].connections = node.connections
 
@@ -1227,28 +1315,22 @@ function prepareNodes(nodes, edges) {
             let position = {x: 0, y: 0}
             let conRank  // this is used to specify the x position of the node.
             if (node.connections.out > conOutStats.q2) { // if the node has more connections than the median, it will be placed in the center
-                if (node.connections.out > conOutStats.q3)
-                    conRank = 1
-                else
-                    conRank = node.connections.out / (maxConOut)  // the more connections the node has the closer to the center it will be
+                if (node.connections.out > conOutStats.q3) conRank = 1
+                else conRank = node.connections.out / (maxConOut)  // the more connections the node has the closer to the center it will be
             } else { //if outgoing connections are below median the node will be more concentrated on the sides
                 conRank = (node.connections.in) / ((maxConOut + maxConIn))
-                if (conRank > 0.5)
-                    conRank = 0.5
+                if (conRank > 0.5) conRank = 0.5
             }
             let yRankBase = node.activityStats.q1 - earliestTime
             position.y = (yRankBase / timeSpan) * graphSize.height
-            if (lastLeft)
-                position.x = graphSize.width - ((conRank) * (graphSize.width / 2))
-            else
-                position.x = (conRank) * (graphSize.width / 2)
+            if (lastLeft) position.x = graphSize.width - ((conRank) * (graphSize.width / 2))
+            else position.x = (conRank) * (graphSize.width / 2)
             lastLeft = !lastLeft
             position.y = position.y || 0 // this is last resort if possition calculation faced any issues
             position.x = position.x || 0 // this is last resort if position calculation faced any issues
             node.position = position
             let sizeRank = (node.connections.out / maxConOut)
-            if (sizeRank >= 1)
-                sizeRank = 1.2
+            if (sizeRank >= 1) sizeRank = 1.2
             let size = sizeRank * max_size
             size = size > min_size ? size : min_size
             node.data.nwidth = size
@@ -1285,8 +1367,7 @@ function setDisplayTimeSpan(timestamplist) {
         daySpan.classList.add("p-2")
         daySpan.innerText = day
         let dayCountPercentage = ((timestamplist[day] || 0) / maxDayCount) * 100
-        if (dayCountPercentage > 0)
-            daySpan.style.background = `linear-gradient(90deg, orange ${dayCountPercentage}%, transparent ${100 - dayCountPercentage}%)`
+        if (dayCountPercentage > 0) daySpan.style.background = `linear-gradient(90deg, orange ${dayCountPercentage}%, transparent ${100 - dayCountPercentage}%)`
 
         document.getElementById("timespan").appendChild(daySpan)
     })
@@ -1308,6 +1389,10 @@ function getSVG(element) {
 function getSVGSize(element) {
     return "" + element._private.data.nwidth + "px"
 }
+
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### TIMELINE DISPLAY ###############################################
 
 // TIMLELINE STUFF STARTS HERE
 function createTimelineSystemView(edges) {
@@ -1395,7 +1480,9 @@ function downloadTimelineAsCSVFile(csv_data) {
 
 
 // TIMELINE STUFF ENDS HERE
-
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### HEATMAP DISPLAY ###############################################
 
 // HEATMAPSTUFF STARTS HERE
 
@@ -1486,20 +1573,19 @@ function createHeatmap() {
 }
 
 // HEATMAP STUFF ENDS HERE
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### STATISTICS DISPLAY (right) ###################################################
+
 function createStatisticsDisplay() {
     // system: toSystem, fromSystem, connections.in, connections.out, users.in.count, users.out.count
     // user: toSystems, connections
     let sysList = Object.entries(systemStatisics).sort((a, b) => {
-            if (b[1].toSystems.size - a[1].toSystems.size !== 0)
-                return b[1].toSystems.size - a[1].toSystems.size
-            if (b[1].connections.out - a[1].connections.out !== 0)
-                return b[1].connections.out - a[1].connections.out
-            if (b[1].fromSystems.size - a[1].fromSystems.size !== 0)
-                return b[1].fromSystems.size - a[1].fromSystems.size
-            if (b[1].connections.in - a[1].connections.in !== 0)
-                return b[1].connections.in - a[1].connections.in
-        }
-    )
+        if (b[1].toSystems.size - a[1].toSystems.size !== 0) return b[1].toSystems.size - a[1].toSystems.size
+        if (b[1].connections.out - a[1].connections.out !== 0) return b[1].connections.out - a[1].connections.out
+        if (b[1].fromSystems.size - a[1].fromSystems.size !== 0) return b[1].fromSystems.size - a[1].fromSystems.size
+        if (b[1].connections.in - a[1].connections.in !== 0) return b[1].connections.in - a[1].connections.in
+    })
     let sysT = document.getElementById("sysTable")
     sysT.innerHTML = ""
     for (const [sys, e] of sysList) {
@@ -1523,8 +1609,7 @@ function createStatisticsDisplay() {
         sysT.appendChild(row)
     }
     let usersList = Object.entries(userStatistics).sort((a, b) => {
-        if (b[1].toSystems.size - a[1].toSystems.size !== 0)
-            return b[1].toSystems.size - a[1].toSystems.size
+        if (b[1].toSystems.size - a[1].toSystems.size !== 0) return b[1].toSystems.size - a[1].toSystems.size
         return b[1].connections.out - a[1].connections.out
 
     })
@@ -1543,6 +1628,10 @@ function createStatisticsDisplay() {
         usersT.appendChild(row)
     }
 }
+
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### GRAPH Creation ###############################################################
 
 function drawGraph(graph, rootNode) {
     // this is cytoscape stuff
@@ -1581,9 +1670,7 @@ function drawGraph(graph, rootNode) {
         flagMode = "klay";
     }
     cy = cytoscape({
-        container: document.getElementById("cy"),
-        boxSelectionEnabled: false,
-        style: cytoscape.stylesheet()
+        container: document.getElementById("cy"), boxSelectionEnabled: false, style: cytoscape.stylesheet()
             .selector('node').css({
                 "content": "data(nlabel)",
                 "width": "data(nwidth)",
@@ -1595,8 +1682,7 @@ function drawGraph(graph, rootNode) {
                 "background-height": (ele) => getSVGSize(ele),
                 "background-opacity": 0.3, //"data(opacity)",
                 "background-color": "data(nfcolor)",
-                "border-color": "data(nbcolor)",
-                //"border-style": "solid",
+                "border-color": "data(nbcolor)", //"border-style": "solid",
                 //"border-width": 1,
                 "text-valign": "bottom",
                 "text-outline-width": 0.5,
@@ -1604,8 +1690,7 @@ function drawGraph(graph, rootNode) {
                 "shape": "data(nshape)"
             })
             .selector(':selected').css({
-                "border-width": 4,
-                "border-color": "data(nfcolor)" //"#404040"
+                "border-width": 4, "border-color": "data(nfcolor)" //"#404040"
             })
             .selector('edge').css({
                 "content": "data(elabel)",
@@ -1622,13 +1707,8 @@ function drawGraph(graph, rootNode) {
                 "line-color": "#61bfcc",
                 "transition-property": "background-color, line-color, target-arrow-color",
                 "transition-duration": "0.5s"
-            }),
-        elements: graph,
-        layout: {
-            name: flagMode,
-            roots: rootNode,
-            animate: true,
-            padding: 10
+            }), elements: graph, layout: {
+            name: flagMode, roots: rootNode, animate: true, padding: 10
         }
     });
     cy.on("layoutstop", function () {
@@ -1637,32 +1717,22 @@ function drawGraph(graph, rootNode) {
     cy.nodes().forEach(function (ele) {
         ele.qtip({
             content: {
-                title: "<b>Node Details</b>",
-                text: qtipNode(ele)
-            },
-            style: {
+                title: "<b>Node Details</b>", text: qtipNode(ele)
+            }, style: {
                 classes: "qtip-bootstrap"
-            },
-            position: {
-                my: "top center",
-                at: "bottom center",
-                target: ele
+            }, position: {
+                my: "top center", at: "bottom center", target: ele
             }
         });
     });
     cy.edges().forEach(function (ele) {
         ele.qtip({
             content: {
-                title: "<b>Details</b>",
-                text: qtipEdge(ele)
-            },
-            style: {
+                title: "<b>Details</b>", text: qtipEdge(ele)
+            }, style: {
                 classes: "qtip-bootstrap"
-            },
-            position: {
-                my: "top center",
-                at: "bottom center",
-                target: ele
+            }, position: {
+                my: "top center", at: "bottom center", target: ele
             }
         });
     });
@@ -1691,20 +1761,15 @@ function qtipNode(ndata) {
         qtext += `<br><details><summary>Tags:</summary>${tagList}</details>`
     }
 
-    qtext += '<br><button type="button" class="btn btn-primary btn-xs" onclick="' +
-        'qtipNodeFilter(' + '\'' + ndata._private.data["label"] + '\', \'' + ndata._private.data["nlabel"] +
-        '\')">filter for</button>'
+    qtext += '<br><button type="button" class="btn btn-primary btn-xs" onclick="' + 'qtipNodeFilter(' + '\'' + ndata._private.data["label"] + '\', \'' + ndata._private.data["nlabel"] + '\')">filter for</button>'
     return qtext;
 }
 
 function qtipNodeFilter(type, filterStr) {
     let filterObject = {
-        users: "",
-        hosts: "",
-        event_ids: []
+        users: "", hosts: "", event_ids: []
     }
-    if (type === "User")
-        document.getElementById("queryUser").value = filterStr
+    if (type === "User") document.getElementById("queryUser").value = filterStr
     if (type === "Host") {
         document.getElementById("queryHostSrc").value = filterStr
     }
@@ -1773,13 +1838,14 @@ function qtipEdge(ndata) {
     return qtext;
 }
 
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### FILTERING ###############################################################
+
 function createQuery() {
     // this is called when filters are applied
     filterObject = {
-        users: "",
-        srcHosts: "",
-        dstHosts: "",
-        event_ids: []
+        users: "", srcHosts: "", dstHosts: "", event_ids: []
     }
     let setUserStr = document.getElementById("queryUser").value;
     let srcSetHostStr = document.getElementById("queryHostSrc").value;
@@ -1801,12 +1867,9 @@ function createQuery() {
     filter(filterObject)
 }
 
-function changeNode(nodeIdOld, nodeIdNew) {
-    //toDo
-    //Node change data.id, data.nhostname, data.nid, data.nlabel, data.objid
-    // edge change data.target, data.source
-}
-
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### Exports ###############################################################
 
 // EXPORT FUNCTIONS START HERE
 function exportCSV() {
@@ -1844,13 +1907,9 @@ function exportJPEG() {
 function quartiles(arr) {
     const sortedArr = arr.sort((a, b) => a - b);
     const n = sortedArr.length;
-    let q1 = n % 2 === 0
-        ? median(sortedArr.slice(0, n / 2))
-        : median(sortedArr.slice(0, Math.floor(n / 2)));
+    let q1 = n % 2 === 0 ? median(sortedArr.slice(0, n / 2)) : median(sortedArr.slice(0, Math.floor(n / 2)));
     const q2 = median(sortedArr);
-    let q3 = n % 2 === 0
-        ? median(sortedArr.slice(n / 2))
-        : median(sortedArr.slice(Math.floor(n / 2) + 1));
+    let q3 = n % 2 === 0 ? median(sortedArr.slice(n / 2)) : median(sortedArr.slice(Math.floor(n / 2) + 1));
 
     q1 = q1 || q2 // in case there is too less data
     q3 = q3 || q2 // in case there is too less data
@@ -1870,6 +1929,9 @@ function median(arr) {
     }
 }
 
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### Mapping from IPs to Hosts ###################################################
 
 function fillHostAndIpMaps(csv_data, ipColName, hostColName, valueSeperator, excludes) {
     let lines = csv_data.split("\n")
@@ -1893,13 +1955,11 @@ function fillHostAndIpMaps(csv_data, ipColName, hostColName, valueSeperator, exc
             }).filter(function (v) {
                 if (v.match(ipRegex)) return v
             })
-            if (!ips || ips.length === 0 || (!hostname || excludes.includes(hostname)))
-                continue
+            if (!ips || ips.length === 0 || (!hostname || excludes.includes(hostname))) continue
             let host2ipList = caseData.host2ipMapperFromFile[hostname] || []
             caseData.host2ipMapperFromFile[hostname] = host2ipList
             for (const ip of ips) {
-                if (!host2ipList.includes(ip))
-                    host2ipList.push(ip)
+                if (!host2ipList.includes(ip)) host2ipList.push(ip)
                 let ip2HostList = caseData.ip2hostMapperFromFile[ip] || []
                 if (!ip2HostList.includes(hostname)) {
                     ip2HostList.push(hostname)
@@ -1920,10 +1980,8 @@ function getIPsHost(ip) {
     more than one IP Address is in the list
      */
     return new Promise(resolve => {
-        if (!ip)
-            resolve(null)
-        if (!ipRegex.test(ip))
-            resolve(ip.split(".")[0].toUpperCase())
+        if (!ip) resolve(null)
+        if (!ipRegex.test(ip)) resolve(ip.split(".")[0].toUpperCase())
         let ip2HostList = caseData.ip2hostMapperFromFile[ip] || caseData.ip2hostMapper[ip] || []
         if (ip2HostList.length > 1) {
             let hDiv = document.getElementById("hostSelectionDiv")
@@ -2095,8 +2153,7 @@ function mappingFromData(objects) {
                 list.push(ipAddress)
                 caseData.host2ipMapper[hostname] = list
                 list = caseData.ip2hostMapper[ipAddress] || []
-                if (!list.includes(hostname))
-                    list.push(hostname)
+                if (!list.includes(hostname)) list.push(hostname)
                 caseData.ip2hostMapper[ipAddress] = list
             }
         }
@@ -2108,65 +2165,14 @@ function mappingFromData(objects) {
     }
 }
 
-function createUserEdges(data) {
-    /*
-    This function creates the edges between the user nodes and the host nodes
-     */
-    let user = data.UserName.toUpperCase()
-    let dest = data.Destination.trim().toUpperCase()
-    if (ipRegex.test(dest))
-        dest = caseData.host2ipMapperFromFile[dest] || caseData.host2ipMapper[dest] || dest
-    else
-        dest = dest.split(".")[0].toUpperCase()
-
-    data.LogonTimes = data.LogonTimes || [0]
-    data.LogonTimes.sort((a, b) => {
-        return new Date(a).getTime() - new Date(b).getTime()
-    })
-    let timestamp = new Date(data.LogonTimes[0]).getTime()
-
-    let sid = data.SID || caseData.userSidMapper[user]
-    let hostname = data.SourceHostname
-    hostname = hostname ? hostname.toUpperCase() : null
-    let sourceIP = data.SourceIP || caseData.host2ipMapperFromFile[hostname] || caseData.host2ipMapper[hostname] || "-"
-    {
-        let userEdge = {
-            "data": {
-                "id": user + sourceIP + dest + data.EventID,
-                "source": user,
-                "target": dest,
-                "objid": user + sourceIP + dest + data.EventID,
-                "elabel": data.EventID,
-                "label": "Event",
-                "mod": "User",
-                "distance": 5,
-                "ewidth": 0.1,
-                "ntype": "edge",
-                "eventSource": sourceIP + ", " + (hostname || "-"),
-                "eid": data.EventID,
-                "count": data.LogonCount,
-                "logontype": data.LogonType | "-",
-                "edge_color": edge_color,
-                "ecolor": ecolor,
-                "FirstTime": data.EventTime,
-                "EventTimes": data.LogonTimes,
-                "FirstEventTimeStamp": timestamp,
-                "UserName": user,
-                "SID": sid || "-",
-                "EventID": data.EventID,
-                "LogonType": data.LogonType || "-",
-                "Description": data.Description || "-",
-            }
-        }
-        caseData.userEdges.add(userEdge)
-    }
-}
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### DATA PROCESSING ###############################################################
 
 async function createNodesAndEdges(objects) {
-    /*
-    This function creates the nodes and edges for the graph only user nodes are created directly in the
-    processJSONUpload function
-     */
+    let nodeTranslation = caseData["nodeTranslation"] || new Map()
+    let edgeTimeMap = caseData["hostEdgesLogonTimes"] || new Map()
+
     for (const data of objects) {
         if (!data.Destination) {
             console.error("No Destination in this line - will be skipped:")
@@ -2175,45 +2181,36 @@ async function createNodesAndEdges(objects) {
         }
         let ipAddress = bad_ips.includes(data.SourceIP) ? null : data.SourceIP.trim()
         let source = ""
-        let hostname = bad_hostnames.includes(data.SourceHostname) ? await getIPsHost(ipAddress) : data.SourceHostname || await getIPsHost(ipAddress)
-        hostname = hostname ? hostname.toUpperCase() : hostname //set to upper case if not null
+        let hostname = bad_hostnames.includes(data.SourceHostname) ? ipAddress : data.SourceHostname
         let user = data.UserName.toUpperCase()
-        let dest = await getIPsHost(data.Destination.trim())
+        let dest = data.Destination.trim()
+        if (!ipRegex.test(dest)) dest = dest.split(".")[0]
+        dest = dest.toUpperCase()
+        if (["LOCAL", "127.0.0.1", "::1"].includes(hostname)) {
+            hostname = dest
+        }
         dest = dest.toUpperCase()
         source = hostname || ""
-        let sid = caseData.userSidMapper[user]
-        let ips = caseData.ip2hostMapperFromFile[hostname || dest] || []
-        ips = ips.concat(caseData.host2ipMapper[hostname || dest] || [])
-        let dest_ips = caseData.host2ipMapper[dest] || []
-        if (["LOCAL", "127.0.0.1", "::1"].includes(source)) {
-            source = dest
-            ips = dest_ips
-        }
+        source = source.trim()
+        if (!ipRegex.test(source)) dest = dest.split(".")[0]
+        source = source.toUpperCase()
+        nodeTranslation.set(dest, dest)
+        if (!source) continue
+        nodeTranslation.set(source, source)
+        let description = data.Description || "-"
+        let logonType = (data.LogonType || "-")
 
-        if (source && !caseData.nodesName.has(source)) {
-            createHostNode(caseData.hostNodes, source, ips)
-            caseData.nodesName.add(source)
-        }
-        if (!caseData.nodesName.has(dest)) {
-            createHostNode(caseData.hostNodes, dest, dest_ips)
-            caseData.nodesName.add(dest)
-        }
-
-        if (!source) {
-            continue
-        }
-
-        let edgeid = source + ipAddress + dest + user + data.EventID + (data.LogonType || "-")
-        if (caseData.edgesName.has(edgeid))
-            continue
-        else
-            caseData.edgesName.add(edgeid)
-        let edgelabel = user // + " " + data.EventID //+ data.LogonType | "" + data.EventTime
-        data.LogonTimes = data.LogonTimes || [0]
-        data.LogonTimes.sort((a, b) => {
+        let edgeid = source + ipAddress + dest + user + data.EventID + logonType + description
+        let logontimes = edgeTimeMap.get(edgeid) || []
+        data.LogonTimes = data.LogonTimes || []
+        logontimes.push(...data.LogonTimes)
+        logontimes = logontimes.sort((a, b) => {
             return new Date(a).getTime() - new Date(b).getTime()
         })
-        let timeStamp = new Date(data.LogonTimes[0]).getTime()
+        logontimes = [...new Set(logontimes)] // remove duplicates
+        edgeTimeMap.set(edgeid, logontimes)
+        let edgelabel = user
+        let sid = "-"
         let edge = {
             "data": {
                 "id": edgeid,
@@ -2226,24 +2223,76 @@ async function createNodesAndEdges(objects) {
                 "distance": 15,
                 "ntype": "edge",
                 "eid": data.EventID,
-                "count": data.LogonCount,
-                "eventSource": (data.SourceIP || "-") + ", " + (data.SourceHostname || "-"),
-                "logontype": data.LogonType || "-",
+                "count": caseData.hostEdgesLogonTimes.get(edgeid).length,
+                "eventSource": "-",
+                "logontype": logonType,
                 "edge_color": edge_color,
                 "ecolor": ecolor,
-                "FirstTime": data.EventTime,
-                "EventTimes": data.LogonTimes,
-                "FirstEventTimeStamp": timeStamp,
+                "EventTimes": caseData.hostEdgesLogonTimes.get(edgeid) || [],
                 "UserName": user,
                 "SID": sid || "-",
                 "IP": data.SourceIP || "-",
                 "EventID": data.EventID,
-                "LogonType": data.LogonType || "-",
-                "Description": data.Description || "-",
+                "LogonType": logonType,
+                "Description": logonType,
             }
         }
+        caseData.hostEdges = new Set([...caseData.hostEdges].filter(e => {
+            return e.data.id !== edgeid
+        }))
         caseData.hostEdges.add(edge)
+//############################## USER EDGES ############################################
+        sid = data.SID || "-"
+        let uedgeid = user + source + dest + data.EventID + logonType + sid + data.Description
+
+        let times = caseData.userEdgesLogonTimes.get(uedgeid) || []
+        times.push(...data.LogonTimes)
+        times = times.sort((a, b) => {
+            return new Date(a).getTime() - new Date(b).getTime()
+        })
+        times = [...new Set(times)] // remove duplicates
+        caseData.userEdgesLogonTimes.set(uedgeid, times)
+        let userEdge = {
+            "data": {
+                "id": uedgeid,
+                "source": user,
+                "target": dest,
+                "objid": uedgeid,
+                "elabel": data.EventID,
+                "label": "Event",
+                "mod": "User",
+                "distance": 5,
+                "ewidth": 0.1,
+                "ntype": "edge",
+                "eventSource": source,
+                "eid": data.EventID,
+                "count": times.length,
+                "logontype": logonType,
+                "edge_color": edge_color,
+                "ecolor": ecolor,
+                "EventTimes": caseData.userEdgesLogonTimes.get(uedgeid) || [],
+                "UserName": user,
+                "SID": sid || "-",
+                "EventID": data.EventID,
+                "LogonType": logonType,
+                "Description": description,
+            }
+        }
+        caseData.userEdges = new Set([...caseData.userEdges].filter(e => e.data.id !== uedgeid))
+        caseData.userEdges.add(userEdge)
     }
+}
+
+function resolveIP2Host() {
+    console.log("ip resover called")
+    caseData.nodeTranslation.forEach(async (key, value) => {
+        if (ipRegex.test(key)) {
+            if (caseData.ip2hostMapperFromFile[key])
+                caseData.nodeTranslation.set(key, caseData.ip2hostMapperFromFile[key][0])
+            else
+                caseData.nodeTranslation.set(key, await getIPsHost(key))
+        }
+    })
 }
 
 function parseDataFromJSON(jsonText) {
@@ -2251,6 +2300,7 @@ function parseDataFromJSON(jsonText) {
     This function is called when the user uploads the Event file to directly parse each line into the objects array
     for further processing
     */
+    let objects = []
     let json_objects = jsonText.split("\n")
     for (const line of json_objects) {
         try {
@@ -2261,6 +2311,7 @@ function parseDataFromJSON(jsonText) {
             console.log(line)
         }
     }
+    return objects
 }
 
 async function processJSONUpload(results) {
@@ -2268,30 +2319,27 @@ async function processJSONUpload(results) {
     This function is called when the user uploads the Event file.
     It reads the uploaded file and creates the nodes and edges for the graph for the user display directly
      */
-    await parseDataFromJSON(results)
+    //let objects = []
+    let objects = await parseDataFromJSON(results)
     await mappingFromData(objects)
-    for (const data of objects) {
-        //process users
-        if (data.Destination && data.UserName) {
-            createUserEdges(data)
-        }
-    }
-    // create user nodes
-    for (const user of caseData.userNodeNames) {
-        await createUserNode(caseData.userNodes, user, caseData.userSidMapper[user])
-    }
-    //create the other nodes
+
     await createNodesAndEdges(objects)
     caseData.userNodes = new Set([...caseData.userNodes, ...caseData.hostNodes])
     caseData.userNodes.forEach(node => caseData.nodeMap.set(node.data.id, node))
     if (document.getElementById("modeUser").checked) {
         current_edges = caseData.userEdges
         current_nodes = caseData.userNodes
+        prepareUserNodesAndEdges(current_edges).then((nande) => {
+            setNodesAndEdges(nande.nodes, nande.edges)
+        })
+
     } else {
         current_nodes = caseData.hostNodes
         current_edges = caseData.hostEdges
+        prepareHostNodesAndEdges(current_edges).then((nande) => {
+            setNodesAndEdges(nande.nodes, nande.edges)
+        })
     }
-    setNodesAndEdges(current_nodes, current_edges)
 }
 
 function loadClientInfo(results) {
@@ -2383,96 +2431,4 @@ function fileUpload() {
     modal.hide()
     uploadBtn.innerText = "Upload"
     uploadBtn.disabled = false
-}
-
-
-function createUserNode(nodes, username, sid) {
-    let nodeSize = default_size
-    let position = 0
-    let nwidth = nodeSize
-    let nheight = nodeSize
-    let nprivilege = "";
-    let nsub = "";
-    let ncategory = "";
-    let nname = username
-    let nfsize = "10"
-    let nshape = "ellipse"
-    let ntype = "User"
-    let ncolor
-    let nbcolor
-    let nfcolor
-    ncolor = ncolor_user
-    nbcolor = nbcolor_user
-    nfcolor = nfcolor_user
-    nprivilege = "Normal"
-
-    let node_object = {
-        "data": {
-            "id": username, //"88" + "" + logonIP.id,
-            "objid": username, //"88" + "" + logonIP.id,
-            "nlabel": nname,
-            "ncolor": ncolor,
-            "nbcolor": nbcolor,
-            "nfcolor": nfcolor,
-            "nwidth": nwidth,
-            "nheight": nheight,
-            "nfsize": nfsize,
-            "nshape": nshape,
-            "label": "User",
-            "ntype": ntype, //"nsid": logonUser.user_sid,
-            "SID": sid || "-",
-            "LogonCount": rank ? caseData.rankData.logonUserCount[username] || 0 : "-",
-            "Tags": [],
-            "nsub": nsub,
-            "ncategory": ncategory,
-            "nid": username
-            // "nrank": logonIP.rank
-        },
-        "position": position,
-
-    }
-    nodes.add(node_object)
-}
-
-
-function createHostNode(nodes, id, ips) {
-    let nodeSize = default_size
-    let position = 0
-    let nwidth = nodeSize
-    let nheight = nodeSize
-
-    let nsub = "";
-    let ncategory = "";
-    let nname = id
-    let nshape = "rectangle"
-    let nfsize = "8"
-    let ncolor = ncolor_host
-    let nbcolor = nbcolor_host
-    let nfcolor = nfcolor_host
-    let ntype = "Host"
-
-    let node_object = {
-        "data": {
-            "id": id, //"88" + "" + logonIP.id,
-            "objid": id, //"88" + "" + logonIP.id,
-            "nlabel": nname,
-            "ncolor": ncolor,
-            "nbcolor": nbcolor,
-            "nfcolor": nfcolor,
-            "nwidth": nwidth,
-            "nheight": nheight,
-            "nfsize": nfsize,
-            "nshape": nshape,
-            "label": "Host",
-            "ntype": ntype, //"nsid": logonUser.user_sid,
-            "nhostname": id,
-            "LogonCount": rank ? caseData.rankData.sourceIPCount[id] || 0 : "-", //LogonCount here means outgoing connections from that system
-            "ips": ips.join(", "),
-            "nsub": nsub,
-            "ncategory": ncategory,
-            "nid": id,
-        },
-        "position": position,
-    }
-    nodes.add(node_object)
 }
