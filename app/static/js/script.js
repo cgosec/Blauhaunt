@@ -81,21 +81,22 @@ for (const btn of graphStyle) {
 
 // Attach the event listener to the page to trigger defined short cuts
 document.addEventListener("keypress", e => {
-    console.log(e.keyCode)
-    if (e.ctrlKey && e.keyCode === 17 && !searchOpen) {
+    console.log(e)
+    if (e.ctrlKey && e.key === "\x11" && !searchOpen) {
+        console.log("history")
         userSearchHistory()
         e.preventDefault(); // Prevent the default browser refresh
 
-    } else if (e.ctrlKey && e.keyCode === 25 && !searchOpen) {
+    } else if (e.ctrlKey && e.key === "\x02" && !searchOpen) {
         dstHostSearchHistory()
         e.preventDefault(); // Prevent the default browser refresh
 
-    } else if (e.ctrlKey && e.keyCode === 2 && !searchOpen) {
+    } else if (e.ctrlKey && e.key === "\x19" && !searchOpen) {
         srcHostSearchHistory()
         e.preventDefault(); // Prevent the default browser refresh
     }
     // store caseData to IndexDB with Ctrl + M
-    else if (e.keyCode === 10) {
+    else if (e.ctrlKey && e.code === "KeyM") {
         console.log("saving case")
         e.preventDefault(); // Prevent the default browser refresh
         let caseName = document.getElementById("newCaseName").value
