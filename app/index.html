@@ -57,11 +57,11 @@
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light p-1 shadow">
+<nav id="navBar" class="navbar navbar-expand-lg navbar-light bg-light p-1 shadow">
     <a class="navbar-brand" href="#"><img alt="top" class="my_svg" src="static/images/blauhaunt.png"
                                           style="width: 80px"></a>
     <div class="collapse navbar-collapse">
-        <form class="navbar-nav" role="search">
+        <form class="navbar-nav me-auto" role="search">
             <button class="btn btn-secondary me-2" data-bs-target="#UploadEVTX" data-bs-toggle="modal" type="button">
                 Upload Files
             </button>
@@ -104,51 +104,52 @@
                     <input autocomplete="off" class="btn-check graphStyle" id="modeUser" name="btnradio2" type="radio">
                     <label class="btn btn-outline-secondary" for="modeUser">User</label>
                 </div>
-            </form>
-            <div class="row ms-2 mt-1 h-50">
-                <div>Nodes:&nbsp<a id="nodesConter">0</a></div>
-                <div>Edges:&nbsp&nbsp<a id="edgesCounter">0</a></div>
-            </div>
-            <button class="btn btn-outline-primary mt-2 h-25" onclick="{
+                <div class="row ms-2 mt-1 h-50">
+                    <div>Nodes:&nbsp<a id="nodesConter">0</a></div>
+                    <div>Edges:&nbsp&nbsp<a id="edgesCounter">0</a></div>
+                </div>
+                <button class="btn btn-outline-primary mt-2 h-25" onclick="{
                               document.getElementById('filterSideBar').classList.toggle('show')
                     }" type="button">
-                Filters
-            </button>
-            <!-- <button class="btn btn-outline-primary mt-2 h-25" disabled id="renderGraphBtn"
-                    onclick="renderGraphBtnClick()"
-                    type="button">Render
-            </button> -->
-            <div class="btn-group ms-5 mt-2 h-25">
-                <button class="btn btn-outline-secondary" type="button" id="currentDisplayBtn"
-                        onclick="renderGraphBtnClick()">Render
+                    Filters
                 </button>
-                <button aria-expanded="false" aria-haspopup="true"
-                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                        data-bs-toggle="dropdown" id="currentDisplay" role="button"
-                        type="button">
-                    <span class="sr-only"></span>
-                </button>
-                <div aria-labelledby="currentDisplay" class="dropdown-menu">
-                    <input autocomplete="off" checked="checked" class="btn-check render-radios" id="renderGraph"
-                           name="renderradio"
-                           type="radio" value="graph">
-                    <label class="btn btn-outline-secondary dropdown-item" for="renderGraph">Graph</label>
-                    <input autocomplete="off" class="btn-check render-radios" id="renderTimeline" name="renderradio"
-                           type="radio" value="timeline">
-                    <label class="btn btn-outline-secondary dropdown-item" for="renderTimeline">Timeline</label>
-                    <input autocomplete="off" class="btn-check render-radios" id="renderHeatmap" name="renderradio"
-                           type="radio" value="heatmap">
-                    <label class="btn btn-outline-secondary dropdown-item" for="renderHeatmap">Heatmap</label>
-                    <!--
-                    <a class="dropdown-item"
-                       onclick="{currentDisplay = 'graph'; document.getElementById('currentDisplayBtn').innerText = 'Graph'}">Graph</a>
-                    <a class="dropdown-item"
-                       onclick="{currentDisplay = 'timeline'; document.getElementById('currentDisplayBtn').innerText = 'Timeline'}">Timeline</a>
-                    <a class="dropdown-item"
-                       onclick="{currentDisplay = 'heatmap'; document.getElementById('currentDisplayBtn').innerText = 'HeatMap'}">HeatMap</a>
-                       -->
+                <!-- <button class="btn btn-outline-primary mt-2 h-25" disabled id="renderGraphBtn"
+                        onclick="renderGraphBtnClick()"
+                        type="button">Render
+                </button> -->
+                <div class="btn-group ms-5 mt-2 h-25">
+                    <button class="btn btn-outline-secondary" type="button" id="currentDisplayBtn"
+                            onclick="renderGraphBtnClick()">Render
+                    </button>
+                    <button aria-expanded="false" aria-haspopup="true"
+                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" id="currentDisplay" role="button"
+                            type="button">
+                        <span class="sr-only"></span>
+                    </button>
+                    <div aria-labelledby="currentDisplay" class="dropdown-menu">
+                        <input autocomplete="off" checked="checked" class="btn-check render-radios" id="renderGraph"
+                               name="renderradio"
+                               type="radio" value="graph">
+                        <label class="btn btn-outline-secondary dropdown-item" for="renderGraph">Graph</label>
+                        <input autocomplete="off" class="btn-check render-radios" id="renderTimeline" name="renderradio"
+                               type="radio" value="timeline">
+                        <label class="btn btn-outline-secondary dropdown-item" for="renderTimeline">Timeline</label>
+                        <input autocomplete="off" class="btn-check render-radios" id="renderHeatmap" name="renderradio"
+                               type="radio" value="heatmap">
+                        <label class="btn btn-outline-secondary dropdown-item" for="renderHeatmap">Heatmap</label>
+                        <!--
+                        <a class="dropdown-item"
+                           onclick="{currentDisplay = 'graph'; document.getElementById('currentDisplayBtn').innerText = 'Graph'}">Graph</a>
+                        <a class="dropdown-item"
+                           onclick="{currentDisplay = 'timeline'; document.getElementById('currentDisplayBtn').innerText = 'Timeline'}">Timeline</a>
+                        <a class="dropdown-item"
+                           onclick="{currentDisplay = 'heatmap'; document.getElementById('currentDisplayBtn').innerText = 'HeatMap'}">HeatMap</a>
+                           -->
+                    </div>
                 </div>
-            </div>
+
+            </form>
             <div class="btn-group ms-4 mt-2 h-25" role="group">
                 <button class="btn btn-outline-secondary" type="button" id="currentGraphBtn"
                 >GraphStyle

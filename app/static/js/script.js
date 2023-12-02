@@ -1345,6 +1345,13 @@ function prepareNodes(nodes, edges) {
     createStatisticsDisplay()
 }
 
+function highlightEdge(edge) {
+    cy.getElementById(edge.data.id).style({"line-color": "red", "width": "3"})
+}
+
+function unhighlightEdge(edge) {
+    cy.getElementById(edge.data.id).style({"line-color" : edge.data.ecolor, "width" : "1"})
+}
 
 function setDisplayTimeSpan(timestamplist) {
     /*
@@ -1353,24 +1360,72 @@ function setDisplayTimeSpan(timestamplist) {
      */
     document.getElementById("timespan").innerHTML = ""
     let dayList = Object.keys(timestamplist).sort()
-    maxDayCount = Math.max(...Object.values(timestamplist))
-    firstDay = new Date(dayList[0])
-    lastDay = new Date(dayList[dayList.length - 1])
+    let maxDayCount = Math.max(...Object.values(timestamplist))
+    let firstDay = new Date(dayList[0])
+    let firstDay_double = new Date(dayList[0])
+    let lastDay = new Date(dayList[dayList.length - 1])
+
     dayList = []
     while (firstDay.getTime() <= lastDay.getTime()) {
         dayList.push(firstDay.toISOString().split("T")[0])
         firstDay.setDate(firstDay.getDate() + 1)
     }
+
+    let firstDaySpan = document.createElement("span")
+    firstDaySpan.classList.add("mt-auto")
+    firstDaySpan.classList.add("p-2")
+    firstDaySpan.classList.add("border-bottom")
+    firstDaySpan.innerText = firstDay_double.toISOString().split("T")[0]
+    firstDaySpan.style.backgroundColor = "orange"
+    document.getElementById("timespan").appendChild(firstDaySpan)
+
     dayList.forEach(day => {
         let daySpan = document.createElement("span")
         daySpan.classList.add("mt-auto")
-        daySpan.classList.add("p-2")
-        daySpan.innerText = day
+        daySpan.classList.add("border-bottom")
+        daySpan.classList.add("flex-grow-1")
+        daySpan.classList.add("rounded-5")
+        daySpan.classList.add("rounded-start")
+        // daySpan.innerText = day
         let dayCountPercentage = ((timestamplist[day] || 0) / maxDayCount) * 100
-        if (dayCountPercentage > 0) daySpan.style.background = `linear-gradient(90deg, orange ${dayCountPercentage}%, transparent ${100 - dayCountPercentage}%)`
+        daySpan.style.width = 5 + ((dayCountPercentage) / 2) + "px"
+        daySpan.style.backgroundColor = "orange"
 
+        // add mouse over to display the date and the number of events and disappears on mouse out
+        daySpan.addEventListener("mouseover", (e) => {
+            daySpan.innerText = day + " (" + (timestamplist[day] || 0) + ")"
+            daySpan.style.width = "auto"
+            daySpan.style.backgroundColor = "green"
+            daySpan.style.color = "white"
+            daySpan.style.fontWeight = "bold"
+            daySpan.style.padding = "5px"
+            filtered_edges.forEach(edge => {
+                edge.data.EventTimes.forEach(time => {
+                    if (new Date(time).toISOString().split("T")[0] === day)
+                        highlightEdge(edge)
+                })
+                if (edge.data.EventTimes.includes(Date.parse(day))) highlightEdge(edge)
+            })
+            // turn style back to normal on mouse out
+            daySpan.addEventListener("mouseout", (e) => {
+                daySpan.innerText = ""
+                daySpan.style.width = 5 + ((dayCountPercentage) / 2) + "px"
+                daySpan.style.backgroundColor = "orange"
+                daySpan.style.padding = ""
+                filtered_edges.forEach(edge => {
+                    unhighlightEdge(edge)
+                })
+            })
+        })
         document.getElementById("timespan").appendChild(daySpan)
     })
+    let lastDaySpan = document.createElement("span")
+    lastDaySpan.classList.add("mt-auto")
+    lastDaySpan.classList.add("p-2")
+    lastDaySpan.classList.add("border-bottom")
+    lastDaySpan.innerText = lastDay.toISOString().split("T")[0]
+    lastDaySpan.style.backgroundColor = "orange"
+    document.getElementById("timespan").appendChild(lastDaySpan)
 }
 
 function getSVG(element) {
@@ -1607,6 +1662,18 @@ function createStatisticsDisplay() {
         row.appendChild(uOut)
         row.appendChild(uIn)
         sysT.appendChild(row)
+        //highlight edges to or from this node on mouse over
+        row.addEventListener("mouseover", (e) => {
+            filtered_edges.forEach(edge => {
+                if (edge.data.source === sys || edge.data.target === sys) highlightEdge(edge)
+            })
+            // turn style back to normal on mouse out
+            row.addEventListener("mouseout", (e) => {
+                filtered_edges.forEach(edge => {
+                    unhighlightEdge(edge)
+                })
+            })
+        })
     }
     let usersList = Object.entries(userStatistics).sort((a, b) => {
         if (b[1].toSystems.size - a[1].toSystems.size !== 0) return b[1].toSystems.size - a[1].toSystems.size
@@ -1626,6 +1693,18 @@ function createStatisticsDisplay() {
         row.appendChild(u)
         row.appendChild(toSys)
         usersT.appendChild(row)
+        //highlight edges to or from this node on mouse over
+        row.addEventListener("mouseover", (e) => {
+            filtered_edges.forEach(edge => {
+                if (edge.data.UserName === user) highlightEdge(edge)
+            })
+            // turn style back to normal on mouse out
+            row.addEventListener("mouseout", (e) => {
+                filtered_edges.forEach(edge => {
+                    unhighlightEdge(edge)
+                })
+            })
+        })
     }
 }
 
@@ -1752,7 +1831,7 @@ function qtipNode(ndata) {
     } else if (ndata._private.data["ntype"] === "Host") {
         qtext += '<br>OS: ' + ndata._private.data["os"];
         qtext += '<br>IPs: ' + ndata._private.data["ips"];
-        qtext += '<br>Outgoing connections: ' + ndata._private.data["LogonCount"];
+       // qtext += '<br>Outgoing connections: ' + ndata._private.data["LogonCount"];
         let tagList = "<ul class='list-group'>"
         for (t of ndata._private.data["Tags"]) {
             tagList += `<li class="list-group-item">${t}</li>`
