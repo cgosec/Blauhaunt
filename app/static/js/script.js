@@ -1433,10 +1433,16 @@ function setDisplayTimeSpan(timestamplist) {
         // daySpan.innerText = day
         let dayCountPercentage = ((timestamplist[day] || 0) / maxDayCount) * 100
         daySpan.style.width = 5 + ((dayCountPercentage) / 2) + "px"
-        daySpan.style.backgroundColor = "orange"
+        // color light red when weekend else color it orange
+        daySpan.style.backgroundColor = new Date(day).getUTCDay() === 5 || new Date(day).getUTCDay() === 6 ? "red" : "orange"
 
         // add mouse over to display the date and the number of events and disappears on mouse out
         daySpan.addEventListener("mouseover", (e) => {
+            let oldWidth = daySpan.style.width
+            let oldBackground = daySpan.style.backgroundColor
+            let oldColor = daySpan.style.color
+            let oldWeight = daySpan.style.fontWeight
+            let oldPadding = daySpan.style.padding
             daySpan.innerText = day + " (" + (timestamplist[day] || 0) + ")"
             daySpan.style.width = "auto"
             daySpan.style.backgroundColor = "green"
@@ -1453,9 +1459,10 @@ function setDisplayTimeSpan(timestamplist) {
             // turn style back to normal on mouse out
             daySpan.addEventListener("mouseout", (e) => {
                 daySpan.innerText = ""
-                daySpan.style.width = 5 + ((dayCountPercentage) / 2) + "px"
-                daySpan.style.backgroundColor = "orange"
-                daySpan.style.padding = ""
+                daySpan.style.width = oldWidth
+                daySpan.style.backgroundColor = oldBackground
+                daySpan.style.padding = oldPadding
+                daySpan.style.color = oldColor
                 filtered_edges.forEach(edge => {
                     unhighlightEdge(edge)
                 })
