@@ -41,6 +41,9 @@ let objects = []  // here all the single objects will be in from the processed l
 let rank = true // rank is a needed indication for the custom sorting algorithm for the nodes
 let hostMapDelimiter = ","  // this is the delimiter for the hostMap file
 
+let ctrlPressed = false  // this is used to check if the ctrl key is pressed
+let altPressed = false  // this is used to check if the alt key is pressed
+
 /*
 prepare the UI
 * */
@@ -78,6 +81,7 @@ for (const btn of graphStyle) {
 
 // Attach the event listener to the page to trigger defined short cuts
 document.addEventListener("keypress", e => {
+    console.log(e.keyCode)
     if (e.ctrlKey && e.keyCode === 17 && !searchOpen) {
         userSearchHistory()
         e.preventDefault(); // Prevent the default browser refresh
@@ -90,8 +94,37 @@ document.addEventListener("keypress", e => {
         srcHostSearchHistory()
         e.preventDefault(); // Prevent the default browser refresh
     }
+    // store caseData to IndexDB with Ctrl + M
+    else if (e.keyCode === 10) {
+        console.log("saving case")
+        e.preventDefault(); // Prevent the default browser refresh
+        let caseName = document.getElementById("newCaseName").value
+        // if no case name is give the user will be prompted to enter a case name
+        while (!caseName) {
+            caseName = prompt("Please enter a case name")
+            if (caseName === null) return
+            document.getElementById("newCaseName").value = caseName
+        }
+        storeDataToIndexDB(caseName)
+        document.getElementById('case_list').innerHTML = ''
+        getCases()
+    }
+
 });
 
+document.addEventListener("keydown", e => {
+    if (e.ctrlKey)
+        ctrlPressed = true
+    if (e.altKey)
+        altPressed = true
+})
+
+document.addEventListener("keyup", e => {
+    if (!e.ctrlKey)
+        ctrlPressed = false
+    if (!e.altKey)
+        altPressed = false
+})
 
 function darkmode() {
     if (ds.checked) {
@@ -179,7 +212,8 @@ function generateBlankCaseData() {
         },
         userSearchHistory: [],
         srcHostSearchHistory: [],
-        dstHostSearchHistory: []
+        dstHostSearchHistory: [],
+        permanentHighlightedEdges: new Set(),
     }
 }
 
@@ -340,7 +374,7 @@ function retrieveDataFromIndexDB(caseName) {
         const getRequest = objectStore.get(caseName);
 
         getRequest.onsuccess = function (event) {
-            let caseData = event.target.result
+            caseData = event.target.result
             console.log(caseData)
             let eventSetNew = new Set()
             let tagSetNew = new Set()
@@ -1350,8 +1384,18 @@ function highlightEdge(edge) {
 }
 
 function unhighlightEdge(edge) {
-    cy.getElementById(edge.data.id).style({"line-color" : edge.data.ecolor, "width" : "1"})
+    if (edge.data.id in caseData.permanentHighlightedEdges) return
+    cy.getElementById(edge.data.id).style({"line-color": edge.data.edge_color, "width": "1"})
 }
+
+function permanentHighlightNode(edge) {
+    caseData.permanentHighlightedEdges.add(edge.data.id)
+}
+
+function removeFromPermanentHighlightNode(edge) {
+    caseData.permanentHighlightedEdges.delete(edge.data.id)
+}
+
 
 function setDisplayTimeSpan(timestamplist) {
     /*
@@ -1711,6 +1755,44 @@ function createStatisticsDisplay() {
 // #####################################################################################################################
 // #####################################################################################################################
 // ###################################### GRAPH Creation ###############################################################
+function nodeMouseDown(node) {
+    for (const edge of node.connectedEdges()) {
+        let e = edge._private
+        if (!(e.data.source === node.id())) continue
+        let permanentHighlight = caseData.permanentHighlightedEdges.has(e.data.id)
+        if (!permanentHighlight)
+            highlightEdge(e)
+        if (ctrlPressed) {
+            if (permanentHighlight)
+                removeFromPermanentHighlightNode(e)
+            else
+                permanentHighlightNode(e)
+        }
+    }
+}
+
+function nodeMouseUp(node) {
+    for (const edge of node.connectedEdges()) {
+        let e = edge._private
+        if (!(e.data.source === node.id())) continue
+        let permanentHighlight = caseData.permanentHighlightedEdges.has(e.data.id)
+        if (!permanentHighlight) unhighlightEdge(e)
+    }
+}
+
+function edgeMouseDown(edge) {
+    let e = edge._private
+    if (ctrlPressed) {
+        if (caseData.permanentHighlightedEdges.has(e.data.id)) {
+            removeFromPermanentHighlightNode(e)
+            unhighlightEdge(e)
+        } else {
+            permanentHighlightNode(e)
+            highlightEdge(e)
+        }
+    }
+}
+
 
 function drawGraph(graph, rootNode) {
     // this is cytoscape stuff
@@ -1749,7 +1831,9 @@ function drawGraph(graph, rootNode) {
         flagMode = "klay";
     }
     cy = cytoscape({
-        container: document.getElementById("cy"), boxSelectionEnabled: false, style: cytoscape.stylesheet()
+        container: document.getElementById("cy"),
+        boxSelectionEnabled: false,
+        style: cytoscape.stylesheet()
             .selector('node').css({
                 "content": "data(nlabel)",
                 "width": "data(nwidth)",
@@ -1786,8 +1870,12 @@ function drawGraph(graph, rootNode) {
                 "line-color": "#61bfcc",
                 "transition-property": "background-color, line-color, target-arrow-color",
                 "transition-duration": "0.5s"
-            }), elements: graph, layout: {
-            name: flagMode, roots: rootNode, animate: true, padding: 10
+            }),
+        elements: graph, layout: {
+            name: flagMode,
+            roots: rootNode,
+            animate: true,
+            padding: 10
         }
     });
     cy.on("layoutstop", function () {
@@ -1796,24 +1884,34 @@ function drawGraph(graph, rootNode) {
     cy.nodes().forEach(function (ele) {
         ele.qtip({
             content: {
-                title: "<b>Node Details</b>", text: qtipNode(ele)
+                title: "<b>Node Details</b>",
+                text: qtipNode(ele)
             }, style: {
                 classes: "qtip-bootstrap"
             }, position: {
                 my: "top center", at: "bottom center", target: ele
             }
         });
+        ele.on('mousedown', e => nodeMouseDown(ele))
+        ele.on('mouseup', e => nodeMouseUp(ele))
     });
     cy.edges().forEach(function (ele) {
         ele.qtip({
             content: {
-                title: "<b>Details</b>", text: qtipEdge(ele)
+                title: "<b>Details</b>",
+                text: qtipEdge(ele)
             }, style: {
                 classes: "qtip-bootstrap"
             }, position: {
-                my: "top center", at: "bottom center", target: ele
+                my: "top center",
+                at: "bottom center",
+                target: ele
             }
         });
+        if (caseData.permanentHighlightedEdges.has(ele._private.data.id)) {
+            highlightEdge(ele._private)
+        }
+        ele.on('mousedown', e => edgeMouseDown(ele))
     });
 }
 
@@ -1831,7 +1929,7 @@ function qtipNode(ndata) {
     } else if (ndata._private.data["ntype"] === "Host") {
         qtext += '<br>OS: ' + ndata._private.data["os"];
         qtext += '<br>IPs: ' + ndata._private.data["ips"];
-       // qtext += '<br>Outgoing connections: ' + ndata._private.data["LogonCount"];
+        // qtext += '<br>Outgoing connections: ' + ndata._private.data["LogonCount"];
         let tagList = "<ul class='list-group'>"
         for (t of ndata._private.data["Tags"]) {
             tagList += `<li class="list-group-item">${t}</li>`
