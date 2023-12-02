@@ -394,6 +394,7 @@ function retrieveDataFromIndexDB(caseName) {
             })
             minConSwitch.disabled = false
             processEdgesToNodes()
+            document.getElementById("newCaseName").value = caseName
         }
 
         getRequest.onerror = function (event) {
