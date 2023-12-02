@@ -110,7 +110,6 @@ document.addEventListener("keypress", e => {
         document.getElementById('case_list').innerHTML = ''
         getCases()
     }
-
 });
 
 document.addEventListener("keydown", e => {
@@ -118,6 +117,7 @@ document.addEventListener("keydown", e => {
         ctrlPressed = true
     if (e.altKey)
         altPressed = true
+    altPressed = true
 })
 
 document.addEventListener("keyup", e => {
@@ -1389,11 +1389,11 @@ function unhighlightEdge(edge) {
     cy.getElementById(edge.data.id).style({"line-color": edge.data.edge_color, "width": "1"})
 }
 
-function permanentHighlightNode(edge) {
+function permanentHighlightEdge(edge) {
     caseData.permanentHighlightedEdges.add(edge.data.id)
 }
 
-function removeFromPermanentHighlightNode(edge) {
+function removeFromPermanentHighlightEdge(edge) {
     caseData.permanentHighlightedEdges.delete(edge.data.id)
 }
 
@@ -1418,7 +1418,7 @@ function setDisplayTimeSpan(timestamplist) {
 
     let firstDaySpan = document.createElement("span")
     firstDaySpan.classList.add("mt-auto")
-    firstDaySpan.classList.add("p-2")
+    firstDaySpan.classList.add("pe-2")
     firstDaySpan.classList.add("border-bottom")
     firstDaySpan.innerText = firstDay_double.toISOString().split("T")[0]
     firstDaySpan.style.backgroundColor = "orange"
@@ -1449,13 +1449,15 @@ function setDisplayTimeSpan(timestamplist) {
             daySpan.style.backgroundColor = "green"
             daySpan.style.color = "white"
             daySpan.style.fontWeight = "bold"
-            daySpan.style.padding = "5px"
+            daySpan.style.paddingRight = "15px"
+            daySpan.style.paddingTop = "2px"
             filtered_edges.forEach(edge => {
-                edge.data.EventTimes.forEach(time => {
-                    if (new Date(time).toISOString().split("T")[0] === day)
+                for (const time of edge.data.EventTimes) {
+                    if (new Date(time).toISOString().split("T")[0] === day) {
                         highlightEdge(edge)
-                })
-                if (edge.data.EventTimes.includes(Date.parse(day))) highlightEdge(edge)
+                        break
+                    }
+                }
             })
             // turn style back to normal on mouse out
             daySpan.addEventListener("mouseout", (e) => {
@@ -1468,12 +1470,32 @@ function setDisplayTimeSpan(timestamplist) {
                     unhighlightEdge(edge)
                 })
             })
+            daySpan.addEventListener("click", (e) => {
+                //highlight edges permanently when clicked on and crtl is pressed
+                if (ctrlPressed) {
+                    filtered_edges.forEach(edge => {
+                        for (const time of edge.data.EventTimes) {
+                            if (new Date(time).toISOString().split("T")[0] === day) {
+                                if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
+                                    removeFromPermanentHighlightEdge(edge)
+                                    unhighlightEdge(edge)
+                                } else {
+                                    permanentHighlightEdge(edge)
+                                    highlightEdge(edge)
+                                }
+                                break
+                            }
+                        }
+                    })
+                }
+            })
         })
+
         document.getElementById("timespan").appendChild(daySpan)
     })
     let lastDaySpan = document.createElement("span")
     lastDaySpan.classList.add("mt-auto")
-    lastDaySpan.classList.add("p-2")
+    lastDaySpan.classList.add("pe-2")
     lastDaySpan.classList.add("border-bottom")
     lastDaySpan.innerText = lastDay.toISOString().split("T")[0]
     lastDaySpan.style.backgroundColor = "orange"
@@ -1731,10 +1753,10 @@ function createStatisticsDisplay() {
                 filtered_edges.forEach(edge => {
                     if (edge.data.source === sys || edge.data.target === sys) {
                         if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
-                            removeFromPermanentHighlightNode(edge)
+                            removeFromPermanentHighlightEdge(edge)
                             unhighlightEdge(edge)
                         } else {
-                            permanentHighlightNode(edge)
+                            permanentHighlightEdge(edge)
                             highlightEdge(edge)
                         }
                     }
@@ -1777,10 +1799,10 @@ function createStatisticsDisplay() {
                 filtered_edges.forEach(edge => {
                     if (edge.data.UserName === user) {
                         if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
-                            removeFromPermanentHighlightNode(edge)
+                            removeFromPermanentHighlightEdge(edge)
                             unhighlightEdge(edge)
                         } else {
-                            permanentHighlightNode(edge)
+                            permanentHighlightEdge(edge)
                             highlightEdge(edge)
                         }
                     }
@@ -1802,9 +1824,9 @@ function nodeMouseDown(node) {
             highlightEdge(e)
         if (ctrlPressed) {
             if (permanentHighlight)
-                removeFromPermanentHighlightNode(e)
+                removeFromPermanentHighlightEdge(e)
             else
-                permanentHighlightNode(e)
+                permanentHighlightEdge(e)
         }
     }
 }
@@ -1822,10 +1844,10 @@ function edgeMouseDown(edge) {
     let e = edge._private
     if (ctrlPressed) {
         if (caseData.permanentHighlightedEdges.has(e.data.id)) {
-            removeFromPermanentHighlightNode(e)
+            removeFromPermanentHighlightEdge(e)
             unhighlightEdge(e)
         } else {
-            permanentHighlightNode(e)
+            permanentHighlightEdge(e)
             highlightEdge(e)
         }
     }
