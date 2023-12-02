@@ -81,7 +81,6 @@ for (const btn of graphStyle) {
 
 // Attach the event listener to the page to trigger defined short cuts
 document.addEventListener("keypress", e => {
-    console.log(e)
     if (e.ctrlKey && e.key === "\x11" && !searchOpen) {
         console.log("history")
         userSearchHistory()
@@ -174,9 +173,7 @@ function darkmode() {
 
 function generateBlankCaseData() {
     caseData = {
-        hostNodes: new Set(),
         hostEdges: new Set(),
-        userNodes: new Set(),
         userEdges: new Set(),
         nodesName: new Set(),
         edgesName: new Set(),
@@ -221,6 +218,8 @@ function generateBlankCaseData() {
 function resetScene() {
     // reset scene is called when a new case is loaded. simply add cleanOnLoad class to an element that needs to be cleaned
     const toCleanList = document.getElementsByClassName("cleanOnLoad")
+    filtered_nodes = []
+    filtered_edges = []
     for (const element of toCleanList) {
         element.innerHTML = ""
     }
@@ -394,17 +393,7 @@ function retrieveDataFromIndexDB(caseName) {
                 tagSetNew.add(tag)
             })
             minConSwitch.disabled = false
-            let userModGraph = document.getElementById("modeUser").checked
-            if (userModGraph) {
-                prepareUserNodesAndEdges(caseData.userEdges).then(nande => {
-                    setNodesAndEdges(nande.nodes, nande.edges)
-                })
-            } else {
-                prepareHostNodesAndEdges(caseData.hostEdges).then(nande => {
-                    setNodesAndEdges(nande.nodes, nande.edges)
-                })
-                document.getElementById("newCaseName").value = caseName
-            }
+            processEdgesToNodes()
         }
 
         getRequest.onerror = function (event) {
@@ -921,14 +910,7 @@ function filter(filterObject) {
             }
         })
     }
-    if (!userModGraph) prepareHostNodesAndEdges(filtered_edges).then(nande => {
-        setNodesAndEdges(nande.nodes, nande.edges)
-    })
-    else {
-        prepareUserNodesAndEdges(filtered_edges).then(nande => {
-            setNodesAndEdges(nande.nodes, nande.edges)
-        })
-    }
+    processFilteredEdgesToNodes()
 }
 
 function joinEdges(edges) {
@@ -2540,12 +2522,19 @@ function trimDomainNodesNames() {
     })
 }
 
-function replaceNodeNames(oldName, newName) {
+function replaceNodeNamesClick() {
+    let oldNameInput = document.getElementById("oldNodeName")
+    let newNodeInput = document.getElementById("newNodeName")
+    let oldName = oldNameInput.value
+    let newName = newNodeInput.value
     if (!oldName || !newName) {
         console.log("Error in replaceNodeNames: oldName or newName is empty")
         return
     }
     caseData.nodeTranslation.set(oldName, newName.toUpperCase())
+    oldNameInput.value = ""
+    newNodeInput.value = ""
+    processFilteredEdgesToNodes()
 }
 
 function parseDataFromJSON(jsonText) {
@@ -2577,19 +2566,31 @@ async function processJSONUpload(results) {
     await mappingFromData(objects)
 
     await createNodesAndEdges(objects)
-    caseData.userNodes = new Set([...caseData.userNodes, ...caseData.hostNodes])
-    caseData.userNodes.forEach(node => caseData.nodeMap.set(node.data.id, node))
+    processEdgesToNodes()
+}
+
+function processEdgesToNodes() {
     if (document.getElementById("modeUser").checked) {
         current_edges = caseData.userEdges
-        current_nodes = caseData.userNodes
         prepareUserNodesAndEdges(current_edges).then((nande) => {
             setNodesAndEdges(nande.nodes, nande.edges)
         })
 
     } else {
-        current_nodes = caseData.hostNodes
         current_edges = caseData.hostEdges
         prepareHostNodesAndEdges(current_edges).then((nande) => {
+            setNodesAndEdges(nande.nodes, nande.edges)
+        })
+    }
+}
+
+function processFilteredEdgesToNodes() {
+    if (document.getElementById("modeUser").checked)
+        prepareUserNodesAndEdges(filtered_edges).then(nande => {
+            setNodesAndEdges(nande.nodes, nande.edges)
+        })
+    else {
+        prepareHostNodesAndEdges(filtered_edges).then(nande => {
             setNodesAndEdges(nande.nodes, nande.edges)
         })
     }
