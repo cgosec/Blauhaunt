@@ -1384,7 +1384,7 @@ function highlightEdge(edge) {
 }
 
 function unhighlightEdge(edge) {
-    if (edge.data.id in caseData.permanentHighlightedEdges) return
+    if (caseData.permanentHighlightedEdges.has(edge.data.id)) return
     cy.getElementById(edge.data.id).style({"line-color": edge.data.edge_color, "width": "1"})
 }
 
@@ -1718,6 +1718,22 @@ function createStatisticsDisplay() {
                 })
             })
         })
+        row.addEventListener("click", (e) => {
+            if (ctrlPressed) {
+                filtered_edges.forEach(edge => {
+                    if (edge.data.source === sys || edge.data.target === sys) {
+                        if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
+                            removeFromPermanentHighlightNode(edge)
+                            unhighlightEdge(edge)
+                        }
+                        else {
+                            permanentHighlightNode(edge)
+                            highlightEdge(edge)
+                        }
+                    }
+                })
+            }
+        });
     }
     let usersList = Object.entries(userStatistics).sort((a, b) => {
         if (b[1].toSystems.size - a[1].toSystems.size !== 0) return b[1].toSystems.size - a[1].toSystems.size
@@ -1749,6 +1765,22 @@ function createStatisticsDisplay() {
                 })
             })
         })
+        row.addEventListener("click", (e) => {
+            if (ctrlPressed) {
+                filtered_edges.forEach(edge => {
+                    if (edge.data.UserName === user) {
+                        if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
+                            removeFromPermanentHighlightNode(edge)
+                            unhighlightEdge(edge)
+                        }
+                        else {
+                            permanentHighlightNode(edge)
+                            highlightEdge(edge)
+                        }
+                    }
+                })
+            }
+        });
     }
 }
 
