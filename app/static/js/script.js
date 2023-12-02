@@ -1725,8 +1725,7 @@ function createStatisticsDisplay() {
                         if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
                             removeFromPermanentHighlightNode(edge)
                             unhighlightEdge(edge)
-                        }
-                        else {
+                        } else {
                             permanentHighlightNode(edge)
                             highlightEdge(edge)
                         }
@@ -1772,8 +1771,7 @@ function createStatisticsDisplay() {
                         if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
                             removeFromPermanentHighlightNode(edge)
                             unhighlightEdge(edge)
-                        }
-                        else {
+                        } else {
                             permanentHighlightNode(edge)
                             highlightEdge(edge)
                         }
@@ -2502,6 +2500,22 @@ function resolveIP2Host() {
                 caseData.nodeTranslation.set(key, await getIPsHost(key))
         }
     })
+}
+
+function trimDomainNodesNames() {
+    caseData.nodeTranslation.forEach((key, value) => {
+        if (!ipRegex.test(key) && key.includes(".") && key === value) {
+            caseData.nodeTranslation.set(key, key.split(".")[0])
+        }
+    })
+}
+
+function replaceNodeNames(oldName, newName) {
+    if (!oldName || !newName) {
+        console.log("Error in replaceNodeNames: oldName or newName is empty")
+        return
+    }
+    caseData.nodeTranslation.set(oldName, newName.toUpperCase())
 }
 
 function parseDataFromJSON(jsonText) {
