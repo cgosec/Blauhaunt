@@ -1434,7 +1434,7 @@ function setDisplayTimeSpan(timestamplist) {
         let dayCountPercentage = ((timestamplist[day] || 0) / maxDayCount) * 100
         daySpan.style.width = 5 + ((dayCountPercentage) / 2) + "px"
         // color light red when weekend else color it orange
-        daySpan.style.backgroundColor = new Date(day).getUTCDay() === 5 || new Date(day).getUTCDay() === 6 ? "red" : "orange"
+        daySpan.style.backgroundColor = new Date(day).getUTCDay() === 0 || new Date(day).getUTCDay() === 6 ? "red" : "orange"
 
         // add mouse over to display the date and the number of events and disappears on mouse out
         daySpan.addEventListener("mouseover", (e) => {
