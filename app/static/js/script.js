@@ -970,7 +970,8 @@ function calcGraphSize() {
     // this function calculates the overall width and height of the graph based on the number of nodes
     let nodeCount = parseInt(nodesCounter.innerText)
     let graphWidth = (max_size * nodeCount) / 5
-    graphWidth = graphWidth <= screen.width ? screen.width : graphWidth
+    let maxScreenWidth = screen.width * 0.7
+    graphWidth = graphWidth <= maxScreenWidth ? maxScreenWidth : graphWidth
     let graphHeight = (max_size * nodeCount) / 5
     graphHeight = graphHeight <= screen.height ? screen.height : graphHeight
     max_size = max_size + (nodeCount / 50)
