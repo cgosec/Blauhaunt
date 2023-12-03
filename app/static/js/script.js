@@ -1238,7 +1238,6 @@ function prepareNodes(nodes, edges) {
                 node.data.Tags = []
                 node.data.os = "Unknown"
             }
-            restyleNode(node)
 
             // calc needed Data for x position depending on connection behaviour
             for (const edge of edges) {
@@ -1315,11 +1314,16 @@ function prepareNodes(nodes, edges) {
             // calc needed Data for y postition depending on timing
             let qs = quartiles(timeList)
             node.activityStats = {q1: qs.q1, q2: qs.q2, q3: qs.q3}
+
             timeList.forEach(time => {
                 let day = new Date(time).toISOString().split("T")[0]
                 let count = allDatesCount[day] || 0
                 allDatesCount[day] = count + 1
             })
+        }
+        // set all dayDatesCount to half the value since they are counted twice (once for each direction)
+        for (const day in allDatesCount) {
+            allDatesCount[day] = allDatesCount[day] / 2
         }
         //calculate the data needed for graph size
         let conInStats = quartiles(consIn)
@@ -1364,6 +1368,10 @@ function prepareNodes(nodes, edges) {
     createStatisticsDisplay()
 }
 
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### EDGE HIGHLIGHTING ###############################################
+
 function highlightEdge(edge) {
     cy.getElementById(edge.data.id).style({"line-color": "red", "width": "3"})
 }
@@ -1380,6 +1388,11 @@ function permanentHighlightEdge(edge) {
 function removeFromPermanentHighlightEdge(edge) {
     caseData.permanentHighlightedEdges.delete(edge.data.id)
 }
+
+
+// #####################################################################################################################
+// #####################################################################################################################
+// ###################################### GRAPH TIMESPAN DISPLAY ###############################################
 
 function setDisplayTimeSpan(timestamplist) {
     /*
@@ -1487,7 +1500,7 @@ function setDisplayTimeSpan(timestamplist) {
 }
 
 function getSVG(element) {
-    // this function returns the svg for the nodes to display
+    // this function returns the svg for the nodes to display does not work with the images yet
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const img = document.createElementNS('http://www.w3.org/2000/svg', 'image');
     img.setAttribute('href', element._private.data.nimage);
@@ -1649,13 +1662,21 @@ function createHeatmap() {
         dayList.push(firstDay.toISOString().split("T")[0])
         firstDay.setDate(firstDay.getDate() + 1)
     }
+    dayList.push(lastDay.toISOString().split("T")[0])
 
     // calculate max activity for outlier exclusion
     let activityQuartiles = quartiles(Object.values(userDayObj).map(usrObj => {
         return Math.max(...Object.values(usrObj))
     }))
     let maxActivityOnAllDays = activityQuartiles.q3 + ((activityQuartiles.q3 - activityQuartiles.q2) * 2)
-
+    // remove days where there is 0 activity
+    dayList = dayList.filter(day => {
+        let activity = 0
+        userList.forEach(user => {
+            activity += userDayObj[user][day] || 0
+        })
+        return activity > 0
+    });
     // create cols for each day
     dayList.forEach(day => {
         let tableHeadDay = document.createElement("th")
@@ -1667,6 +1688,8 @@ function createHeatmap() {
 
     // create table body and heatmap
     let tableBody = document.createElement("tbody")
+
+
     userList.forEach(user => {
         let tableRow = document.createElement("tr")
         let tableUser = document.createElement("th")
@@ -1675,7 +1698,11 @@ function createHeatmap() {
         dayList.forEach(day => {
             let tableData = document.createElement("td")
             let eventCount = userDayObj[user][day] || 0
+            // make the cell text bolt and blue
+            tableData.style.fontWeight = "bold"
+            tableData.style.color = "blue"
             tableData.innerText = eventCount
+            // color the cell based on the number of events
             tableData.style.backgroundColor = `rgba(128, 0, 0, ${(eventCount / maxActivityOnAllDays)})`
             tableRow.appendChild(tableData)
         })
