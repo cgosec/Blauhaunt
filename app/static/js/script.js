@@ -2416,52 +2416,52 @@ async function createNodesAndEdges(objects) {
         if (!ipRegex.test(source)) dest = dest.split(".")[0]
         source = source.toUpperCase()
         nodeTranslation.set(dest, dest)
-        if (!source) continue
-        nodeTranslation.set(source, source)
-        let description = data.Description || "-"
-        let logonType = (data.LogonType || "-")
-
-        let edgeid = source + ipAddress + dest + user + data.EventID + logonType + description
-        let logontimes = edgeTimeMap.get(edgeid) || []
-        data.LogonTimes = data.LogonTimes || []
-        logontimes.push(...data.LogonTimes)
-        logontimes = logontimes.sort((a, b) => {
-            return new Date(a).getTime() - new Date(b).getTime()
-        })
-        logontimes = [...new Set(logontimes)] // remove duplicates
-        edgeTimeMap.set(edgeid, logontimes)
-        let edgelabel = user
         let sid = "-"
-        let edge = {
-            "data": {
-                "id": edgeid,
-                "source": source,
-                "target": dest,
-                "objid": edgeid,
-                "elabel": edgelabel,
-                "label": "Event",
-                "mod": "System",
-                "distance": 15,
-                "ntype": "edge",
-                "eid": data.EventID,
-                "count": caseData.hostEdgesLogonTimes.get(edgeid).length,
-                "eventSource": "-",
-                "logontype": logonType,
-                "edge_color": edge_color,
-                "ecolor": ecolor,
-                "EventTimes": caseData.hostEdgesLogonTimes.get(edgeid) || [],
-                "UserName": user,
-                "SID": sid || "-",
-                "IP": data.SourceIP || "-",
-                "EventID": data.EventID,
-                "LogonType": logonType,
-                "Description": logonType,
+        nodeTranslation.set(source, source)
+            let description = data.Description || "-"
+            let logonType = (data.LogonType || "-")
+        if (source) {
+
+            let edgeid = source + ipAddress + dest + user + data.EventID + logonType + description
+            let logontimes = edgeTimeMap.get(edgeid) || []
+            data.LogonTimes = data.LogonTimes || []
+            logontimes.push(...data.LogonTimes)
+            logontimes = logontimes.sort((a, b) => {
+                return new Date(a).getTime() - new Date(b).getTime()
+            })
+            logontimes = [...new Set(logontimes)] // remove duplicates
+            edgeTimeMap.set(edgeid, logontimes)
+            let edge = {
+                "data": {
+                    "id": edgeid,
+                    "source": source,
+                    "target": dest,
+                    "objid": edgeid,
+                    "elabel": user,
+                    "label": "Event",
+                    "mod": "System",
+                    "distance": 15,
+                    "ntype": "edge",
+                    "eid": data.EventID,
+                    "count": caseData.hostEdgesLogonTimes.get(edgeid).length,
+                    "eventSource": "-",
+                    "logontype": logonType,
+                    "edge_color": edge_color,
+                    "ecolor": ecolor,
+                    "EventTimes": caseData.hostEdgesLogonTimes.get(edgeid) || [],
+                    "UserName": user,
+                    "SID": sid || "-",
+                    "IP": data.SourceIP || "-",
+                    "EventID": data.EventID,
+                    "LogonType": logonType,
+                    "Description": logonType,
+                }
             }
+            caseData.hostEdges = new Set([...caseData.hostEdges].filter(e => {
+                return e.data.id !== edgeid
+            }))
+            caseData.hostEdges.add(edge)
         }
-        caseData.hostEdges = new Set([...caseData.hostEdges].filter(e => {
-            return e.data.id !== edgeid
-        }))
-        caseData.hostEdges.add(edge)
 //############################## USER EDGES ############################################
         sid = data.SID || "-"
         let uedgeid = user + source + dest + data.EventID + logonType + sid + data.Description

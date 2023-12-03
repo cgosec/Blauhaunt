@@ -94,12 +94,11 @@
                 </ul>
             </div>
             <div class="btn-group mt-2 h-25">
-
-                <button type="button" class="btn btn-outline-primary" onclick="resolveIP2Host()">
+                <button type="button" class="btn btn-outline-secondary" onclick="resolveIP2Host()">
                     Resolve IPs
                 </button>
                 <button aria-expanded="false" aria-haspopup="true"
-                        class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split  me-2"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split  me-2"
                         data-bs-toggle="dropdown" id="nodeNamesBtn" role="button" type="button">
                     <span class="sr-only"></span>
                 </button>
@@ -123,8 +122,19 @@
                     </div>
                 </div>
             </div>
+            <div class="btn-group ms-2 mt-2 h-25">
+                <button class="btn btn-outline-secondary" type="button">Tags</button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="tagColorDropdown" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div aria-labelledby="navbarDropdown" class="dropdown-menu cleanOnLoad" id="tagColorList">
+                </div>
+            </div>
             <form name="graphStyle">
-                <div class="btn-group  mt-2 h-25" role="group">
+                <div class="btn-group ms-2 mt-2 h-25" role="group">
                     <input autocomplete="off" checked="checked" class="btn-check graphStyle" id="modeSystem"
                            name="btnradio2"
                            type="radio">
@@ -209,18 +219,7 @@
                     <label class="form-check-label" for="darkSwitch">Dark Mode</label>
                 </div>
                 <script src="static/js/dark-mode-switch.min.js"></script>
-                <div class="btn-group ms-5">
-                    <button class="btn btn-outline-secondary" type="button">Tags</button>
-                    <button aria-expanded="false" aria-haspopup="true"
-                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                            data-bs-toggle="dropdown" id="tagColorDropdown" role="button"
-                            type="button">
-                        <span class="sr-only"></span>
-                    </button>
-                    <div aria-labelledby="navbarDropdown" class="dropdown-menu cleanOnLoad" id="tagColorList">
-                    </div>
-                </div>
-                <div class="btn-group ms-5">
+                <div class="btn-group ms-2">
                     <button class="btn btn-outline-secondary" type="button">Export</button>
                     <button aria-expanded="false" aria-haspopup="true"
                             class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
