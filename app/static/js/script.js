@@ -1381,7 +1381,6 @@ function removeFromPermanentHighlightEdge(edge) {
     caseData.permanentHighlightedEdges.delete(edge.data.id)
 }
 
-
 function setDisplayTimeSpan(timestamplist) {
     /*
     This function is used to display the timespan with an indication of the number of events per day
@@ -1399,6 +1398,7 @@ function setDisplayTimeSpan(timestamplist) {
         dayList.push(firstDay.toISOString().split("T")[0])
         firstDay.setDate(firstDay.getDate() + 1)
     }
+    dayList.push(lastDay.toISOString().split("T")[0])
 
     let firstDaySpan = document.createElement("span")
     firstDaySpan.classList.add("mt-auto")
@@ -1840,39 +1840,90 @@ function edgeMouseDown(edge) {
 
 function drawGraph(graph, rootNode) {
     // this is cytoscape stuff
+    let flagCalculated = document.getElementById("calculated").checked;
     let flagGrid = document.getElementById("modeGrid").checked;
     let flagCose = document.getElementById("modeCose").checked;
     let flagCircle = document.getElementById("modeCircle").checked;
     let flagTree = document.getElementById("modeTree").checked;
     let flagConcentric = document.getElementById("modeConcentric").checked;
-    let flagElk = false // document.getElementById("modeElk").checked;
-    let flagDagre = false //document.getElementById("modeDagre").checked;
-    let flagKlay = false //document.getElementById("modeKlay").checked;
-    let flagMode = "";
+    let options = {}
     prepareNodes(graph.nodes, graph.edges)
+    if (flagCalculated) {
+        options = {
+            name: "preset",
+            roots: rootNode,
+            animate: true,
+            padding: 10
+        }
+    }
     if (flagGrid) {
-        flagMode = rank ? "preset" : "grid";
+        //flagMode = rank ? "preset" : "grid";
+        options = {
+            name: 'grid',
+            fit: true, // whether to fit the viewport to the graph
+            padding: 30, // padding used on fit
+            boundingBox: undefined, // constrain layout bounds; { x1, y1, x2, y2 } or { x1, y1, w, h }
+            avoidOverlap: true, // prevents node overlap, may overflow boundingBox if not enough space
+            avoidOverlapPadding: 10, // extra spacing around nodes when avoidOverlap: true
+            nodeDimensionsIncludeLabels: false, // Excludes the label when calculating node bounding boxes for the layout algorithm
+            spacingFactor: undefined, // Applies a multiplicative factor (>0) to expand or compress the overall area that the nodes take up
+            condense: false, // uses all available space on false, uses minimal space on true
+            rows: undefined, // force num of rows in the grid
+            cols: undefined, // force num of columns in the grid
+            position: function (node) {
+                return {row: node.position.x, col: node.position.y}
+            },
+            sort: function (a, b) {
+                let ret = a._private.edges.length - b._private.edges.length
+                if (ret === 0)
+                    ret = a._private.position.x - b._private.position.x
+                console.log(ret)
+                return ret
+            },
+            animate: false, // whether to transition the node positions
+            animationDuration: 500, // duration of animation in ms if enabled
+            animationEasing: undefined, // easing of animation if enabled
+            animateFilter: function (node, i) {
+                return true;
+            }, // a function that determines whether the node should be animated.  All nodes animated by default on animate enabled.  Non-animated nodes are positioned immediately when the layout starts
+            ready: undefined, // callback on layoutready
+            stop: undefined, // callback on layoutstop
+            transform: function (node, position) {
+                return position;
+            } // transform a given node position. Useful for changing flow direction in discrete layouts
+        };
     }
     if (flagCose) {
-        flagMode = "cose";
+        options = {
+            name: "cose",
+            roots: rootNode,
+            animate: true,
+            padding: 10
+        }
     }
     if (flagCircle) {
-        flagMode = "circle";
+        options = {
+            name: "circle",
+            roots: rootNode,
+            animate: true,
+            padding: 10
+        }
     }
     if (flagTree) {
-        flagMode = "breadthfirst";
-    }
-    if (flagDagre) {
-        flagMode = "dagre";
+        options = {
+            name: "breadthfirst",
+            roots: rootNode,
+            animate: true,
+            padding: 10
+        }
     }
     if (flagConcentric) {
-        flagMode = "concentric";
-    }
-    if (flagElk) {
-        flagMode = "elk";
-    }
-    if (flagKlay) {
-        flagMode = "klay";
+        options = {
+            name: "concentric",
+            roots: rootNode,
+            animate: true,
+            padding: 10
+        }
     }
     cy = cytoscape({
         container: document.getElementById("cy"),
@@ -1915,14 +1966,11 @@ function drawGraph(graph, rootNode) {
                 "transition-property": "background-color, line-color, target-arrow-color",
                 "transition-duration": "0.5s"
             }),
-        elements: graph, layout: {
-            name: flagMode,
-            roots: rootNode,
-            animate: true,
-            padding: 10
-        }
+        elements: graph,
+        layout: options,
     });
     cy.on("layoutstop", function () {
+        cy.fit({padding: 20, animated: true})
         loading_bar.classList.add("loaded");
     });
     cy.nodes().forEach(function (ele) {
@@ -2418,8 +2466,8 @@ async function createNodesAndEdges(objects) {
         nodeTranslation.set(dest, dest)
         let sid = "-"
         nodeTranslation.set(source, source)
-            let description = data.Description || "-"
-            let logonType = (data.LogonType || "-")
+        let description = data.Description || "-"
+        let logonType = (data.LogonType || "-")
         if (source) {
 
             let edgeid = source + ipAddress + dest + user + data.EventID + logonType + description
