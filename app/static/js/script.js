@@ -2564,16 +2564,16 @@ async function createNodesAndEdges(objects) {
     }
 }
 
-function resolveIP2Host() {
+async function resolveIP2Host() {
     console.log("ip resover called")
-    caseData.nodeTranslation.forEach(async (key, value) => {
+    for (const [key, value] of caseData.nodeTranslation ){
         if (ipRegex.test(key)) {
             if (caseData.ip2hostMapperFromFile[key])
                 caseData.nodeTranslation.set(key, caseData.ip2hostMapperFromFile[key][0])
             else
                 caseData.nodeTranslation.set(key, await getIPsHost(key))
         }
-    })
+    }
 }
 
 function trimDomainNodesNames() {
