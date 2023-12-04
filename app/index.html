@@ -104,7 +104,8 @@
                 </button>
                 <div aria-labelledby="nodeNamesBtn" class="dropdown-menu">
                     <div class="row-10">
-                        <button class="btn btn-secondary" type="button" id="trimNodeDomain" onclick="trimDomainNodesNames()">
+                        <button class="btn btn-secondary" type="button" id="trimNodeDomain"
+                                onclick="trimDomainNodesNames()">
                             Trim Domain
                         </button>
                     </div>
@@ -190,63 +191,66 @@
             </form>
             <form>
                 <div class="navbar col h-25">
-                <div class="btn-group" role="group">
-                    <button class="btn btn-outline-secondary" type="button" id="currentGraphBtn"
-                    >GraphStyle
-                    </button>
-                    <button aria-expanded="false" aria-haspopup="true"
-                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                            data-bs-toggle="dropdown" id="currentGraph" role="button"
-                            type="button">
-                        <span class="sr-only"></span>
-                    </button>
-                    <div class="dropdown-menu">
-                        <input autocomplete="off" checked="checked" class="btn-check" id="calculated" name="btnradio"
-                               type="radio">
-                        <label class="btn btn-outline-secondary dropdown-item" for="calculated">calculated</label>
-                        <input autocomplete="off" class="btn-check" id="modeGrid" name="btnradio"
-                               type="radio">
-                        <label class="btn btn-outline-secondary dropdown-item" for="modeGrid">grid</label>
-                        <input autocomplete="off" class="btn-check" id="modeCose" name="btnradio" type="radio">
-                        <label class="btn btn-outline-secondary dropdown-item" for="modeCose">cose</label>
-                        <input autocomplete="off" class="btn-check" id="modeCircle" name="btnradio" type="radio">
-                        <label class="btn btn-outline-secondary dropdown-item" for="modeCircle">circle</label>
-                        <input autocomplete="off" class="btn-check" id="modeTree" name="btnradio" type="radio">
-                        <label class="btn btn-outline-secondary dropdown-item" for="modeTree">tree</label>
-                        <input autocomplete="off" class="btn-check" id="modeConcentric" name="btnradio" type="radio">
-                        <label class="btn btn-outline-secondary dropdown-item" for="modeConcentric">concentric</label>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-secondary" type="button" id="currentGraphBtn"
+                        >GraphStyle
+                        </button>
+                        <button aria-expanded="false" aria-haspopup="true"
+                                class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                                data-bs-toggle="dropdown" id="currentGraph" role="button"
+                                type="button">
+                            <span class="sr-only"></span>
+                        </button>
+                        <div class="dropdown-menu">
+                            <input autocomplete="off" checked="checked" class="btn-check" id="calculated"
+                                   name="btnradio"
+                                   type="radio">
+                            <label class="btn btn-outline-secondary dropdown-item" for="calculated">calculated</label>
+                            <input autocomplete="off" class="btn-check" id="modeGrid" name="btnradio"
+                                   type="radio">
+                            <label class="btn btn-outline-secondary dropdown-item" for="modeGrid">grid</label>
+                            <input autocomplete="off" class="btn-check" id="modeCose" name="btnradio" type="radio">
+                            <label class="btn btn-outline-secondary dropdown-item" for="modeCose">cose</label>
+                            <input autocomplete="off" class="btn-check" id="modeCircle" name="btnradio" type="radio">
+                            <label class="btn btn-outline-secondary dropdown-item" for="modeCircle">circle</label>
+                            <input autocomplete="off" class="btn-check" id="modeTree" name="btnradio" type="radio">
+                            <label class="btn btn-outline-secondary dropdown-item" for="modeTree">tree</label>
+                            <input autocomplete="off" class="btn-check" id="modeConcentric" name="btnradio"
+                                   type="radio">
+                            <label class="btn btn-outline-secondary dropdown-item"
+                                   for="modeConcentric">concentric</label>
+                        </div>
                     </div>
-                </div>
-                <div class="form-check form-switch ms-2">
-                    <input class="form-check-input" id="darkSwitch" type="checkbox">
-                    <label class="form-check-label" for="darkSwitch">Dark Mode</label>
-                </div>
-                <script src="static/js/dark-mode-switch.min.js"></script>
-                <div class="btn-group ms-2">
-                    <button class="btn btn-outline-secondary" type="button">Export</button>
-                    <button aria-expanded="false" aria-haspopup="true"
-                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                            data-bs-toggle="dropdown" id="navbarDropdown" role="button"
-                            type="button">
-                        <span class="sr-only"></span>
-                    </button>
-                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-                        <a class="dropdown-item" href="#" onclick="exportCSV()">Timeline</a>
-                        <a class="dropdown-item" download="image.json" href="#" id="export-json"
-                           onclick="exportJSON()">GraphJSON</a>
-                        <!--    <a class="dropdown-item" download="case.json" href="#" id="caseexport-json"
-                               onclick="exportCaseJSON()">CaseJSON</a> -->
-                        <a class="dropdown-item" download="image.png" href="#" id="export-png"
-                           onclick="exportPNG()">PNG</a>
-                        <a class="dropdown-item" download="image.jpeg" href="#" id="export-jpeg"
-                           onclick="exportJPEG()">JPEG</a>
+                    <div class="form-check form-switch ms-2">
+                        <input class="form-check-input" id="darkSwitch" type="checkbox">
+                        <label class="form-check-label" for="darkSwitch">Dark Mode</label>
                     </div>
-                </div>
-                <button class="btn btn-outline-primary ms-5" onclick="{
+                    <script src="static/js/dark-mode-switch.min.js"></script>
+                    <div class="btn-group ms-2">
+                        <button class="btn btn-outline-secondary" type="button">Export</button>
+                        <button aria-expanded="false" aria-haspopup="true"
+                                class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                                data-bs-toggle="dropdown" id="navbarDropdown" role="button"
+                                type="button">
+                            <span class="sr-only"></span>
+                        </button>
+                        <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                            <a class="dropdown-item" href="#" onclick="exportCSV()">Timeline</a>
+                            <a class="dropdown-item" download="image.json" href="#" id="export-json"
+                               onclick="exportJSON()">GraphJSON</a>
+                            <!--    <a class="dropdown-item" download="case.json" href="#" id="caseexport-json"
+                                   onclick="exportCaseJSON()">CaseJSON</a> -->
+                            <a class="dropdown-item" download="image.png" href="#" id="export-png"
+                               onclick="exportPNG()">PNG</a>
+                            <a class="dropdown-item" download="image.jpeg" href="#" id="export-jpeg"
+                               onclick="exportJPEG()">JPEG</a>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-primary ms-5" onclick="{
               document.getElementById('statsSideBar').classList.toggle('show')
                     }" type="button">
-                    Stats
-                </button>
+                        Stats
+                    </button>
                 </div>
             </form>
         </form>
@@ -322,6 +326,16 @@
                                type="text"/>
                         <div class="input-group-text" data-target="#datetimepicker2"
                              data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <div class="">
+                        <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                               title="Only display connections that happened on the weekend">
+                            <input class="btn-check " id="filterForWeekendsCkbx" type="checkbox">
+                            <label class="btn btn-outline-secondary" for="filterForWeekendsCkbx" onclick="{
+                    }">Weekends only</label>
+                        </label>
                     </div>
                 </div>
             </div>

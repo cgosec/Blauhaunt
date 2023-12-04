@@ -806,11 +806,35 @@ function filter(filterObject) {
             }
             return false
         })
+        // this is needed to avoid loosing the event times in the edges in total
         filtered_edges = structuredClone(filtered_edges)
         filtered_edges.forEach(edge => {
             edge.data.EventTimes = edge.data.EventTimes.filter(t => {
                 ts = new Date(t).getTime()
                 return from <= ts && ts <= to
+            })
+            edge.data.count = edge.data.EventTimes.length
+        })
+    }
+
+    let weekendOnly = document.getElementById("filterForWeekendsCkbx").checked
+    // filter only for events that occured during the weekend
+    if (weekendOnly) {
+        filtered_edges = filtered_edges.filter(edge => {
+            for (const t of edge.data.EventTimes) {
+                ts = new Date(t)
+                if (ts.getUTCDay() === 6 || ts.getUTCDay() === 0) {
+                    return true
+                }
+            }
+            return false
+        })
+        // this is needed to avoid loosing the event times in the edges in total
+        filtered_edges = structuredClone(filtered_edges)
+        filtered_edges.forEach(edge => {
+            edge.data.EventTimes = edge.data.EventTimes.filter(t => {
+                ts = new Date(t)
+                return ts.getUTCDay() === 6 || ts.getUTCDay() === 0
             })
             edge.data.count = edge.data.EventTimes.length
         })
@@ -826,8 +850,8 @@ function filter(filterObject) {
 
         filtered_edges = filtered_edges.filter(edge => {
             for (const t of edge.data.EventTimes) {
-                d = new Date(t)
-                tocompare = d.getUTCHours() * 60 + d.getUTCMinutes()
+                let d = new Date(t)
+                let tocompare = d.getUTCHours() * 60 + d.getUTCMinutes()
                 if (fromClock < toClock && fromClock <= tocompare && tocompare <= toClock) {
                     return true
                 }
@@ -840,8 +864,8 @@ function filter(filterObject) {
         filtered_edges = structuredClone(filtered_edges)
         filtered_edges.forEach(edge => {
             edge.data.EventTimes = edge.data.EventTimes.filter(t => {
-                d = new Date(t)
-                tocompare = d.getUTCHours() * 60 + d.getUTCMinutes()
+                let d = new Date(t)
+                let tocompare = d.getUTCHours() * 60 + d.getUTCMinutes()
                 if (fromClock < toClock && fromClock <= tocompare && tocompare <= toClock) {
                     return true
                 }
@@ -1372,9 +1396,11 @@ function setDisplayTimeSpan(timestamplist) {
     dayList = []
     while (firstDay.getTime() <= lastDay.getTime()) {
         dayList.push(firstDay.toISOString().split("T")[0])
-        firstDay.setDate(firstDay.getDate() + 1)
+        firstDay.setDate(firstDay.getUTCDate() + 1)
     }
-    dayList.push(lastDay.toISOString().split("T")[0])
+    let lastDayString = lastDay.toISOString().split("T")[0]
+    if (!dayList.includes(lastDayString))
+        dayList.push(lastDayString)
 
     let firstDaySpan = document.createElement("span")
     firstDaySpan.classList.add("mt-auto")
@@ -1457,7 +1483,7 @@ function setDisplayTimeSpan(timestamplist) {
     lastDaySpan.classList.add("mt-auto")
     lastDaySpan.classList.add("pe-2")
     lastDaySpan.classList.add("border-bottom")
-    lastDaySpan.innerText = lastDay.toISOString().split("T")[0]
+    lastDaySpan.innerText = lastDayString
     lastDaySpan.style.backgroundColor = "orange"
     document.getElementById("timespan").appendChild(lastDaySpan)
 }
