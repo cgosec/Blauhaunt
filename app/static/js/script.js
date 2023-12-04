@@ -510,16 +510,19 @@ function setNodesAndEdges(nodes, edges) {
 }
 
 
-function renderGraphBtnClick() {
+function renderGraphBtnClick(currentDisplay) {
     for (const e of document.getElementsByClassName("dynamic-display")) {
         e.classList.add("d-none")
     }
-    let currentDisplay = "graph"
-    for (const btn of document.getElementsByClassName("render-radios")) {
-        if (btn.checked) {
-            currentDisplay = btn.value
+    if (!currentDisplay) {
+        currentDisplay = "graph"
+        for (const btn of document.getElementsByClassName("render-radios")) {
+            if (btn.checked) {
+                currentDisplay = btn.value
+            }
         }
     }
+    console.log("Rendering. Current display is set to " + currentDisplay)
     switch (currentDisplay) {
         case "graph":
             //check if there are more than 500 nodes raise a modeal with a warning
@@ -718,46 +721,6 @@ function applyTagFilters() {
             tagFilters.push(btn.value)
     }
     return tagFilters
-}
-
-function _getNeededEdges(srcNodes, dstNodes, edges) {
-    edges = edges || current_edges
-    let srcNodeIds = srcNodes.map(n => {
-        return n.data.id
-    })
-    dstNodeIds = dstNodes.map(n => {
-        return n.data.id
-    })
-    let retEdges = []
-    for (const e of edges) {
-        if (srcNodeIds.includes(e.data.source)) {
-            retEdges.push(e)
-        }
-        if (dstNodeIds.includes(e.data.target)) {
-            retEdges.push(e)
-        }
-    }
-    return retEdges
-}
-
-function _getNeededNode(edges) {
-    let retNodes = []
-    let edgeIds = []
-    for (const e of edges) {
-        edgeIds.push(e.data.source)
-        edgeIds.push(e.data.target)
-    }
-    for (const n of current_nodes) {
-        if (edgeIds.includes(n.data.id)) retNodes.push(n)
-    }
-    return retNodes
-}
-
-function filterByNodes(srcNodes, dstNodes, edges) {
-    edges = edges || current_edges
-    let retEdges = _getNeededEdges(srcNodes, dstNodes, edges)
-    let retNodes = _getNeededNode(retEdges)
-    return {nodes: retNodes, edges: retEdges}
 }
 
 function filter(filterObject) {
@@ -1704,6 +1667,26 @@ function createHeatmap() {
             tableData.innerText = eventCount
             // color the cell based on the number of events
             tableData.style.backgroundColor = `rgba(128, 0, 0, ${(eventCount / maxActivityOnAllDays)})`
+            // if the eventCount is bigger than 0 add an eventlisterner on click set the filtered edges to the edges of that day
+            //with the specific user and render the graph
+            if (eventCount > 0) {
+                tableData.addEventListener("click", (e) => {
+                    let userRegex = new RegExp("^" + user + "$")
+                    let oldFromDate = fromDate.value
+                    let oldToDate = toDate.value
+                    fromDate.value = new Date(day)
+                    // set to date to the next day
+                    toDate.value = new Date(new Date(day).getTime() + 86400000)
+                    filter({users: userRegex})
+                    renderGraphBtnClick("graph")
+                    // toDo anyhow the other nodes are still in the graph
+                    // reset the date to the old one
+                    fromDate.value = oldFromDate
+                    toDate.value = oldToDate
+                    createQuery()
+                })
+            }
+
             tableRow.appendChild(tableData)
         })
         tableBody.appendChild(tableRow)
@@ -2538,44 +2521,46 @@ async function createNodesAndEdges(objects) {
             caseData.hostEdges.add(edge)
         }
 //############################## USER EDGES ############################################
-        sid = data.SID || "-"
-        let uedgeid = user + source + dest + data.EventID + logonType + sid + data.Description
+        if (user) {
+            sid = data.SID || "-"
+            let uedgeid = user + source + dest + data.EventID + logonType + sid + data.Description
 
-        let times = caseData.userEdgesLogonTimes.get(uedgeid) || []
-        times.push(...data.LogonTimes)
-        times = times.sort((a, b) => {
-            return new Date(a).getTime() - new Date(b).getTime()
-        })
-        times = [...new Set(times)] // remove duplicates
-        caseData.userEdgesLogonTimes.set(uedgeid, times)
-        let userEdge = {
-            "data": {
-                "id": uedgeid,
-                "source": user,
-                "target": dest,
-                "objid": uedgeid,
-                "elabel": data.EventID,
-                "label": "Event",
-                "mod": "User",
-                "distance": 5,
-                "ewidth": 0.1,
-                "ntype": "edge",
-                "eventSource": source,
-                "eid": data.EventID,
-                "count": times.length,
-                "logontype": logonType,
-                "edge_color": edge_color,
-                "ecolor": ecolor,
-                "EventTimes": caseData.userEdgesLogonTimes.get(uedgeid) || [],
-                "UserName": user,
-                "SID": sid || "-",
-                "EventID": data.EventID,
-                "LogonType": logonType,
-                "Description": description,
+            let times = caseData.userEdgesLogonTimes.get(uedgeid) || []
+            times.push(...data.LogonTimes)
+            times = times.sort((a, b) => {
+                return new Date(a).getTime() - new Date(b).getTime()
+            })
+            times = [...new Set(times)] // remove duplicates
+            caseData.userEdgesLogonTimes.set(uedgeid, times)
+            let userEdge = {
+                "data": {
+                    "id": uedgeid,
+                    "source": user,
+                    "target": dest,
+                    "objid": uedgeid,
+                    "elabel": data.EventID,
+                    "label": "Event",
+                    "mod": "User",
+                    "distance": 5,
+                    "ewidth": 0.1,
+                    "ntype": "edge",
+                    "eventSource": source,
+                    "eid": data.EventID,
+                    "count": times.length,
+                    "logontype": logonType,
+                    "edge_color": edge_color,
+                    "ecolor": ecolor,
+                    "EventTimes": caseData.userEdgesLogonTimes.get(uedgeid) || [],
+                    "UserName": user,
+                    "SID": sid || "-",
+                    "EventID": data.EventID,
+                    "LogonType": logonType,
+                    "Description": description,
+                }
             }
+            caseData.userEdges = new Set([...caseData.userEdges].filter(e => e.data.id !== uedgeid))
+            caseData.userEdges.add(userEdge)
         }
-        caseData.userEdges = new Set([...caseData.userEdges].filter(e => e.data.id !== uedgeid))
-        caseData.userEdges.add(userEdge)
     }
 }
 
