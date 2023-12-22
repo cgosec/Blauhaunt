@@ -1,7 +1,7 @@
 # Blauhaunt
-A tool collection for filtering and visualizing logon events. Designed to help answering the "Cotton Eye Joe" question  (Where did you come from where did you go) in Security Incidents and Threat Hunts.
+A tool collection for filtering and visualizing logon events. Designed to help answering the "Cotton Eye Joe" question (Where did you come from where did you go) in Security Incidents and Threat Hunts.
 
-***This tool is designed for experienced DFIR specialists. You may have little to none usage from it without expirience in Threat Hunting*** 
+***This tool is designed for experienced DFIR specialists. You may have little to none usage from it without experience in Threat Hunting*** 
 
 ## Table of Contents  
 - [Get started](#get-started)
@@ -18,7 +18,7 @@ A tool collection for filtering and visualizing logon events. Designed to help a
 ## Get started
 Running Blauhaunt is as simple as that:
 
-open https://cgosec.github.io/Blauhaunt/app/ since there is no backend no data will leave your local system. *(third party librarys integrated and I do not take any responsibilities of their communication behavior. Imports are in the index.html file on top)*
+open https://cgosec.github.io/Blauhaunt/app/ since there is no backend no data will leave your local system. *(third party libraries integrated and I do not take any responsibilities of their communication behavior. Imports are in the index.html file on top)*
 
 run a cmd or bash or what ever you like...
 
@@ -34,7 +34,7 @@ Some random test data is in the directory test_data to get started. However this
 
 ### Upload Data
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c1176bd5-b3e5-4208-80d6-2bdf02e218e9)
-Kick "Upload Data" (suprising isn't it :-P)
+Klick "Upload Data" (surprising isn't it :-P)
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/23d391c9-af24-44b2-853e-cf064eb2bcb2)
 Upload the json export of the velo artifact or the result(s) of the powershell script here.
@@ -51,8 +51,8 @@ and export the json
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/61edef0d-96b2-40cc-ac81-2f38ada4077b)
 This is optional too.
-Upload a mapping for having IP-Adresses resolved to their hostnames. You need to have a file where there is one col for Hostnames and a col for IP-Adresses.
-If a System has multiple IP-Adresses you can have them in this one col seperated by an arbitrarily symbol e.G. "/".
+Upload a mapping for having IP-Addresses resolved to their hostnames. You need to have a file where there is one col for Hostnames and a col for IP-Addresses.
+If a System has multiple IP-Addresses you can have them in this one col separated by an arbitrarily symbol e.G. "/".
 
 Example:
 | Hostname    | IP-Addresses | MaybeSomeNotNeededStuff |
@@ -63,7 +63,7 @@ Example:
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/5abba586-b386-4af6-8085-4b1d5eb85301)
 
-Once a propper file is selected a delimiter (if non is specified a comma is expected). And click Load Map.
+Once a proper file is selected a delimiter (if non is specified a comma is expected). And click Load Map.
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/086ead34-6448-48d0-8f52-7758f13cd778)
 1. Choose the name of the col where the hostname is in
@@ -76,7 +76,7 @@ When done click ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/01
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/993df0ce-9f77-4117-b775-23650fd0f20d)
 
-If everything was processed as intendet you should now see the number of total nodes and edges
+If everything was processed as intended you should now see the number of total nodes and edges
 
 ### Filtering
 
@@ -100,7 +100,7 @@ Filter for a time span for activities.
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/71048d37-f979-4006-bcf9-f240d90ece02)
 
-The Daily times filter specifies from what time we are intrested in the events. This is useful if nightly user logons are not common in your environment. This is regardles of the date - that means in your timespan only events that occured during that hourly timespan are in the set. (Works over night like in the example picture too)
+The Daily times filter specifies from what time we are interested in the events. This is useful if nightly user logons are not common in your environment. This is regardless of the date - that means in your timespan only events that occurred during that hourly timespan are in the set. (Works over night like in the example picture too)
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/923c9522-8614-444b-86fa-b5d4cbdbf4da)
 
@@ -112,7 +112,7 @@ By default events where source and destination are the same node are not display
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c6cbe668-e6c8-4f54-b1a4-41e1085dc26b)
 
-Filtering for EventIDs is a good idea to reduce the data. There is no diffrence in choosing all or none.
+Filtering for EventIDs is a good idea to reduce the data. There is no difference in choosing all or none.
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/17da2925-65e7-4e47-8690-fff918199d5c)
 
@@ -124,7 +124,7 @@ Filtering for Tags only is available when client infos are uploaded. Those are y
 Those apply only for the source not for the destination system.
 
 ### Source: System or User
-Usually I am rather focused on system -> system activitie in favour of identifying the initial access. Since there are a lot of situations you want to focus on user behavior you can choose what your source should be: System or User. 
+Usually I am rather focused on system -> system activity in favour of identifying the initial access. Since there are a lot of situations you want to focus on user behavior you can choose what your source should be: System or User. 
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/f14a564f-5747-4887-aa33-5b747a5a2336)
 
@@ -142,7 +142,7 @@ comming soon
 comming soon
 
 If you want to change from one view to another: choose the view you need and then click render.
-'Be careful with Timelin! Few nodes and edges can still have a huge timeline!* Checking the Stats ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/29429607-9a31-4633-a86e-70a9b70fa5ee) is a good idea before rendering a timeline.
+'Be careful with Timeline! Few nodes and edges can still have a huge timeline!* Checking the Stats ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/29429607-9a31-4633-a86e-70a9b70fa5ee) is a good idea before rendering a timeline.
 
 ### Graph Style
 comming soon
@@ -163,30 +163,30 @@ comming soon
 comming soon
 
 ## Integration in investigation
-I recommend using Blauhaunt with [Velociraptor](https://github.com/Velocidex/velociraptor) since it is the fastest way to get data from multible systems. The Blauhaunt import format for event data and client info is the one that can be exported from Velo.
-The blauhaunt_script.ps1 works well if you prefere working with e.g. [KAPE](https://www.kroll.com/en/insights/publications/cyber/kroll-artifact-parser-extractor-kape) triage data.
+I recommend using Blauhaunt with [Velociraptor](https://github.com/Velocidex/velociraptor) since it is the fastest way to get data from multiple systems. The Blauhaunt import format for event data and client info is the one that can be exported from Velo.
+The blauhaunt_script.ps1 works well if you prefer working with e.g. [KAPE](https://www.kroll.com/en/insights/publications/cyber/kroll-artifact-parser-extractor-kape) triage data.
 
-Blauhaunt really gets useful if you have multible systems to identify your next pivot system or sus users. Blauhaunt standalone will not magically bring you to the compromised systems and users. But if you have hundrets of systems to check it really speeds up your game.
+Blauhaunt really gets useful if you have multiple systems to identify your next pivot system or sus users. Blauhaunt standalone will not magically bring you to the compromised systems and users. But if you have hundreds of systems to check it really speeds up your game.
 
 ### Example workflow
 
 #### Known compromised system
-(e.g. from a Velo hunt) -> Check in Blauhaunt what users connected to this system -> sus user -> sus systems -> further sus users -> the story goes on. You have good chances identifing the systems where deeper forensics will speed you up in your hunt.
+(e.g. from a Velo hunt) -> Check in Blauhaunt what users connected to this system -> sus user -> sus systems -> further sus users -> the story goes on. You have good chances identifying the systems where deeper forensics will speed you up in your hunt.
 If you e.g. identify compromised users on that system again you can go back to Blauhaunt and repeat the game.
 
 #### No idea where to start
-With several filters Blauhaunt gives you statistical and visual possibilities identifing unusual connections. You can e.g. check for user activities occuring at night. Or simply see a logon fire coming form a system where an attacker is enumerating the AD-Infrastructure.
+With several filters Blauhaunt gives you statistical and visual possibilities identifying unusual connections. You can e.g. check for user activities occurring at night. Or simply see a logon fire coming form a system where an attacker is enumerating the AD-Infrastructure.
 
 #### Lucky shot
 If you are really lucky and have a noisy attacker + solid administration in the network, Blauhaunt can potentially deliver you an optical attack map with the timeline of compromised systems along the y-axis in the center.
 
-## Architekture
+## Architecture
 Blauhaunt is designed to run entirely without a backend system.
 I suggest simply starting a python http server on the local system from a shell in the directory where the index.html is in with this command:
 
      python -m http.server
      
-if you are using linux likely you have to type python3 instead of python - but if you are using this tool you sould be technical skilled enough to figure that out yourself ;)
+if you are using linux likely you have to type python3 instead of python - but if you are using this tool you should be technical skilled enough to figure that out yourself ;)
 
 *Some day I will create a backend in Django with an API to get realtime data to display for better threat hunting*
 
@@ -194,11 +194,11 @@ if you are using linux likely you have to type python3 instead of python - but i
 The layout of the graph is calculated according to the set filters. 
 The icon size of a node is calculated by its activities within the set filters.
 The x-axis position of a node is calculated by its outgoing connections. Nodes having many outgoing connections are rather in the center of the graph. Nodes with fewer outgoing connections are at the left and the right of the graph.
-The y-axis is calculated by the first quatile of the nodes activitie time.
+The y-axis is calculated by the first quatile of the nodes activity time.
 
 To not have too many nodes at the same spot there is some movement when there are too many on the same spot.
 
-The other layouts are defaults from the cytoscape universe that can be choosen as well.
+The other layouts are defaults from the cytoscape universe that can be chosen as well.
 
 ### Filters
 description comming soon
@@ -272,8 +272,15 @@ You can simply take the json export from this artefact to import it into Blauhau
 The client_info import is designed to work directly with the client_info from Velociraptor too. You can simply export the json file and upload it into Blauhaunt.
 
 ### Usage
-Comming soon
+_Comming soon: how to use Blauhaunt in Velo GUI_
 
+If you want to parse event logs collected from a system offline using velociraptor, you can do so like this:
+
+     .\velociraptor*.exe artifacts --definitions Blauhaunt\parser\velociraptor\ collect --format=jsonl Custom.Windows.EventLogs.Blauhaunt --args Security='C:\my\awesome\storage\path\Security.evtx' --args System='C:\my\awesome\storage\path\System.evtx' --args LocalSessionManager='C:\my\awesome\storage\path\Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx' --args RemoteConnectionManager='C:\my\awesome\storage\path\Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx' --args RDPClientOperational='C:\my\awesome\storage\path\Microsoft-Windows-TerminalServices-RDPClient%4Operational.evtx'
+
+If you dislike typing long paths, feel free to use the provided quick script:
+ 
+     .\quick_velo.ps1 -EventLogDirectory C:\my\awesome\storage\path 
 
 ## Acknowledgements
  - [SEC Consult](https://sec-consult.com/de/) This work was massively motivated by my work in and with the SEC Defence team
