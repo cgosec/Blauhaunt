@@ -1,4 +1,4 @@
-# script for when you got some event logs and you wan to quickly run blauhaunt over it
+# script for when you got some event logs and you want to quickly run blauhaunt over it
 # uses the blauhaunt velo artifact for data collection
 # example of use: .\quick_velo.ps1 -EventLogDirectory C:\Windows\System32\winevt\Logs\
 # will put the resulting json in the directory, from which the script is executed
