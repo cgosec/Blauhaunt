@@ -272,8 +272,15 @@ You can simply take the json export from this artefact to import it into Blauhau
 The client_info import is designed to work directly with the client_info from Velociraptor too. You can simply export the json file and upload it into Blauhaunt.
 
 ### Usage
-Comming soon
+_Comming soon: how to use Blauhaunt in Velo GUI_
 
+If you want to parse event logs collected from a system offline using velociraptor, you can do so like this:
+
+     .\velociraptor*.exe artifacts --definitions Blauhaunt\parser\velociraptor\ collect --format=jsonl Custom.Windows.EventLogs.Blauhaunt --args Security='C:\my\awesome\storage\path\Security.evtx' --args System='C:\my\awesome\storage\path\System.evtx' --args LocalSessionManager='C:\my\awesome\storage\path\Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx' --args RemoteConnectionManager='C:\my\awesome\storage\path\Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx' --args RDPClientOperational='C:\my\awesome\storage\path\Microsoft-Windows-TerminalServices-RDPClient%4Operational.evtx'
+
+If you dislike typing long paths, feel free to use the provided quick script:
+ 
+     .\quick_velo.ps1 -EventLogDirectory C:\my\awesome\storage\path 
 
 ## Acknowledgements
  - [SEC Consult](https://sec-consult.com/de/) This work was massively motivated by my work in and with the SEC Defence team
