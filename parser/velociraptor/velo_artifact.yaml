@@ -168,16 +168,16 @@ sources:
               else=if(
                 condition= System.Channel=~'TerminalServices',
                 then=if(
-                  condition= UserData.EventXML.Address,
-                  then= UserData.EventXML.Address,
+                  condition=UserData.EventXML.Param3,
+                  then=UserData.EventXML.Param3,
                   else=if(
-                    condition= UserData.EventXML.Param3,
-                    then= UserData.EventXML.Param3,
-                    else= ''
-                    ),
+                    condition=UserData.EventXML.Address,
+                    then=UserData.EventXML.Address,
+                    else=''
+                  )
+                ),
                 else= ''
                 )
-              )
             )  
             as SourceIP,
 
