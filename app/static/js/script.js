@@ -44,6 +44,9 @@ let hostMapDelimiter = ","  // this is the delimiter for the hostMap file
 let ctrlPressed = false  // this is used to check if the ctrl key is pressed
 let altPressed = false  // this is used to check if the alt key is pressed
 
+let timeOffsetList = document.getElementById("timeOffsetList")
+
+
 /*
 prepare the UI
 * */
@@ -76,6 +79,75 @@ for (const btn of graphStyle) {
                 })
         }
     })
+}
+
+// allow users to select the timezone they want to display the graph. Lists will stay in UTC.
+timeOffsetList.addEventListener("change", e => {
+    // this is used to set the time offset for the case. this is needed to display the correct time in the graph
+    let offset = e.target.value
+    if (offset === "none") {
+        caseData.timeOffset = 0
+    } else {
+        caseData.timeOffset = Number.parseFloat(offset)
+    }
+    document.getElementById("timeOffset").innerText = "Time:" + offset + "h"
+});
+
+function applyTimeOffset(time) {
+    // this is used to apply the time offset to a given time
+    return time + caseData.timeOffset
+}
+
+let offsetMap = new Map()
+offsetMap.set("none", "Z")
+offsetMap.set(-12.0, "Y")
+offsetMap.set(-11.0, "X")
+offsetMap.set(-10.0, "W")
+offsetMap.set(-9.0, "V")
+offsetMap.set(-9.5, " V†")
+offsetMap.set(-8.0, "U")
+offsetMap.set(-7.0, "T")
+offsetMap.set(-6.0, "S")
+offsetMap.set(-5.0, "R")
+offsetMap.set(-4.0, "Q")
+offsetMap.set(-3.5, "P†")
+offsetMap.set(-3.0, "P")
+offsetMap.set(-2.0, "O")
+offsetMap.set(-1.0, "N")
+offsetMap.set(0.0, "Z")
+offsetMap.set(1.0, "A")
+offsetMap.set(2.0, "B")
+offsetMap.set(3.0, "C")
+offsetMap.set(3.5, "C†")
+offsetMap.set(4.0, "D")
+offsetMap.set(4.5, "D†")
+offsetMap.set(5.0, "E")
+offsetMap.set(5.5, "E†")
+offsetMap.set(6.0, "F")
+offsetMap.set(6.5, "F†")
+offsetMap.set(7.0, "G")
+offsetMap.set(8.0, "H")
+offsetMap.set(8.75, "H*")
+offsetMap.set(9.0, "I")
+offsetMap.set(9.5, "I†")
+offsetMap.set(10.0, "K")
+offsetMap.set(10.5, "K†")
+offsetMap.set(11.0, "L")
+offsetMap.set(12.0, "M")
+offsetMap.set(12.45, "M*")
+offsetMap.set(13.0, "M†")
+
+function applyTimeOffsetToTimeString(isoString) {
+    const date = new Date(isoString);
+    const offset = (caseData.timeOffset || 0.0)
+    const rest = offset % 1
+    const hours = offset > 0 ? Math.floor(offset) : Math.ceil(offset)
+    const minutes = Math.floor(rest * 60)
+    date.setHours(date.getHours() + hours)
+    date.setMinutes(date.getMinutes() + minutes)
+    let dateString = date.toISOString()
+    dateString = dateString.replace(".000Z", offsetMap.get(offset))
+    return dateString
 }
 
 
@@ -268,7 +340,6 @@ function getCases() {
     request.onerror = function (event) {
         console.error('Error opening database:', event.target.error);
     };
-    let caseDropDown = document.getElementById("caseDropdown")
     request.onsuccess = function (event) {
         const db = event.target.result;
 
@@ -281,7 +352,7 @@ function getCases() {
         };
         oStoreRequest.onsuccess = function (event) {
             // create all the elements, butons, filters etc.
-            let caseDropDown = document.getElementById("case_list")
+            let caseDropDown = document.getElementById("case_list") || document.createElement("div")  // this is needed for the backend edition
             const keys = event.target.result;
             for (let caseName of keys) {
                 let wrapper1 = document.createElement("div")
@@ -393,6 +464,7 @@ function retrieveDataFromIndexDB(caseName) {
                 tagSetNew.add(tag)
             })
             minConSwitch.disabled = false
+            document.getElementById("timeOffsetBtn").innerText = "Time:" + (caseData.timeOffset / (60 * 60 * 1000)) + "h"
             processEdgesToNodes()
             document.getElementById("newCaseName").value = caseName
         }
@@ -577,7 +649,8 @@ function createEventIDBtn(eventID, description) {
                         <label class="btn btn-outline-secondary" for=${"evtBtn" + eventID}>${eventID}</label>
                     </label>`
     currentBtnGroupForEventBtns.innerHTML += newEventBtn //toDo someday with createNode
-    if (eventID === 4624 || eventID === 4625) {
+    eventID = "" + eventID
+    if (eventID === "4624" || eventID === "4625") {
         createLogonTypeBtn(2)
         createLogonTypeBtn(3)
         createLogonTypeBtn(4)

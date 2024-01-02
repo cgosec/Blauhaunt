@@ -134,6 +134,54 @@
                 <div aria-labelledby="navbarDropdown" class="dropdown-menu cleanOnLoad" id="tagColorList">
                 </div>
             </div>
+            <div class="btn-group ms-2 mt-2 h-25">
+                <button class="btn btn-outline-secondary" type="button">Time: 0h</button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="timeOffsetBtn" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <select aria-labelledby="navbarDropdown" class="dropdown-menu cleanOnLoad" id="timeOffsetList">
+                    <option value="-12">UTC−12:00, Y</option>
+                    <option value="-11">UTC−11:00, X</option>
+                    <option value="-10">UTC−10:00, W</option>
+                    <option value="-9.5">UTC−09:30, V†</option>
+                    <option value="-9">UTC−09:00, V</option>
+                    <option value="-8">UTC−08:00, U</option>
+                    <option value="-7">UTC−07:00, T</option>
+                    <option value="-6">UTC−06:00, S</option>
+                    <option value="-5">UTC−05:00, R</option>
+                    <option value="-4">UTC−04:00, Q</option>
+                    <option value="-3.5">UTC−03:30, P†</option>
+                    <option value="-3">UTC−03:00, P</option>
+                    <option value="-2">UTC−02:00, O</option>
+                    <option value="-1">UTC−01:00, N</option>
+                    <option value="0">UTC±00:00, Z</option>
+                    <option value="1">UTC+01:00, A</option>
+                    <option value="2">UTC+02:00, B</option>
+                    <option value="3">UTC+03:00, C</option>
+                    <option value="3.5">UTC+03:30, C†</option>
+                    <option value="4">UTC+04:00, D</option>
+                    <option value="4.5">UTC+04:30, D†</option>
+                    <option value="5">UTC+05:00, E</option>
+                    <option value="5.5">UTC+05:30, E†</option>
+                    <option value="5.75">UTC+05:45, E*</option>
+                    <option value="6">UTC+06:00, F</option>
+                    <option value="6.5">UTC+06:30, F†</option>
+                    <option value="7">UTC+07:00, G</option>
+                    <option value="8">UTC+08:00, H</option>
+                    <option value="8.75">UTC+08:45, H*</option>
+                    <option value="9">UTC+09:00, I</option>
+                    <option value="9.5">UTC+09:30, I†</option>
+                    <option value="10">UTC+10:00, K</option>
+                    <option value="10.5">UTC+10:30, K†</option>
+                    <option value="11">UTC+11:00, L</option>
+                    <option value="12">UTC+12:00, M</option>
+                    <option value="12.75">UTC+12:45, M*</option>
+                    <option value="13">UTC+13:00, M†</option>
+                </select>
+            </div>
             <form name="graphStyle">
                 <div class="btn-group ms-2 mt-2 h-25" role="group">
                     <input autocomplete="off" checked="checked" class="btn-check graphStyle" id="modeSystem"
