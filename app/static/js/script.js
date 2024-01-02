@@ -86,16 +86,18 @@ timeOffsetList.addEventListener("change", e => {
     // this is used to set the time offset for the case. this is needed to display the correct time in the graph
     let offset = e.target.value
     if (offset === "none") {
-        caseData.timeOffset = 0
+        caseData.timezoneSelection = 14
     } else {
-        caseData.timeOffset = Number.parseFloat(offset)
+        caseData.timezoneSelection  = e.target.selectedIndex
     }
     document.getElementById("timeOffsetBtn").innerText = "Time:" + offset + "h"
 });
 
+
+
 function applyTimeOffset(time) {
     // this is used to apply the time offset to a given time
-    return time + ((caseData.timeOffset || 0) * 60 * 60 * 1000)
+    return time + ((timeOffsetList.value || 0) * 60 * 60 * 1000)
 }
 
 let offsetMap = new Map()
@@ -139,7 +141,7 @@ offsetMap.set(13.0, "M†")
 
 function applyTimeOffsetToTimeString(isoString) {
     const date = new Date(isoString);
-    const offset = (caseData.timeOffset || 0.0)
+    const offset = (timeOffsetList.value || 0.0)
     const rest = offset % 1
     const hours = offset > 0 ? Math.floor(offset) : Math.ceil(offset)
     const minutes = Math.floor(rest * 60)
@@ -284,6 +286,7 @@ function generateBlankCaseData() {
         srcHostSearchHistory: [],
         dstHostSearchHistory: [],
         permanentHighlightedEdges: new Set(),
+        timezoneSelection : 14
     }
 }
 
@@ -464,7 +467,7 @@ function retrieveDataFromIndexDB(caseName) {
                 tagSetNew.add(tag)
             })
             minConSwitch.disabled = false
-            document.getElementById("timeOffsetBtn").innerText = "Time:" + (caseData.timeOffset / (60 * 60 * 1000)) + "h"
+            timeOffsetList.selectedIndex = caseData.timezoneSelection
             processEdgesToNodes()
             document.getElementById("newCaseName").value = caseName
         }
@@ -1484,7 +1487,7 @@ function setDisplayTimeSpan(timestamplist) {
     firstDaySpan.classList.add("mt-auto")
     firstDaySpan.classList.add("pe-2")
     firstDaySpan.classList.add("border-bottom")
-    firstDaySpan.innerText = "Timezone: " + offsetMap.get(caseData.timeOffset || 0) + "\n" + firstDay_double.toISOString().split("T")[0]
+    firstDaySpan.innerText = "Timezone: " + offsetMap.get(timeOffsetList.value || 0) + "\n" + firstDay_double.toISOString().split("T")[0]
     firstDaySpan.style.backgroundColor = "orange"
     document.getElementById("timespan").appendChild(firstDaySpan)
 
@@ -1712,7 +1715,7 @@ function createHeatmap() {
     let tableHead = document.createElement("thead")
     let tableHeadRow = document.createElement("tr")
     let tableHeadUser = document.createElement("th")
-    tableHeadUser.innerText = "Timezone: " + offsetMap.get(caseData.timeOffset || 0) + "\nUser"
+    tableHeadUser.innerText = "Timezone: " + offsetMap.get(timeOffsetList.value || 0) + "\nUser"
     tableHeadRow.appendChild(tableHeadUser)
     let userList = Object.keys(userDayObj).sort()
     let dayList = new Set()
