@@ -50,7 +50,7 @@ let timeOffsetList = document.getElementById("timeOffsetList")
 /*
 prepare the UI
 * */
-darkSwitch.addEventListener("change", darkmode)
+ds.addEventListener("change", darkmode)
 darkmode()
 getCases()
 generateBlankCaseData()
@@ -88,11 +88,9 @@ timeOffsetList.addEventListener("change", e => {
     if (offset === "none") {
         caseData.timezoneSelection = 14
     } else {
-        caseData.timezoneSelection  = e.target.selectedIndex
+        caseData.timezoneSelection = e.target.selectedIndex
     }
-    document.getElementById("timeOffsetBtn").innerText = "Time:" + offset + "h"
 });
-
 
 
 function applyTimeOffset(time) {
@@ -102,42 +100,42 @@ function applyTimeOffset(time) {
 
 let offsetMap = new Map()
 offsetMap.set("none", "Z")
-offsetMap.set(-12.0, "Y")
-offsetMap.set(-11.0, "X")
-offsetMap.set(-10.0, "W")
-offsetMap.set(-9.0, "V")
-offsetMap.set(-9.5, " V†")
-offsetMap.set(-8.0, "U")
-offsetMap.set(-7.0, "T")
-offsetMap.set(-6.0, "S")
-offsetMap.set(-5.0, "R")
-offsetMap.set(-4.0, "Q")
-offsetMap.set(-3.5, "P†")
-offsetMap.set(-3.0, "P")
-offsetMap.set(-2.0, "O")
-offsetMap.set(-1.0, "N")
-offsetMap.set(0.0, "Z")
-offsetMap.set(1.0, "A")
-offsetMap.set(2.0, "B")
-offsetMap.set(3.0, "C")
-offsetMap.set(3.5, "C†")
-offsetMap.set(4.0, "D")
-offsetMap.set(4.5, "D†")
-offsetMap.set(5.0, "E")
-offsetMap.set(5.5, "E†")
-offsetMap.set(6.0, "F")
-offsetMap.set(6.5, "F†")
-offsetMap.set(7.0, "G")
-offsetMap.set(8.0, "H")
-offsetMap.set(8.75, "H*")
-offsetMap.set(9.0, "I")
-offsetMap.set(9.5, "I†")
-offsetMap.set(10.0, "K")
-offsetMap.set(10.5, "K†")
-offsetMap.set(11.0, "L")
-offsetMap.set(12.0, "M")
-offsetMap.set(12.45, "M*")
-offsetMap.set(13.0, "M†")
+offsetMap.set("-12", "Y")
+offsetMap.set("-11", "X")
+offsetMap.set("-10", "W")
+offsetMap.set("-9", "V")
+offsetMap.set("-9.5", " V†")
+offsetMap.set("-8", "U")
+offsetMap.set("-7", "T")
+offsetMap.set("-6", "S")
+offsetMap.set("-5", "R")
+offsetMap.set("-4", "Q")
+offsetMap.set("-3.5", "P†")
+offsetMap.set("-3", "P")
+offsetMap.set("-2", "O")
+offsetMap.set("-1", "N")
+offsetMap.set("0", "Z")
+offsetMap.set("1", "A")
+offsetMap.set("2", "B")
+offsetMap.set("3", "C")
+offsetMap.set("3.5", "C†")
+offsetMap.set("4", "D")
+offsetMap.set("4.5", "D†")
+offsetMap.set("5", "E")
+offsetMap.set("5.5", "E†")
+offsetMap.set("6", "F")
+offsetMap.set("6.5", "F†")
+offsetMap.set("7", "G")
+offsetMap.set("8", "H")
+offsetMap.set("8.75", "H*")
+offsetMap.set("9", "I")
+offsetMap.set("9.5", "I†")
+offsetMap.set("10", "K")
+offsetMap.set("10.5", "K†")
+offsetMap.set("11", "L")
+offsetMap.set("12", "M")
+offsetMap.set("12.75", "M*")
+offsetMap.set("13", "M†")
 
 function applyTimeOffsetToTimeString(isoString) {
     const date = new Date(isoString);
@@ -286,7 +284,7 @@ function generateBlankCaseData() {
         srcHostSearchHistory: [],
         dstHostSearchHistory: [],
         permanentHighlightedEdges: new Set(),
-        timezoneSelection : 14
+        timezoneSelection: 14
     }
 }
 
@@ -1260,13 +1258,14 @@ function restyleNode(node) {
     // this function sets the style and image of the node based on the node type
     switch (node.data.ntype) {
         case "Host":
-            if (node.data.os.toLowerCase().includes("server")) node.data.nimage = "static/images/font-awesome/server.svg"
-            else node.data.nimage = "static/images/font-awesome/desktop.svg"
+            let os = node.data.os || "Unknown"
+            if (os.toLowerCase().includes("server")) node.data.nimage = "static/images/font-awesome/server.svg"
+            else node.data.nimage = "/static/images/font-awesome/desktop.svg"
             node.data.opacity = "0"
             node.data.nshape = "roundrectangle"
             break
         case "User":
-            node.data.nimage = "static/images/font-awesome/user.svg"
+            node.data.nimage = "/static/images/font-awesome/user.svg"
             node.data.opacity = "0"
             break
     }
