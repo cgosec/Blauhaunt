@@ -90,12 +90,12 @@ timeOffsetList.addEventListener("change", e => {
     } else {
         caseData.timeOffset = Number.parseFloat(offset)
     }
-    document.getElementById("timeOffset").innerText = "Time:" + offset + "h"
+    document.getElementById("timeOffsetBtn").innerText = "Time:" + offset + "h"
 });
 
 function applyTimeOffset(time) {
     // this is used to apply the time offset to a given time
-    return time + caseData.timeOffset
+    return time + ((caseData.timeOffset || 0) * 60 * 60 * 1000)
 }
 
 let offsetMap = new Map()
@@ -865,14 +865,17 @@ function filter(filterObject) {
     } else rank = true
 
     // filter for time frame
-    let from = fromDate.value
-    let to = toDate.value
+    let from = fromDate.value + "Z"
+    let to = toDate.value + "Z"
     if (from || to) {
         from = new Date(from).getTime() || 0
         to = new Date(to).getTime() || 9999999999999
+        // convert to UTC time (subtract the local offset to get UTC time)
+        from = from + (from - applyTimeOffset(from)) //we need to invert the offset here because we want to apply the offset to the time
+        to = to + (to - applyTimeOffset(to)) // same here
         filtered_edges = filtered_edges.filter(edge => {
             for (const t of edge.data.EventTimes) {
-                ts = new Date(t).getTime()
+                let ts = new Date(t).getTime()
                 if (from <= ts && ts <= to) {
                     return true
                 }
@@ -883,7 +886,7 @@ function filter(filterObject) {
         filtered_edges = structuredClone(filtered_edges)
         filtered_edges.forEach(edge => {
             edge.data.EventTimes = edge.data.EventTimes.filter(t => {
-                ts = new Date(t).getTime()
+                let ts = new Date(t).getTime()
                 return from <= ts && ts <= to
             })
             edge.data.count = edge.data.EventTimes.length
@@ -895,7 +898,8 @@ function filter(filterObject) {
     if (weekendOnly) {
         filtered_edges = filtered_edges.filter(edge => {
             for (const t of edge.data.EventTimes) {
-                ts = new Date(t)
+                let ts = new Date(t)
+                ts = new Date(applyTimeOffset(ts.getTime()))
                 if (ts.getUTCDay() === 6 || ts.getUTCDay() === 0) {
                     return true
                 }
@@ -906,7 +910,8 @@ function filter(filterObject) {
         filtered_edges = structuredClone(filtered_edges)
         filtered_edges.forEach(edge => {
             edge.data.EventTimes = edge.data.EventTimes.filter(t => {
-                ts = new Date(t)
+                let ts = new Date(t)
+                ts = new Date(applyTimeOffset(ts.getTime()))
                 return ts.getUTCDay() === 6 || ts.getUTCDay() === 0
             })
             edge.data.count = edge.data.EventTimes.length
@@ -923,7 +928,7 @@ function filter(filterObject) {
 
         filtered_edges = filtered_edges.filter(edge => {
             for (const t of edge.data.EventTimes) {
-                let d = new Date(t)
+                let d = new Date(applyTimeOffset(new Date(t).getTime()))
                 let tocompare = d.getUTCHours() * 60 + d.getUTCMinutes()
                 if (fromClock < toClock && fromClock <= tocompare && tocompare <= toClock) {
                     return true
@@ -937,7 +942,7 @@ function filter(filterObject) {
         filtered_edges = structuredClone(filtered_edges)
         filtered_edges.forEach(edge => {
             edge.data.EventTimes = edge.data.EventTimes.filter(t => {
-                let d = new Date(t)
+                let d = new Date(applyTimeOffset(new Date(t).getTime()))
                 let tocompare = d.getUTCHours() * 60 + d.getUTCMinutes()
                 if (fromClock < toClock && fromClock <= tocompare && tocompare <= toClock) {
                     return true
@@ -1376,7 +1381,7 @@ function prepareNodes(nodes, edges) {
             node.activityStats = {q1: qs.q1, q2: qs.q2, q3: qs.q3}
 
             timeList.forEach(time => {
-                let day = new Date(time).toISOString().split("T")[0]
+                let day = new Date(applyTimeOffset(new Date(time).getTime())).toISOString().split("T")[0]
                 let count = allDatesCount[day] || 0
                 allDatesCount[day] = count + 1
             })
@@ -1479,7 +1484,7 @@ function setDisplayTimeSpan(timestamplist) {
     firstDaySpan.classList.add("mt-auto")
     firstDaySpan.classList.add("pe-2")
     firstDaySpan.classList.add("border-bottom")
-    firstDaySpan.innerText = firstDay_double.toISOString().split("T")[0]
+    firstDaySpan.innerText = "Timezone: " + offsetMap.get(caseData.timeOffset || 0) + "\n" + firstDay_double.toISOString().split("T")[0]
     firstDaySpan.style.backgroundColor = "orange"
     document.getElementById("timespan").appendChild(firstDaySpan)
 
@@ -1512,7 +1517,7 @@ function setDisplayTimeSpan(timestamplist) {
             daySpan.style.paddingTop = "2px"
             filtered_edges.forEach(edge => {
                 for (const time of edge.data.EventTimes) {
-                    if (new Date(time).toISOString().split("T")[0] === day) {
+                    if (new Date(applyTimeOffset(new Date(time).getTime())).toISOString().split("T")[0] === day) {
                         highlightEdge(edge)
                         break
                     }
@@ -1534,7 +1539,7 @@ function setDisplayTimeSpan(timestamplist) {
                 if (ctrlPressed) {
                     filtered_edges.forEach(edge => {
                         for (const time of edge.data.EventTimes) {
-                            if (new Date(time).toISOString().split("T")[0] === day) {
+                            if (new Date(applyTimeOffset(new Date(time).getTime())).toISOString().split("T")[0] === day) {
                                 if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
                                     removeFromPermanentHighlightEdge(edge)
                                     unhighlightEdge(edge)
@@ -1679,7 +1684,7 @@ function getHeatmapData() {
     let userModGraph = document.getElementById("modeUser").checked
     for (const edge of filtered_edges) {
         for (const time of edge.data.EventTimes) {
-            let day = new Date(time).toISOString().split("T")[0]
+            let day = new Date(applyTimeOffset(new Date(time).getTime())).toISOString().split("T")[0]
             if (userModGraph) {
                 let usrObj = userDayActivityObj[edge.data.source] || {}
                 let count = (usrObj[day] || 0) + 1
@@ -1707,7 +1712,7 @@ function createHeatmap() {
     let tableHead = document.createElement("thead")
     let tableHeadRow = document.createElement("tr")
     let tableHeadUser = document.createElement("th")
-    tableHeadUser.innerText = "User"
+    tableHeadUser.innerText = "Timezone: " + offsetMap.get(caseData.timeOffset || 0) + "\nUser"
     tableHeadRow.appendChild(tableHeadUser)
     let userList = Object.keys(userDayObj).sort()
     let dayList = new Set()
@@ -2665,7 +2670,7 @@ async function createNodesAndEdges(objects) {
 
 async function resolveIP2Host() {
     console.log("ip resover called")
-    for (const [key, value] of caseData.nodeTranslation ){
+    for (const [key, value] of caseData.nodeTranslation) {
         if (ipRegex.test(key)) {
             if (caseData.ip2hostMapperFromFile[key])
                 caseData.nodeTranslation.set(key, caseData.ip2hostMapperFromFile[key][0])

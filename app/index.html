@@ -135,10 +135,10 @@
                 </div>
             </div>
             <div class="btn-group ms-2 mt-2 h-25">
-                <button class="btn btn-outline-secondary" type="button">Time: 0h</button>
+                <button class="btn btn-outline-secondary" type="button" id="timeOffsetBtn">Time: 0h</button>
                 <button aria-expanded="false" aria-haspopup="true"
                         class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                        data-bs-toggle="dropdown" id="timeOffsetBtn" role="button"
+                        data-bs-toggle="dropdown" id="timeOffsetDropBtn" role="button"
                         type="button">
                     <span class="sr-only"></span>
                 </button>
@@ -376,6 +376,14 @@
                              data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
                     </div>
                 </div>
+                <script>
+                    $('#datetimepicker1').datetimepicker({
+                        format: 'YYYY-MM-DDTHH:mm:ss',
+                    });
+                    $('#datetimepicker2').datetimepicker({
+                        format: 'YYYY-MM-DDTHH:mm:ss'
+                    });
+                </script>
                 <div class="mt-2">
                     <div class="">
                         <label data-bs-placement="bottom" data-bs-toggle="tooltip"
