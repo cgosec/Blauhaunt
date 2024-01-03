@@ -431,7 +431,7 @@ function deleteCasefromIdexDB(caseName) {
 
 // list cases: const transaction = db.transaction(db.objectStoreNames);
 // Function to retrieve data from IndexedDB this is called in getCases()
-function retrieveDataFromIndexDB(caseName) {
+function retrieveDataFromIndexDB(caseName, callback) {
     const request = indexedDB.open('BlauHaunt', 1);
     resetScene()
 
@@ -447,6 +447,7 @@ function retrieveDataFromIndexDB(caseName) {
 
         getRequest.onsuccess = function (event) {
             caseData = event.target.result
+            console.log(`${caseName} data loaded from IndexDB:`)
             console.log(caseData)
             let eventSetNew = new Set()
             let tagSetNew = new Set()
@@ -467,6 +468,8 @@ function retrieveDataFromIndexDB(caseName) {
             minConSwitch.disabled = false
             timeOffsetList.selectedIndex = caseData.timezoneSelection
             processEdgesToNodes()
+            if (callback)
+                callback()
             document.getElementById("newCaseName").value = caseName
         }
 
@@ -476,7 +479,6 @@ function retrieveDataFromIndexDB(caseName) {
         }
     }
 }
-
 // #####################################################################################################################
 // #####################################################################################################################
 // ###########################################HISTORIES #######################################################
