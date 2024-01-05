@@ -449,28 +449,37 @@ function retrieveDataFromIndexDB(caseName, callback) {
             caseData = event.target.result
             console.log(`${caseName} data loaded from IndexDB:`)
             console.log(caseData)
-            let eventSetNew = new Set()
-            let tagSetNew = new Set()
-            caseData.eventIDs.forEach(id => {
-                if (!eventSetNew.has(id)) {
-                    caseData.eventIDs.delete(id)
-                    createEventIDBtn(id)
-                }
-                eventSetNew.add(id)
-            })
-            caseData.tags.forEach(tag => {
-                if (!tagSetNew.has(tag)) {
-                    caseData.tags.delete(tag)
-                    createTagBtn(tag)
-                }
-                tagSetNew.add(tag)
-            })
-            minConSwitch.disabled = false
-            timeOffsetList.selectedIndex = caseData.timezoneSelection
-            processEdgesToNodes()
-            if (callback)
-                callback()
-            document.getElementById("newCaseName").value = caseName
+            try {
+                let eventSetNew = new Set()
+                let tagSetNew = new Set()
+                caseData.eventIDs.forEach(id => {
+                    if (!eventSetNew.has(id)) {
+                        caseData.eventIDs.delete(id)
+                        createEventIDBtn(id)
+                    }
+                    eventSetNew.add(id)
+                })
+                caseData.tags.forEach(tag => {
+                    if (!tagSetNew.has(tag)) {
+                        caseData.tags.delete(tag)
+                        createTagBtn(tag)
+                    }
+                    tagSetNew.add(tag)
+                })
+                minConSwitch.disabled = false
+                timeOffsetList.selectedIndex = caseData.timezoneSelection
+                processEdgesToNodes()
+                document.getElementById("newCaseName").value = caseName
+            } catch (e) {
+                console.error(e)
+                generateBlankCaseData()
+            }
+            try {
+                if (callback)
+                    callback()
+            } catch (e) {
+                console.error(e)
+            }
         }
 
         getRequest.onerror = function (event) {
@@ -2584,10 +2593,10 @@ async function createNodesAndEdges(objects) {
         }
         let ipAddress = bad_ips.includes(data.SourceIP) ? null : data.SourceIP.trim()
         let source = ""
-        let hostname = bad_hostnames.includes(data.SourceHostname) ? ipAddress : data.SourceHostname
+        let hostname = !data.SourceHostname || bad_hostnames.includes(data.SourceHostname) ? ipAddress : data.SourceHostname
         let user = data.UserName.toUpperCase()
         let dest = data.Destination.trim()
-        let distinction = data.Distinction.trim().toUpperCase() || ""
+        let distinction = data.Distinction ? data.Distinction.trim().toUpperCase() : ""
         if (!ipRegex.test(dest)) dest = dest.split(".")[0]
         dest = dest.toUpperCase()
         if (["LOCAL", "127.0.0.1", "::1"].includes(hostname)) {
