@@ -222,6 +222,7 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
         "SID":"-",
         "Destination":"Desti-LAPTOP",
         "Description":"using explicit credentials",
+        "Distinction": "SomeCustomFieldToDistionctEdgesAndFilterFor"
         "EventID":4648,
         "LogonType":"-",
         "SourceIP":"-",
