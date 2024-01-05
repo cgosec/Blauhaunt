@@ -479,6 +479,7 @@ function retrieveDataFromIndexDB(caseName, callback) {
         }
     }
 }
+
 // #####################################################################################################################
 // #####################################################################################################################
 // ###########################################HISTORIES #######################################################
@@ -845,6 +846,13 @@ function filter(filterObject) {
     if (filterObject.dstHosts) {
         filtered_edges = filtered_edges.filter(edge => {
             return filterObject.dstHosts.test(edge.data.target)
+        })
+    }
+
+    // filter for custom distinction
+    if (filterObject.customDistinction) {
+        filtered_edges = filtered_edges.filter(edge => {
+            return filterObject.customDistinction.test(edge.data.Distinction)
         })
     }
 
@@ -1615,7 +1623,7 @@ function createTimelineSystemView(edges) {
             tableDataSourceSystem.innerText = edge.data.source
             tableDataTargetSystem.innerText = edge.data.target
             tableDataEventID.innerText = edge.data.EventID
-            tableDataLogonType.innerText = edge.data.logontype || "-"
+            tableDataLogonType.innerText = edge.data.Logontype || "-"
             timelineEntries.push(tableRow)
         }
     }
@@ -1778,6 +1786,7 @@ function createHeatmap() {
             // if the eventCount is bigger than 0 add an eventlisterner on click set the filtered edges to the edges of that day
             //with the specific user and render the graph
             if (eventCount > 0) {
+                //add click event to display graph of that user
                 tableData.addEventListener("click", (e) => {
                     let userRegex = new RegExp("^" + user + "$")
                     let oldFromDate = fromDate.value
@@ -1785,7 +1794,7 @@ function createHeatmap() {
                     fromDate.value = new Date(day)
                     // set to date to the next day
                     toDate.value = new Date(new Date(day).getTime() + 86400000)
-                    filter({users: userRegex})
+                    filter({users: userRegex})  // get events only for that user
                     renderGraphBtnClick("graph")
                     // toDo anyhow the other nodes are still in the graph
                     // reset the date to the old one
@@ -2167,12 +2176,13 @@ qtipEdge
 This function generate the description text for each edge.
 */
 function qtipEdge(ndata) {
-    var qtext = "";
+    let qtext = "";
     if (ndata._private.data["mod"] == "System") {
-        qtext = "<b>User: " + ndata._private.data['UserName'] + "</b><br>"
+        qtext += "<b>User: " + ndata._private.data['UserName'] + "</b><br>"
+        qtext += "Distinction: " + ndata._private.data["Distinction"] + "<br>";
         qtext += "Count: " + ndata._private.data["count"];
-        qtext += "<br>Logon Type: " + ndata._private.data["EventID"];
-        qtext += "<br>LogonType: " + (ndata._private.data["LogonType"] || "-");
+        qtext += "<br>Event ID: " + ndata._private.data["EventID"];
+        qtext += "<br>Logon Type: " + (ndata._private.data["LogonType"] || "-");
         qtext += "<br>SID: " + ndata._private.data["SID"];
         //qtext += "<br>SourceIP: " + ndata._private.data["SourceIP"];
         qtext += "<br>Description: " + ndata._private.data["Description"];
@@ -2187,9 +2197,10 @@ function qtipEdge(ndata) {
     }
     if (ndata._private.data["mod"] == "User") {
         qtext += "<b>Source System: " + ndata._private.data['eventSource'] + "</b><br>";
+        qtext += "Distinction: " + ndata._private.data["Distinction"] + "<br>";
         qtext += "Count: " + ndata._private.data["count"];
-        qtext += "<br>Logon Type: " + ndata._private.data["EventID"];
-        qtext += "<br>LogonType: " + (ndata._private.data["LogonType"] || "-");
+        qtext += "<br>Event ID: " + ndata._private.data["EventID"];
+        qtext += "<br>Logon Type: " + (ndata._private.data["LogonType"] || "-");
         qtext += "<br>SID: " + (ndata._private.data["SID"] || "-");
         //qtext += "<br>SourceIP: " + ndata._private.data["SourceIP"];
         qtext += "<br>Description: " + (ndata._private.data["Description"] || "-");
@@ -2237,6 +2248,7 @@ function createQuery() {
     let setUserStr = document.getElementById("queryUser").value;
     let srcSetHostStr = document.getElementById("queryHostSrc").value;
     let destSetHostStr = document.getElementById("queryHostDst").value;
+    let distinctionStr = document.getElementById("queryDistinction").value;
     if (setUserStr) {
         caseData.userSearchHistory.push(setUserStr)
         filterObject.users = new RegExp(setUserStr)
@@ -2249,6 +2261,10 @@ function createQuery() {
     if (destSetHostStr) {
         caseData.dstHostSearchHistory.push(destSetHostStr)
         filterObject.dstHosts = new RegExp(destSetHostStr)
+
+    }
+    if (distinctionStr) {
+        filterObject.customDistinction = new RegExp(distinctionStr)
 
     }
     filter(filterObject)
@@ -2571,6 +2587,7 @@ async function createNodesAndEdges(objects) {
         let hostname = bad_hostnames.includes(data.SourceHostname) ? ipAddress : data.SourceHostname
         let user = data.UserName.toUpperCase()
         let dest = data.Destination.trim()
+        let distinction = data.Distinction.trim().toUpperCase() || ""
         if (!ipRegex.test(dest)) dest = dest.split(".")[0]
         dest = dest.toUpperCase()
         if (["LOCAL", "127.0.0.1", "::1"].includes(hostname)) {
@@ -2588,7 +2605,7 @@ async function createNodesAndEdges(objects) {
         let logonType = (data.LogonType || "-")
         if (source) {
 
-            let edgeid = source + ipAddress + dest + user + data.EventID + logonType + description
+            let edgeid = source + ipAddress + dest + user + data.EventID + logonType + distinction + description
             let logontimes = edgeTimeMap.get(edgeid) || []
             data.LogonTimes = data.LogonTimes || []
             logontimes.push(...data.LogonTimes)
@@ -2610,8 +2627,8 @@ async function createNodesAndEdges(objects) {
                     "ntype": "edge",
                     "eid": data.EventID,
                     "count": caseData.hostEdgesLogonTimes.get(edgeid).length,
-                    "eventSource": "-",
-                    "logontype": logonType,
+                    "eventSource": source,
+                    "Distinction": distinction,
                     "edge_color": edge_color,
                     "ecolor": ecolor,
                     "EventTimes": caseData.hostEdgesLogonTimes.get(edgeid) || [],
@@ -2620,7 +2637,7 @@ async function createNodesAndEdges(objects) {
                     "IP": data.SourceIP || "-",
                     "EventID": data.EventID,
                     "LogonType": logonType,
-                    "Description": logonType,
+                    "Description": description,
                 }
             }
             caseData.hostEdges = new Set([...caseData.hostEdges].filter(e => {
@@ -2631,7 +2648,7 @@ async function createNodesAndEdges(objects) {
 //############################## USER EDGES ############################################
         if (user) {
             sid = data.SID || "-"
-            let uedgeid = user + source + dest + data.EventID + logonType + sid + data.Description
+            let uedgeid = user + source + dest + data.EventID + logonType + distinction + sid + data.Description
 
             let times = caseData.userEdgesLogonTimes.get(uedgeid) || []
             times.push(...data.LogonTimes)
@@ -2655,7 +2672,7 @@ async function createNodesAndEdges(objects) {
                     "eventSource": source,
                     "eid": data.EventID,
                     "count": times.length,
-                    "logontype": logonType,
+                    "Distinction": distinction,
                     "edge_color": edge_color,
                     "ecolor": ecolor,
                     "EventTimes": caseData.userEdgesLogonTimes.get(uedgeid) || [],
