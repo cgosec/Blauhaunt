@@ -102,10 +102,6 @@ Filter for a time span for activities.
 
 The Daily times filter specifies from what time we are interested in the events. This is useful if nightly user logons are not common in your environment. This is regardless of the date - that means in your timespan only events that occurred during that hourly timespan are in the set. (Works over night like in the example picture too)
 
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/923c9522-8614-444b-86fa-b5d4cbdbf4da)
-
-This is a filter that helps to focus on the top talkers in big sets. You can specify a threshold for a minimum of outgoing connection for the source system.
-
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/e7447115-cd1f-4455-975a-06eb066fc68c)
 
 By default events where source and destination are the same node are not displayed. If you want to display them active it by clicking.
@@ -222,6 +218,7 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
         "SID":"-",
         "Destination":"Desti-LAPTOP",
         "Description":"using explicit credentials",
+        "Distinction": "SomeCustomFieldToDistionctEdgesAndFilterFor"
         "EventID":4648,
         "LogonType":"-",
         "SourceIP":"-",
