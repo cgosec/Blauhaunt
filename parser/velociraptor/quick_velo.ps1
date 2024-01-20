@@ -10,11 +10,15 @@ param(
         Mandatory = $true,
         ValueFromPipeline = $true,
         ValueFromPipelineByPropertyName = $true,
-        Position = 1
-    )]
-    [System.IO.FileInfo] $EventLogDirectory
+        Position = 1,
+        HelpMessage = "Directory containing the event logs (evtx)")]
+    [System.IO.FileInfo] $EventLogDirectory,
+    [Parameter(
+        Position = 2,
+        HelpMessage = "Name of the output file with path (default: .\BlauhauntData.json)")]
+        [System.IO.FileInfo] $OutfileName = ".\BlauhauntData.json"
 )
 
 $blauhauntArtifact = (Get-ChildItem . | Where-Object -Property Name -Like "velo_artifact.yaml").FullName
 $velociraptorPath = (Get-ChildItem . | Where-Object -Property Name -Like "velociraptor*exe").FullName
-"$velociraptorPath artifacts --definitions $blauhauntArtifact collect --format=jsonl Custom.Windows.EventLogs.Blauhaunt --args Security='$EventLogDirectory\Security.evtx' --args System='$EventLogDirectory\System.evtx' --args LocalSessionManager='$EventLogDirectory\Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx' --args RemoteConnectionManager='$EventLogDirectory\Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx' --args RDPClientOperational='$EventLogDirectory\Microsoft-Windows-TerminalServices-RDPClient%4Operational.evtx'" | Invoke-Expression | Out-File -FilePath ".\Custom.Windows.EventLogs.Blauhaunt.json"
+"$velociraptorPath artifacts --definitions $blauhauntArtifact collect --format=jsonl Custom.Windows.EventLogs.Blauhaunt --args Security='$EventLogDirectory\Security.evtx' --args System='$EventLogDirectory\System.evtx' --args LocalSessionManager='$EventLogDirectory\Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx' --args RemoteConnectionManager='$EventLogDirectory\Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx' --args RDPClientOperational='$EventLogDirectory\Microsoft-Windows-TerminalServices-RDPClient%4Operational.evtx'" | Invoke-Expression | Out-File -FilePath $OutfileName
