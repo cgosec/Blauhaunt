@@ -873,7 +873,7 @@ function filter(filterObject) {
         })
     }
 
-    // filter for event ids
+    // filter for event
     if (filterObject.event_ids.length > 0) {
         filtered_edges = filtered_edges.filter(edge => {
             return filterObject.event_ids.includes("" + edge.data.EventID)
@@ -1649,7 +1649,7 @@ function createTimelineSystemView(edges) {
     })
     let table = document.createElement("table")
     table.classList.add("table")
-    table.innerHTML = "<thead><tr><th scope=\"col\">Time</th><th scope=\"col\">User</th><th scope=\"col\">Source System</th><th scope=\"col\">Target System</th><th scope=\"col\">Event ID</th><th scope=\"col\">Logon Type</th></tr></thead>"
+    table.innerHTML = "<thead><tr><th scope=\"col\">Time</th><th scope=\"col\">User</th><th scope=\"col\">Source System</th><th scope=\"col\">Target System</th><th scope=\"col\">Event</th><th scope=\"col\">Logon Type</th></tr></thead>"
     let tableBody = document.createElement("tbody")
     for (const entry of timelineEntries) {
         tableBody.appendChild(entry)
@@ -2198,7 +2198,7 @@ function qtipEdge(ndata) {
         qtext += "<b>User: " + ndata._private.data['UserName'] + "</b><br>"
         qtext += "Distinction: " + ndata._private.data["Distinction"] + "<br>";
         qtext += "Count: " + ndata._private.data["count"];
-        qtext += "<br>Event ID: " + ndata._private.data["EventID"];
+        qtext += "<br>Event: " + ndata._private.data["EventID"];
         qtext += "<br>Logon Type: " + (ndata._private.data["LogonType"] || "-");
         qtext += "<br>SID: " + ndata._private.data["SID"];
         //qtext += "<br>SourceIP: " + ndata._private.data["SourceIP"];
@@ -2216,7 +2216,7 @@ function qtipEdge(ndata) {
         qtext += "<b>Source System: " + ndata._private.data['eventSource'] + "</b><br>";
         qtext += "Distinction: " + ndata._private.data["Distinction"] + "<br>";
         qtext += "Count: " + ndata._private.data["count"];
-        qtext += "<br>Event ID: " + ndata._private.data["EventID"];
+        qtext += "<br>Event: " + ndata._private.data["EventID"];
         qtext += "<br>Logon Type: " + (ndata._private.data["LogonType"] || "-");
         qtext += "<br>SID: " + (ndata._private.data["SID"] || "-");
         //qtext += "<br>SourceIP: " + ndata._private.data["SourceIP"];
