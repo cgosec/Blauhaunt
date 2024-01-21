@@ -829,6 +829,14 @@ function filter(filterObject) {
         edge.data.target = (caseData.nodeTranslation.get(edge.data.target) || edge.data.target)
     })
 
+    //filter for highlighted edges only
+    if (document.getElementById("highlightedEdgesOnly").checked) {
+        filtered_edges = filtered_edges.filter(edge => {
+                return caseData.permanentHighlightedEdges.has(edge.data.id)
+            }
+        )
+    }
+
     // filter out same origin and target
     if (!document.getElementById("selfCon").checked) {
         filtered_edges = filtered_edges.filter(edge => {
