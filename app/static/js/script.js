@@ -1281,18 +1281,28 @@ function setNodeColor(node) {
     }
 }
 
+if (!serverSvgPath) {
+    serverSvgPath = "static/images/font-awesome/server.svg"
+}
+if (!desktopSvgPath) {
+    desktopSvgPath = "static/images/font-awesome/desktop.svg"
+}
+if (!userSvgPath) {
+    userSvgPath = "static/images/font-awesome/user.svg"
+}
+
 function restyleNode(node) {
     // this function sets the style and image of the node based on the node type
     switch (node.data.ntype) {
         case "Host":
             let os = node.data.os || "Unknown"
-            if (os.toLowerCase().includes("server")) node.data.nimage = "static/images/font-awesome/server.svg"
-            else node.data.nimage = "/static/images/font-awesome/desktop.svg"
+            if (os.toLowerCase().includes("server")) node.data.nimage = serverSvgPath
+            else node.data.nimage = desktopSvgPath
             node.data.opacity = "0"
             node.data.nshape = "roundrectangle"
             break
         case "User":
-            node.data.nimage = "/static/images/font-awesome/user.svg"
+            node.data.nimage = userSvgPath
             node.data.opacity = "0"
             break
     }
