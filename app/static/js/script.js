@@ -2623,7 +2623,7 @@ async function createNodesAndEdges(objects) {
         dest = dest.toUpperCase()
         source = hostname || ""
         source = source.trim()
-        if (!ipRegex.test(source)) dest = dest.split(".")[0]
+        if (!ipRegex.test(source)) source = source.split(".")[0]
         source = source.toUpperCase()
         nodeTranslation.set(dest, dest)
         let sid = "-"
