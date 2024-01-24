@@ -11,6 +11,7 @@ let min_size = 30
 let max_size = 45
 let default_size = 37
 const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+const sidRegex = /^S-\d-\d+(-\d+)+$/
 
 
 let edgesCounter = document.getElementById("edgesCounter") // element to display the number of edges
@@ -258,6 +259,7 @@ function generateBlankCaseData() {
         host2ipMapper: {},
         host2ipMapperFromFile: {},
         userSidMapper: {},
+        sidUserMapper: {},
         hostInfo: new Map(),
         nodeMap: new Map(),
         tags: new Set(),
@@ -2590,7 +2592,20 @@ function mappingFromData(objects) {
         let user = data.UserName.toUpperCase()
         if (!caseData.userNodeNames.has(user)) {
             caseData.userNodeNames.add(user)
-            caseData.userSidMapper[user] = data.SID ? data.SID.trim() : null
+        }
+        if (data.SID && data.SID !== "-" && data.SID !== "S-1-5-18" && data.SID !== "S-1-0-0") {
+            // if the username is already mapped to a SID, the SID is not changed but a console output about the conflict is generated
+            let sid = data.SID.trim()
+            if (caseData.userSidMapper[user]) {
+                if (caseData.userSidMapper[user] !== sid) {
+                    console.log(`Conflict: User ${user} is mapped to SID ${caseData.userSidMapper[user]} and ${sid}`)
+                    // console output to show the SID that is kept
+                    console.log(`Keeping ${caseData.userSidMapper[user]}`)
+                }
+            } else {
+                caseData.userSidMapper[user] = sid
+                caseData.sidUserMapper[sid] = user
+            }
         }
     }
 }
@@ -2613,6 +2628,12 @@ async function createNodesAndEdges(objects) {
         let source = ""
         let hostname = !data.SourceHostname || bad_hostnames.includes(data.SourceHostname) ? ipAddress : data.SourceHostname
         let user = data.UserName.toUpperCase()
+        let sid = data.SID ? data.SID.trim() : ""
+        // when user is an SID check, if we have a mapping to an actual username and use that instead
+        if (sidRegex.test(user)) {
+            user = caseData.sidUserMapper[user] || user
+            sid = user
+        }
         let dest = data.Destination.trim()
         let distinction = data.Distinction ? data.Distinction.trim().toUpperCase() : ""
         if (!ipRegex.test(dest)) dest = dest.split(".")[0]
@@ -2626,13 +2647,12 @@ async function createNodesAndEdges(objects) {
         if (!ipRegex.test(source)) source = source.split(".")[0]
         source = source.toUpperCase()
         nodeTranslation.set(dest, dest)
-        let sid = "-"
         nodeTranslation.set(source, source)
         let description = data.Description || "-"
         let logonType = (data.LogonType || "-")
         if (source) {
 
-            let edgeid = source + ipAddress + dest + user + data.EventID + logonType + distinction + description
+            let edgeid = source + ipAddress + dest + user + sid + data.EventID + logonType + distinction + description
             let logontimes = edgeTimeMap.get(edgeid) || []
             data.LogonTimes = data.LogonTimes || []
             logontimes.push(...data.LogonTimes)
