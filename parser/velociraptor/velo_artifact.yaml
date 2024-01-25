@@ -149,7 +149,7 @@ sources:
               then=System.Computer,
               else=EventData.TargetServerName),
             else=if(
-                condition=EventData.EventID.Value = 4776,
+                condition=System.EventID.Value = 4776,
                 then=EventData.Workstation,
                 else=System.Computer)
         ) as Destination,
@@ -162,7 +162,13 @@ sources:
             `4778`='REMOTE SESSION RECONNECTED'),
             member=str(str=System.EventID.Value)
         ) as Description,
-        get(field="Message") as Message
+        -- this is to avoid having a wrong SID in 4648 events:
+        if(
+          condition=System.EventID.Value=4648,
+          then="-",
+          else=get(field="Message")
+        )
+        as Message
         FROM parse_evtx(filename=OSPath)
         WHERE (EventID IN (4624, 4625)
         AND LogonType =~ LogonTypes)
