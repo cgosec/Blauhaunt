@@ -2631,8 +2631,9 @@ async function createNodesAndEdges(objects) {
         let sid = data.SID ? data.SID.trim() : ""
         // when user is an SID check, if we have a mapping to an actual username and use that instead
         if (sidRegex.test(user)) {
+            let tmpUsr = user
             user = caseData.sidUserMapper[user] || user
-            sid = user
+            sid = tmpUsr
         }
         let dest = data.Destination.trim()
         let distinction = data.Distinction ? data.Distinction.trim().toUpperCase() : ""
@@ -2646,6 +2647,8 @@ async function createNodesAndEdges(objects) {
         source = source.trim()
         if (!ipRegex.test(source)) source = source.split(".")[0]
         source = source.toUpperCase()
+        if (source && dest === "127.0.0.1")
+            dest = source
         nodeTranslation.set(dest, dest)
         nodeTranslation.set(source, source)
         let description = data.Description || "-"
