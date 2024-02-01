@@ -2639,7 +2639,7 @@ async function createNodesAndEdges(objects) {
         let distinction = data.Distinction ? data.Distinction.trim().toUpperCase() : ""
         if (!ipRegex.test(dest)) dest = dest.split(".")[0]
         dest = dest.toUpperCase()
-        if (["LOCAL", "127.0.0.1", "::1"].includes(hostname)) {
+        if (["LOCAL", "LOKAL", "127.0.0.1", "::1"].includes(hostname)) {
             hostname = dest
         }
         dest = dest.toUpperCase()
