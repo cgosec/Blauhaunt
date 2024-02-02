@@ -2446,6 +2446,11 @@ function getIPsHost(ip) {
             let customHost = document.getElementById("customHost")
             customHost.value = ip
             let selectBtn = document.getElementById("selectHostBtn")
+            let cancleBtn = document.getElementById("cancelBtn")
+            cancleBtn.addEventListener("click", e => {
+                hostSelect.hide();
+                resolve(null)
+            });
             let customButtonSet = e => {
                 hDiv.innerHTML = ""
                 hostSelect.hide();
@@ -2745,8 +2750,10 @@ async function resolveIP2Host() {
         if (ipRegex.test(key)) {
             if (caseData.ip2hostMapperFromFile[key])
                 caseData.nodeTranslation.set(key, caseData.ip2hostMapperFromFile[key][0])
-            else
-                caseData.nodeTranslation.set(key, await getIPsHost(key))
+            else {
+                let selection = await getIPsHost(key)
+                if (selection) caseData.nodeTranslation.set(key, selection) // skip if no selection was made
+            }
         }
     }
 }
