@@ -67,7 +67,8 @@ for (const btn of graphStyle) {
                 prepareUserNodesAndEdges(caseData.userEdges).then(data => {
                     current_nodes = data.nodes
                     current_edges = data.edges
-                    setNodesAndEdges(current_nodes, current_edges)
+                    //setNodesAndEdges(current_nodes, current_edges)
+                    createQuery()
                 })
                 break
             default :
@@ -76,7 +77,8 @@ for (const btn of graphStyle) {
                 prepareHostNodesAndEdges(caseData.hostEdges).then(data => {
                     current_nodes = data.nodes
                     current_edges = data.edges
-                    setNodesAndEdges(current_nodes, current_edges)
+                    //setNodesAndEdges(current_nodes, current_edges)
+                    createQuery()
                 })
         }
     })
@@ -2756,6 +2758,8 @@ async function resolveIP2Host() {
             }
         }
     }
+    // apply filters again to update the graph
+    createQuery()
 }
 
 function trimDomainNodesNames() {
