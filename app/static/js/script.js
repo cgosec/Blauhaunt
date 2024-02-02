@@ -2274,9 +2274,9 @@ function createQuery() {
     filterObject = {
         users: "", srcHosts: "", dstHosts: "", event_ids: []
     }
-    let setUserStr = document.getElementById("queryUser").value;
-    let srcSetHostStr = document.getElementById("queryHostSrc").value;
-    let destSetHostStr = document.getElementById("queryHostDst").value;
+    let setUserStr = document.getElementById("queryUser").value.toUpperCase();
+    let srcSetHostStr = document.getElementById("queryHostSrc").value.toUpperCase();
+    let destSetHostStr = document.getElementById("queryHostDst").value.toUpperCase();
     let distinctionStr = document.getElementById("queryDistinction").value;
     if (setUserStr) {
         caseData.userSearchHistory.push(setUserStr)
