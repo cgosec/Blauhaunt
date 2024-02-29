@@ -2132,6 +2132,7 @@ function drawGraph(graph, rootNode) {
         loading_bar.classList.add("loaded");
     });
     cy.nodes().forEach(function (ele) {
+        try{
         ele.qtip({
             content: {
                 title: "<b>Node Details</b>",
@@ -2144,8 +2145,14 @@ function drawGraph(graph, rootNode) {
         });
         ele.on('mousedown', e => nodeMouseDown(ele))
         ele.on('mouseup', e => nodeMouseUp(ele))
+        }
+        catch(error){
+            console.log("error creating qtip");
+            console.error(error);
+        }
     });
     cy.edges().forEach(function (ele) {
+        try{
         ele.qtip({
             content: {
                 title: "<b>Details</b>",
@@ -2158,10 +2165,15 @@ function drawGraph(graph, rootNode) {
                 target: ele
             }
         });
+        ele.on('mousedown', e => edgeMouseDown(ele))
+        }
+        catch(error){
+            console.log("error creating qtip");
+            console.error(error);
+        }
         if (caseData.permanentHighlightedEdges.has(ele._private.data.id)) {
             highlightEdge(ele._private)
         }
-        ele.on('mousedown', e => edgeMouseDown(ele))
     });
 }
 
