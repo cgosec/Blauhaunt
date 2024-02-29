@@ -1268,21 +1268,22 @@ function setNodeColor(node) {
         node.data.nfcolor = nfcolor_host
         node.data.ncolor = ncolor_host
         node.data.nbcolor = nbcolor_host
+        for (tag of caseData.tags) {
+            if (nodeTags.includes(tag)) {
+                let colorVals = tagColorMap.get(tag)
+                if (!parseInt(colorVals.default) && parseInt(colorVals.priority) > latestPrio) {
+                    node.data.nfcolor = colorVals.color
+                    latestPrio = parseInt(colorVals.priority)
+                }
+            }
+    }
     }
     if (node.data.ntype === "User") {
         node.data.nfcolor = nfcolor_user
         node.data.ncolor = ncolor_user
         node.data.nbcolor = nbcolor_user
     }
-    for (tag of caseData.tags) {
-        if (nodeTags.includes(tag)) {
-            let colorVals = tagColorMap.get(tag)
-            if (!parseInt(colorVals.default) && parseInt(colorVals.priority) > latestPrio) {
-                node.data.nfcolor = colorVals.color
-                latestPrio = parseInt(colorVals.priority)
-            }
-        }
-    }
+
 }
 
 if (!serverSvgPath) {
