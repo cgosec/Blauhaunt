@@ -1268,21 +1268,22 @@ function setNodeColor(node) {
         node.data.nfcolor = nfcolor_host
         node.data.ncolor = ncolor_host
         node.data.nbcolor = nbcolor_host
+        for (tag of caseData.tags) {
+            if (nodeTags.includes(tag)) {
+                let colorVals = tagColorMap.get(tag)
+                if (!parseInt(colorVals.default) && parseInt(colorVals.priority) > latestPrio) {
+                    node.data.nfcolor = colorVals.color
+                    latestPrio = parseInt(colorVals.priority)
+                }
+            }
+    }
     }
     if (node.data.ntype === "User") {
         node.data.nfcolor = nfcolor_user
         node.data.ncolor = ncolor_user
         node.data.nbcolor = nbcolor_user
     }
-    for (tag of caseData.tags) {
-        if (nodeTags.includes(tag)) {
-            let colorVals = tagColorMap.get(tag)
-            if (!parseInt(colorVals.default) && parseInt(colorVals.priority) > latestPrio) {
-                node.data.nfcolor = colorVals.color
-                latestPrio = parseInt(colorVals.priority)
-            }
-        }
-    }
+
 }
 
 if (!serverSvgPath) {
@@ -2142,6 +2143,7 @@ function drawGraph(graph, rootNode) {
         loading_bar.classList.add("loaded");
     });
     cy.nodes().forEach(function (ele) {
+        try{
         ele.qtip({
             content: {
                 title: "<b>Node Details</b>",
@@ -2154,8 +2156,14 @@ function drawGraph(graph, rootNode) {
         });
         ele.on('mousedown', e => nodeMouseDown(ele))
         ele.on('mouseup', e => nodeMouseUp(ele))
+        }
+        catch(error){
+            console.log("error creating qtip");
+            console.error(error);
+        }
     });
     cy.edges().forEach(function (ele) {
+        try{
         ele.qtip({
             content: {
                 title: "<b>Details</b>",
@@ -2168,10 +2176,15 @@ function drawGraph(graph, rootNode) {
                 target: ele
             }
         });
+        ele.on('mousedown', e => edgeMouseDown(ele))
+        }
+        catch(error){
+            console.log("error creating qtip");
+            console.error(error);
+        }
         if (caseData.permanentHighlightedEdges.has(ele._private.data.id)) {
             highlightEdge(ele._private)
         }
-        ele.on('mousedown', e => edgeMouseDown(ele))
     });
 }
 
