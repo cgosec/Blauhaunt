@@ -1513,6 +1513,16 @@ function setDisplayTimeSpan(timestamplist) {
     let firstDay = new Date(dayList[0])
     let firstDay_double = new Date(dayList[0])
     let lastDay = new Date(dayList[dayList.length - 1])
+    // if the timespan is only one day we do not display the timespan
+    if (dayList.length === 1) {
+        console.log("Timespan only one day - no timespan will be displayed")
+        return
+    }
+    //if the timespan is more than 3 months we do not display the timespan
+    if (lastDay.getTime() - firstDay.getTime() > 1000 * 60 * 60 * 24 * 90) {
+        console.log("Timespan too long to display")
+        return
+    }
 
     dayList = []
     while (firstDay.getTime() <= lastDay.getTime()) {
