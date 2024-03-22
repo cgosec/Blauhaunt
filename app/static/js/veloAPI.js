@@ -122,22 +122,18 @@ function updateData(notebookID, cellID, version) {
 let dataRows = []
 
 function loadData(notebookID, cellID, version) {
-    dataRows = []
     fetch(url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=0&rows=100&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
     }).then(data => {
         data.rows.forEach(row => {
-            let jsonRow = "{"
             row = row.cell;
+            let entry = {}
             for (i = 0; i < row.length; i++) {
-                jsonRow += "\"" + data.columns[i] + "\": \"" + row[i] + "\"";
-                if (i < row.length - 1) {
-                    jsonRow += ", ";
-                }
+                entry[data.columns[i]] = row[i];
             }
-            jsonRow += "}";
+            dataRows.push(JSON.stringify(entry));
             dataRows.push(jsonRow);
         });
         processJSONUpload(dataRows.join("\n"));
