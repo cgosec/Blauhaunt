@@ -134,9 +134,12 @@ function loadData(notebookID, cellID, version) {
                 entry[data.columns[i]] = row[i];
             }
             dataRows.push(JSON.stringify(entry));
-            dataRows.push(jsonRow);
         });
-        processJSONUpload(dataRows.join("\n"));
+        // show loading spinner
+        document.getElementById("loading").style.display = "block";
+        processJSONUpload(dataRows.join("\n")).then(() => {
+            document.getElementById("loading").style.display = "none";
+        });
     });
 }
 
