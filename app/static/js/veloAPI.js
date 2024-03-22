@@ -140,7 +140,7 @@ function loadData(notebookID, cellID, version) {
             jsonRow += "}";
             dataRows.push(jsonRow);
         });
-        parseDataFromJSON(dataRows.join("\n"));
+        processJSONUpload(dataRows.join("\n"));
     });
 }
 
