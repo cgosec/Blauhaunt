@@ -1,10 +1,11 @@
-let notebooks = []
 let artifactName = "Custom.Windows.EventLogs.Blauhaunt"
 let url = window.location.origin
 let header = {}
 checkForVelociraptor()
 
 function selectionModal(title, selectionList) {
+    // remove duplicates from selectionList
+    selectionList = [...new Set(selectionList)]
     let modal = new Promise((resolve, reject) => {
         // create modal
         let modal = document.createElement("div");
@@ -43,13 +44,16 @@ function selectionModal(title, selectionList) {
 }
 
 function getNotebook(huntID) {
+    let notebooks = []
     fetch(url + '/api/v1/GetHunt?hunt_id=' + huntID, {headers: header}).then(response => {
         return response.json()
     }).then(data => {
         let artifacts = data.artifacts;
+        let notebookID = ""
         artifacts.forEach(artifact => {
+            notebookID = "N." + huntID
             if (artifact === artifactName) {
-                notebooks.push("N." + huntID);
+                notebooks.push(notebookID);
             }
         });
         // if there are more notebooks wit the artifact name, show a modal to select the notebook to use
@@ -61,7 +65,7 @@ function getNotebook(huntID) {
                 getCells(selectedNotebook);
             });
         } else {
-            getCells(huntID);
+            getCells(notebookID);
         }
     });
 }
@@ -87,7 +91,7 @@ function getCells(notebookID) {
                 if (selectedCell === null) {
                     return;
                 }
-                updateData(notebookID, cellIDs[selectedCell].cell_id, cellIDs[selectedCell].version);
+                loadData(notebookID, cellIDs[selectedCell].cell_id, cellIDs[selectedCell].version);
             });
         }
         cells.forEach(cell => {
@@ -118,6 +122,7 @@ function updateData(notebookID, cellID, version) {
 let dataRows = []
 
 function loadData(notebookID, cellID, version) {
+    dataRows = []
     fetch(url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=0&rows=100&sort_direction=false`,
         {headers: header}
     ).then(response => {
@@ -127,7 +132,6 @@ function loadData(notebookID, cellID, version) {
             let jsonRow = "{"
             row = row.cell;
             for (i = 0; i < row.length; i++) {
-                console.log(data.columns[i] + ": " + row[i]);
                 jsonRow += "\"" + data.columns[i] + "\": \"" + row[i] + "\"";
                 if (i < row.length - 1) {
                     jsonRow += ", ";
@@ -136,6 +140,7 @@ function loadData(notebookID, cellID, version) {
             jsonRow += "}";
             dataRows.push(jsonRow);
         });
+        parseDataFromJSON(dataRows.join("\n"));
     });
 }
 
