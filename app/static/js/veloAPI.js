@@ -131,6 +131,10 @@ function loadData(notebookID, cellID, version) {
             row = row.cell;
             let entry = {}
             for (i = 0; i < row.length; i++) {
+                if (data.columns[i] === "LogonTimes") {
+                    entry[data.columns[i]] = JSON.parse(row[i]);
+                    continue;
+                }
                 entry[data.columns[i]] = row[i];
             }
             dataRows.push(JSON.stringify(entry));
