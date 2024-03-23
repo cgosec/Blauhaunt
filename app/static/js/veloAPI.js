@@ -113,7 +113,8 @@ function updateData(notebookID, cellID, version, csrf_token) {
             "notebook_id": notebookID,
             "cell_id": cellID,
             "env": [{"key": "ArtifactName", "value": artifactName}],
-            "input": "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n"
+            "input": "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n",
+            "type": "vql"
         })
     }).then(response => {
         return response.json()
@@ -175,7 +176,8 @@ function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
             "notebook_id": clientInfoNotebook,
             "cell_id": cellID,
             "env": [{"key": "ArtifactName", "value": artifactName}],
-            "input": "SELECT * FROM clients()\n"
+            "input": "SELECT * FROM clients()\n",
+            "type": "vql"
         })
     }).then(response => {
         return response.json()
