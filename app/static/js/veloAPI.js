@@ -200,7 +200,13 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
             row = row.cell;
             let entry = {}
             for (i = 0; i < row.length; i++) {
-                entry[data.columns[i]] = row[i];
+                let value = null
+                try {
+                    value = JSON.parse(row[i]);
+                } catch (e) {
+                    value = row[i];
+                }
+                entry[data.columns[i]] = value;
             }
             clientRows.push(JSON.stringify(entry));
             console.log(entry)
