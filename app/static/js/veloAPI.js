@@ -256,7 +256,7 @@ function getFromMonitoringArtifact() {
     console.log("checking for monitoring artifact data...")
     // iterate over notebooks to find the one with the monitoring artifact
     caseData.clientIDs.forEach(clientID => {
-        let notebookID = notebook.notebook_id + "-" + clientID;
+        let notebookID = notebookIDStart + "-" + clientID;
         console.debug("checking for monitoring artifact in: " + notebookID)
         fetch(url + "/api/v1/GetNotebooks?notebook_id=" + notebookID, {
             headers: header,
