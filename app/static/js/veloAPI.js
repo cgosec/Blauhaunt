@@ -343,7 +343,7 @@ function checkForVelociraptor() {
         header = {"Grpc-Metadata-Orgid": orgID}
         // hide the Upload button
         let replaceBtn = document.getElementById("dataBtnWrapper");
-        changeBtn(replaceBtn, "Load Hunt", orgID);
+        changeBtn(replaceBtn, "Load " + orgID, orgID);
         loadDataFromDB(orgID)
         document.getElementById("casesBtnGrp").style.display = "none";
         getClientInfoFromVelo();
