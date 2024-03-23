@@ -36,7 +36,7 @@ let tagColorMap = new Map()  // holds the color for each tag
 let userStatistics = {}  // used for the stats
 let systemStatisics = {}  // used for the stats
 
-let bad_ips = ["LOCAL", '-', "127.0.0.1", "::1"]  // for filtering in Event processing
+let localIPs = ["LOCAL", "127.0.0.1", "::1"]  // for filtering in Event processing
 let bad_hostnames = ["-"]  // for filtering in Event processing
 let objects = []  // here all the single objects will be in from the processed lines of the event file
 let rank = true // rank is a needed indication for the custom sorting algorithm for the nodes
@@ -2654,7 +2654,9 @@ async function createNodesAndEdges(objects) {
             console.error(data)
             continue
         }
-        let ipAddress = bad_ips.includes(data.SourceIP) ? null : data.SourceIP.trim()
+        let ipAddress = localIPs.includes(data.SourceIP) ? data.Destination : data.SourceIP.trim()
+        if (bad_hostnames.includes(ipAddress))
+            ipAddress = null
         let source = ""
         let hostname = !data.SourceHostname || bad_hostnames.includes(data.SourceHostname) ? ipAddress : data.SourceHostname
         let user = data.UserName.toUpperCase()
