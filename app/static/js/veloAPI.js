@@ -267,6 +267,8 @@ function getFromMonitoringArtifact() {
         }).then(response => {
             return response.json()
         }).then(data => {
+            console.debug("monitoring data for clientID: " + clientID)
+            console.debug(data)
             if (data.rows === undefined) {
                 return;
             }
@@ -275,8 +277,10 @@ function getFromMonitoringArtifact() {
             let monitoringData = []
             let maxUpdatedTime = 0;
             rows.forEach(row => {
-                if (row.cell[serverTimeIndex] > maxUpdatedTime) {
+                console.debug(`row time: ${row.cell[serverTimeIndex]}, lastUpdatedTime: ${latestUpdate}`)
+                if (row.cell[serverTimeIndex] > lastUpdatedTime) {
                     if (row.cell[serverTimeIndex] > maxUpdatedTime) {
+                        console.debug("updating maxUpdatedTime to" + row.cell[serverTimeIndex])
                         maxUpdatedTime = row.cell[serverTimeIndex];
                     }
                     let entry = {}
@@ -301,6 +305,7 @@ function getFromMonitoringArtifact() {
             });
             caseData.clientMonitoringLatestUpdate[clientID] = maxUpdatedTime;
             if (monitoringData.length > 0) {
+                console.debug("monitoring data for clientID: " + clientID + " is being processed with " + monitoringData.length + " entries")
                 processJSONUpload(monitoringData.join("\n")).then(() => {
                     console.log("monitoring data processed");
                     storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
