@@ -273,22 +273,22 @@ function getFromMonitoringArtifact() {
             let maxUpdatedTime = 0;
             rows.forEach(row => {
                 if (row.cell[serverTimeIndex] > maxUpdatedTime) {
-                    maxUpdatedTime = cell[serverTimeIndex];
+                    if (row.cell[serverTimeIndex] > maxUpdatedTime) {
+                        maxUpdatedTime = row.cell[serverTimeIndex];
+                    }
                     let entry = {}
                     row.cell.forEach((cell, i) => {
-                        if (cell[serverTimeIndex] > latestUpdate) {
-                            try {
-                                cell = JSON.parse(cell);
-                            } catch (e) {
-                            }
-                            if (data.columns[i] === "LogonTimes") {
-                                // if the column is LogonTimes is not an array, make it one
-                                if (!Array.isArray(cell)) {
-                                    cell = [cell];
-                                }
-                            }
-                            entry[data.columns[i]] = cell;
+                        try {
+                            cell = JSON.parse(cell);
+                        } catch (e) {
                         }
+                        if (data.columns[i] === "LogonTimes") {
+                            // if the column is LogonTimes is not an array, make it one
+                            if (!Array.isArray(cell)) {
+                                cell = [cell];
+                            }
+                        }
+                        entry[data.columns[i]] = cell;
                     });
                     if (entry) {
                         console.debug(entry)
