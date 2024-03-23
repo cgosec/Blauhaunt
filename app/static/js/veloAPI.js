@@ -318,10 +318,15 @@ function getFromMonitoringArtifact() {
 }
 
 function changeBtn(replaceBtn, text, ordID) {
-    replaceBtn.innerHTML = text;
-    replaceBtn.addEventListener("click", function () {
+    let newBtn = document.createElement("button");
+    // get child btn from replaceBtn and copy the classes to the new btn
+    newBtn.className = replaceBtn.firstChild.className;
+    replaceBtn.innerHTML = ""
+    newBtn.innerText = text;
+    newBtn.addEventListener("click", function () {
         getHunts(ordID);
     });
+    replaceBtn.appendChild(newBtn)
 }
 
 function loadDataFromDB(orgID) {
@@ -336,7 +341,7 @@ function checkForVelociraptor() {
         let orgID = data.interface_traits.org;
         header = {"Grpc-Metadata-Orgid": orgID}
         // hide the Upload button
-        let replaceBtn = document.getElementById("uploadModalBtn");
+        let replaceBtn = document.getElementById("dataBtnWrapper");
         changeBtn(replaceBtn, "Load Hunt", orgID);
         loadDataFromDB(orgID)
         document.getElementById("casesBtnGrp").style.display = "none";

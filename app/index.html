@@ -60,10 +60,12 @@
                                           style="width: 80px"></a>
     <div class="collapse navbar-collapse">
         <form class="navbar-nav me-auto" role="search">
-            <button class="btn btn-secondary me-2 mt-2 h-25" data-bs-target="#UploadEVTX" data-bs-toggle="modal"
-                    type="button" id="uploadModalBtn">
-                Upload Files
-            </button>
+            <div id="dataBtnWrapper">
+                <button class="btn btn-secondary me-2 mt-2 h-25" data-bs-target="#UploadEVTX" data-bs-toggle="modal"
+                        type="button" id="uploadModalBtn">
+                    Upload Files
+                </button>
+            </div>
             <div class="btn-group ms-1 me-2 mt-2 h-25" id="casesBtnGrp">
                 <button class="btn btn-outline-secondary" type="button">Cases</button>
                 <button aria-expanded="false" aria-haspopup="true"
@@ -272,7 +274,8 @@
                    This works also for hover elements - simply click on the element that highlights edges while holding
                    CTRL to have them highlighted permanently">
                 <input class="btn-check " id="highlightedEdgesOnly" type="checkbox">
-                <label class="btn btn-outline-secondary" for="highlightedEdgesOnly">Only Show highlighted connections</label>
+                <label class="btn btn-outline-secondary" for="highlightedEdgesOnly">Only Show highlighted
+                    connections</label>
             </label>
             <hr>
             <div class="row">
