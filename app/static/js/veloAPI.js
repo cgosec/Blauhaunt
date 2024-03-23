@@ -121,8 +121,8 @@ function updateData(notebookID, cellID, version) {
 
 let dataRows = []
 
-function loadData(notebookID, cellID, version) {
-    fetch(url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=0&rows=100&sort_direction=false`,
+function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
+    fetch(url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
@@ -144,6 +144,10 @@ function loadData(notebookID, cellID, version) {
         processJSONUpload(dataRows.join("\n")).then(() => {
             document.getElementById("loading").style.display = "none";
         });
+        // if there are more rows, load them
+        if (data.total_rows > toRow) {
+            loadData(notebookID, cellID, version, startRow + toRow, toRow + 1000);
+        }
     });
 }
 
@@ -160,6 +164,58 @@ function getHunts(orgID) {
 }
 
 
+function getClientInfoFromVelo() {
+    fetch(url + '/api/v1/GetNotebooks?count=1000&offset=0', {headers: header}).then(response => {
+        return response.json()
+    }).then(data => {
+        let notebooks = data.items;
+        let clientInfoNotebook = ""
+        notebooks.forEach(notebook => {
+            let notebookID = notebook.notebook_id;
+            notebook.cell_metadata.forEach(metadata => {
+                let cellID = metadata.cell_id;
+                fetch(url + `/api/v1/GetCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+                    return response.json()
+                }).then(data => {
+                    let query = data.input;
+                    if (query.trim() === 'SELECT * FROM clients()') {
+                        clientInfoNotebook = notebookID
+                        let version = metadata.timestamp
+                        loadFromClientInfoCell(clientInfoNotebook, cellID, version);
+                    }
+                });
+            });
+        });
+    });
+}
+
+function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow = 1000) {
+    fetch(url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
+        {headers: header}
+    ).then(response => {
+        return response.json()
+    }).then(data => {
+        let clientRows = []
+        data.rows.forEach(row => {
+            row = row.cell;
+            let entry = {}
+            for (i = 0; i < row.length; i++) {
+                entry[data.columns[i]] = row[i];
+            }
+            clientRows.push(JSON.stringify(entry));
+            console.log(entry)
+        });
+        // show loading spinner
+        loadClientInfo(clientRows.join("\n"))
+        // if there are more rows, load them
+        if (data.total_rows > toRow) {
+            loadFromClientInfoCell(notebookID, cellID, version, startRow + toRow, toRow + 1000);
+        }
+    });
+
+}
+
+
 function checkForVelociraptor() {
     fetch(url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
         return response.json()
@@ -169,6 +225,7 @@ function checkForVelociraptor() {
         // hide the Upload button
         document.getElementById("uploadBtn").style.display = "none";
         document.getElementById("casesBtnGrp").style.display = "none";
+        getClientInfoFromVelo();
         getHunts(orgID);
     }).catch(error => {
         console.log("seems to be not connected to Velociraptor.");
