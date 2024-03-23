@@ -1,7 +1,10 @@
 let artifactName = "Custom.Windows.EventLogs.Blauhaunt"
+let monitoringArtifact = "Custom.Windows.EventMonitoring.Blauhaunt"
 let url = window.location.origin
 let header = {}
 checkForVelociraptor()
+// check every 30 seconds for monitoring data
+setInterval(getFromMonitoringArtifact, 30000)
 
 function selectionModal(title, selectionList) {
     // remove duplicates from selectionList
@@ -119,6 +122,7 @@ function updateData(notebookID, cellID, version, csrf_token) {
     }).then(response => {
         return response.json()
     }).then(data => {
+
         loadData(notebookID, cellID, version);
     });
 }
@@ -152,6 +156,7 @@ function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
         if (data.total_rows > toRow) {
             loadData(notebookID, cellID, version, startRow + toRow, toRow + 1000);
         }
+        storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
     });
 }
 
@@ -242,6 +247,32 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
         }
     });
 
+}
+
+
+function getFromMonitoringArtifact() {
+    let notebookIDStart = "N.E." + monitoringArtifact
+    // iterate over notebooks to find the one with the monitoring artifact
+    fetch(url + '/api/v1/GetNotebooks?count=1000&offset=0', {headers: header}).then(response => {
+        return response.json()
+    }).then(data => {
+        let notebooks = data.items;
+        notebooks.forEach(notebook => {
+            let notebookID = notebook.notebook_id;
+            if (notebookID.startsWith(notebookIDStart)) {
+                let cellID = notebook.cell_metadata[0].cell_id;
+                let version = notebook.cell_metadata[0].timestamp;
+                fetch(url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+                    return response.json()
+                }).then(data => {
+                    let query = data.input;
+                    if (query.trim().toLowerCase() === 'select * from monitoring()') {
+                        loadData(notebookID, cellID, version);
+                    }
+                });
+            }
+        });
+    });
 }
 
 function checkForVelociraptor() {
