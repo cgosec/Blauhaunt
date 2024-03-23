@@ -278,7 +278,7 @@ function getFromMonitoringArtifact() {
             let maxUpdatedTime = 0;
             rows.forEach(row => {
                 console.debug(`row time: ${row.cell[serverTimeIndex]}, lastUpdatedTime: ${latestUpdate}`)
-                if (row.cell[serverTimeIndex] > lastUpdatedTime) {
+                if (row.cell[serverTimeIndex] > latestUpdate) {
                     if (row.cell[serverTimeIndex] > maxUpdatedTime) {
                         console.debug("updating maxUpdatedTime to" + row.cell[serverTimeIndex])
                         maxUpdatedTime = row.cell[serverTimeIndex];
