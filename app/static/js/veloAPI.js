@@ -174,7 +174,7 @@ function getClientInfoFromVelo() {
             let notebookID = notebook.notebook_id;
             notebook.cell_metadata.forEach(metadata => {
                 let cellID = metadata.cell_id;
-                fetch(url + `/api/v1/GetCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+                fetch(url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
                     return response.json()
                 }).then(data => {
                     let query = data.input;
