@@ -175,7 +175,7 @@ function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
             "notebook_id": clientInfoNotebook,
             "cell_id": cellID,
             "env": [{"key": "ArtifactName", "value": artifactName}],
-            "input": "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n"
+            "input": "SELECT * FROM clients()\n"
         })
     }).then(response => {
         return response.json()
@@ -199,7 +199,7 @@ function getClientInfoFromVelo() {
                     return response.json()
                 }).then(data => {
                     let query = data.input;
-                    if (query.trim() === 'SELECT * FROM clients()') {
+                    if (query.trim().toLowerCase() === 'select * from clients()') {
                         clientInfoNotebook = notebookID
                         let version = metadata.timestamp
                         updateClientInfoData(clientInfoNotebook, cellID, version, localStorage.getItem('csrf-token'));
