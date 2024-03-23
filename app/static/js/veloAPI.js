@@ -3,8 +3,6 @@ let monitoringArtifact = "Custom.Windows.EventMonitoring.Blauhaunt"
 let url = window.location.origin
 let header = {}
 checkForVelociraptor()
-// check every 30 seconds for monitoring data
-setInterval(getFromMonitoringArtifact, 30000)
 
 function selectionModal(title, selectionList) {
     // remove duplicates from selectionList
@@ -252,6 +250,7 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
 
 function getFromMonitoringArtifact() {
     let notebookIDStart = "N.E." + monitoringArtifact
+    console.log("checking for monitoring artifact data...")
     // iterate over notebooks to find the one with the monitoring artifact
     fetch(url + '/api/v1/GetNotebooks?count=1000&offset=0', {headers: header}).then(response => {
         return response.json()
@@ -286,6 +285,8 @@ function checkForVelociraptor() {
         document.getElementById("casesBtnGrp").style.display = "none";
         getClientInfoFromVelo();
         getHunts(orgID);
+// check every 30 seconds for monitoring data
+        setInterval(getFromMonitoringArtifact, 30000)
     }).catch(error => {
         console.log("seems to be not connected to Velociraptor.");
     });
