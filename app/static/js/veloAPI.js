@@ -221,6 +221,7 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
     ).then(response => {
         return response.json()
     }).then(data => {
+        clientIDs = []
         let clientRows = []
         data.rows.forEach(row => {
             row = row.cell;
@@ -235,10 +236,12 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
                 entry[data.columns[i]] = value;
             }
             clientRows.push(JSON.stringify(entry));
-            console.log(entry)
+            console.debug(entry)
+            clientIDs.push(entry["client_id"]);
         });
         // show loading spinner
         loadClientInfo(clientRows.join("\n"))
+        caseData.clientIDs = clientIDs;
         // if there are more rows, load them
         if (data.total_rows > toRow) {
             loadFromClientInfoCell(notebookID, cellID, version, startRow + toRow, toRow + 1000);
@@ -252,26 +255,29 @@ function getFromMonitoringArtifact() {
     let notebookIDStart = "N.E." + monitoringArtifact
     console.log("checking for monitoring artifact data...")
     // iterate over notebooks to find the one with the monitoring artifact
-    fetch(url + '/api/v1/GetNotebooks?count=1000&offset=0', {headers: header}).then(response => {
-        return response.json()
-    }).then(data => {
-        let notebooks = data.items;
-        notebooks.forEach(notebook => {
-            let notebookID = notebook.notebook_id;
-            console.debug("checking for monitoring artifact in: " + notebookID)
-            if (notebookID.startsWith(notebookIDStart)) {
-                console.log("found monitoring artifact in notebook: " + notebookID + "...")
-                let cellID = notebook.cell_metadata[0].cell_id;
-                let version = notebook.cell_metadata[0].timestamp;
-                fetch(url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
-                    return response.json()
-                }).then(data => {
-                    let query = data.input;
-                    if (query.trim().toLowerCase() === 'select * from monitoring()') {
-                        loadData(notebookID, cellID, version);
-                    }
+    caseData.clientIDs.forEach(clientID => {
+        let notebookID = notebook.notebook_id + "-" + clientID;
+        console.debug("checking for monitoring artifact in: " + notebookID)
+        fetch(url + "/api/v1/GetNotebooks?notebook_id=" + notebookID, {
+            headers: header,
+        }).then(response => {
+            return response.json()
+        }).then(data => {
+            data.items.forEach(notebook => {
+                notebook.cell_metadata.forEach(metadata => {
+                    console.log("found monitoring artifact in notebook: " + notebookID + "...")
+                    let cellID = metadata.cell_id;
+                    let version = metadata.timestamp;
+                    fetch(url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+                        return response.json()
+                    }).then(data => {
+                        let query = data.input;
+                        if (query.trim().toLowerCase() === 'select * from monitoring()') {
+                            loadData(notebookID, cellID, version);
+                        }
+                    });
                 });
-            }
+            });
         });
     });
 }
