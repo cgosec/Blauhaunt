@@ -258,6 +258,7 @@ function getFromMonitoringArtifact() {
         let notebooks = data.items;
         notebooks.forEach(notebook => {
             let notebookID = notebook.notebook_id;
+            console.debug("checking for monitoring artifact in: " + notebookID)
             if (notebookID.startsWith(notebookIDStart)) {
                 console.log("found monitoring artifact in notebook: " + notebookID + "...")
                 let cellID = notebook.cell_metadata[0].cell_id;
