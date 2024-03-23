@@ -272,29 +272,28 @@ function getFromMonitoringArtifact() {
             let monitoringData = []
             let maxUpdatedTime = 0;
             rows.forEach(row => {
-                let entry = null
-                row.cell.forEach((cell, i) => {
-                    if (cell[serverTimeIndex] > latestUpdate) {
-                        entry = {}
-                        if (cell[serverTimeIndex] > maxUpdatedTime) {
-                            maxUpdatedTime = cell[serverTimeIndex];
-                        }
-                        try {
-                            cell = JSON.parse(cell);
-                        } catch (e) {
-                        }
-                        if (data.columns[i] === "LogonTimes") {
-                            // if the column is LogonTimes is not an array, make it one
-                            if (!Array.isArray(cell)) {
-                                cell = [cell];
+                if (row.cell[serverTimeIndex] > maxUpdatedTime) {
+                    maxUpdatedTime = cell[serverTimeIndex];
+                    let entry = {}
+                    row.cell.forEach((cell, i) => {
+                        if (cell[serverTimeIndex] > latestUpdate) {
+                            try {
+                                cell = JSON.parse(cell);
+                            } catch (e) {
                             }
+                            if (data.columns[i] === "LogonTimes") {
+                                // if the column is LogonTimes is not an array, make it one
+                                if (!Array.isArray(cell)) {
+                                    cell = [cell];
+                                }
+                            }
+                            entry[data.columns[i]] = cell;
                         }
-                        entry[data.columns[i]] = cell;
+                    });
+                    if (entry) {
+                        console.debug(entry)
+                        monitoringData.push(JSON.stringify(entry));
                     }
-                });
-                if (entry) {
-                    console.debug(entry)
-                    monitoringData.push(JSON.stringify(entry));
                 }
             });
             caseData.clientMonitoringLatestUpdate[clientID] = maxUpdatedTime;
