@@ -317,6 +317,22 @@ function getFromMonitoringArtifact() {
     });
 }
 
+function changeBtn(replaceBtn, text, ordID) {
+    replaceBtn.innerHTML = text;
+    replaceBtn.addEventListener("click", function () {
+        getHunts(ordID);
+    });
+}
+
+function successLoadCallback() {
+    changeBtn(document.getElementById("uploadModalBtn"), "Update Hunt", header["Grpc-Metadata-Orgid"]);
+}
+
+function loadDataFromDB(orgID) {
+    // check if casedata with orgID is already in indexedDB
+    retrieveDataFromIndexDB(orgID, successLoadCallback);
+}
+
 function checkForVelociraptor() {
     fetch(url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
         return response.json()
@@ -324,7 +340,9 @@ function checkForVelociraptor() {
         let orgID = data.interface_traits.org;
         header = {"Grpc-Metadata-Orgid": orgID}
         // hide the Upload button
-        document.getElementById("uploadBtn").style.display = "none";
+        let replaceBtn = document.getElementById("uploadModalBtn");
+        changeBtn(replaceBtn, "Load Hunt", orgID);
+        loadDataFromDB()
         document.getElementById("casesBtnGrp").style.display = "none";
         getClientInfoFromVelo();
         getHunts(orgID);
