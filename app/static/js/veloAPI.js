@@ -271,6 +271,12 @@ function getFromMonitoringArtifact() {
                         cell = JSON.parse(cell);
                     } catch (e) {
                     }
+                    if (data.columns[i] === "LogonTimes") {
+                        // if the column is LogonTimes is not an array, make it one
+                        if (!Array.isArray(cell)) {
+                            cell = [cell];
+                        }
+                    }
                     entry[data.columns[i]] = cell;
                 });
                 console.debug(entry)
