@@ -267,6 +267,9 @@ function getFromMonitoringArtifact() {
         }).then(response => {
             return response.json()
         }).then(data => {
+            if (data.rows === undefined) {
+                return;
+            }
             let rows = data.rows;
             let serverTimeIndex = data.columns.indexOf("_ts");
             let monitoringData = []
@@ -317,8 +320,9 @@ function checkForVelociraptor() {
         document.getElementById("uploadBtn").style.display = "none";
         document.getElementById("casesBtnGrp").style.display = "none";
         getClientInfoFromVelo();
-        getHunts(orgID);
+        //getHunts(orgID);
 // check every 30 seconds for monitoring data
+        getFromMonitoringArtifact()
         setInterval(getFromMonitoringArtifact, 30000)
     }).catch(error => {
         console.log("seems to be not connected to Velociraptor.");
