@@ -172,7 +172,7 @@ function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
         method: 'POST',
         headers: header,
         body: JSON.stringify({
-            "notebook_id": notebookID,
+            "notebook_id": clientInfoNotebook,
             "cell_id": cellID,
             "env": [{"key": "ArtifactName", "value": artifactName}],
             "input": "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n"
