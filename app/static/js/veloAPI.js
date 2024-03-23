@@ -256,28 +256,27 @@ function getFromMonitoringArtifact() {
     console.log("checking for monitoring artifact data...")
     // iterate over notebooks to find the one with the monitoring artifact
     caseData.clientIDs.forEach(clientID => {
-        let notebookID = notebookIDStart + "-" + clientID;
-        console.debug("checking for monitoring artifact in: " + notebookID)
-        fetch(url + "/api/v1/GetNotebooks?notebook_id=" + notebookID, {
-            headers: header,
+        console.debug("checking monitoring artifact for clientID: " + clientID)
+        fetch(`url + /api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=0000000000&end_time=9999999999&rows=10000`, {
+            headers: header
         }).then(response => {
             return response.json()
         }).then(data => {
-            data.items.forEach(notebook => {
-                notebook.cell_metadata.forEach(metadata => {
-                    console.log("found monitoring artifact in notebook: " + notebookID + "...")
-                    let cellID = metadata.cell_id;
-                    let version = metadata.timestamp;
-                    fetch(url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
-                        return response.json()
-                    }).then(data => {
-                        let query = data.input;
-                        if (query.trim().toLowerCase() === 'select * from monitoring()') {
-                            loadData(notebookID, cellID, version);
-                        }
-                    });
+            let rows = data.rows;
+            let monitoringData = []
+            rows.forEach(row => {
+                let entry = {}
+                row.cell.forEach((cell, i) => {
+                    try {
+                        cell = JSON.parse(cell);
+                    } catch (e) {
+                    }
+                    entry[data.columns[i]] = cell;
                 });
+                console.debug(entry)
+                monitoringData.push(JSON.stringify(entry));
             });
+            processJSONUpload(monitoringData.join("\n"));
         });
     });
 }
