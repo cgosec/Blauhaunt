@@ -298,10 +298,12 @@ function getFromMonitoringArtifact() {
                 }
             });
             caseData.clientMonitoringLatestUpdate[clientID] = maxUpdatedTime;
-            processJSONUpload(monitoringData.join("\n")).then(() => {
-                console.log("monitoring data processed");
-                storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
-            });
+            if (monitoringData.length > 0) {
+                processJSONUpload(monitoringData.join("\n")).then(() => {
+                    console.log("monitoring data processed");
+                    storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
+                });
+            }
         });
     });
 }
