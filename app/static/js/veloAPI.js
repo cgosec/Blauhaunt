@@ -272,9 +272,10 @@ function getFromMonitoringArtifact() {
             let monitoringData = []
             let maxUpdatedTime = 0;
             rows.forEach(row => {
-                let entry = {}
+                let entry = null
                 row.cell.forEach((cell, i) => {
                     if (cell[serverTimeIndex] < latestUpdate) {
+                        entry = {}
                         if (cell[serverTimeIndex] > maxUpdatedTime) {
                             maxUpdatedTime = cell[serverTimeIndex];
                         }
@@ -291,10 +292,12 @@ function getFromMonitoringArtifact() {
                         entry[data.columns[i]] = cell;
                     }
                 });
-                console.debug(entry)
-                caseData.clientMonitoringLatestUpdate[clientID] = maxUpdatedTime;
-                monitoringData.push(JSON.stringify(entry));
+                if (entry) {
+                    console.debug(entry)
+                    monitoringData.push(JSON.stringify(entry));
+                }
             });
+            caseData.clientMonitoringLatestUpdate[clientID] = maxUpdatedTime;
             processJSONUpload(monitoringData.join("\n")).then(() => {
                 console.log("monitoring data processed");
                 storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
