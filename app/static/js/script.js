@@ -2305,20 +2305,20 @@ function createQuery() {
     let distinctionStr = document.getElementById("queryDistinction").value;
     if (setUserStr) {
         caseData.userSearchHistory.push(setUserStr)
-        filterObject.users = new RegExp(setUserStr)
+        filterObject.users = new RegExp(setUserStr, "i")
     }
     if (srcSetHostStr) {
         caseData.srcHostSearchHistory.push(srcSetHostStr)
-        filterObject.srcHosts = new RegExp(srcSetHostStr)
+        filterObject.srcHosts = new RegExp(srcSetHostStr, "i")
 
     }
     if (destSetHostStr) {
         caseData.dstHostSearchHistory.push(destSetHostStr)
-        filterObject.dstHosts = new RegExp(destSetHostStr)
+        filterObject.dstHosts = new RegExp(destSetHostStr, "i")
 
     }
     if (distinctionStr) {
-        filterObject.customDistinction = new RegExp(distinctionStr)
+        filterObject.customDistinction = new RegExp(distinctionStr, "i")
 
     }
     filter(filterObject)
