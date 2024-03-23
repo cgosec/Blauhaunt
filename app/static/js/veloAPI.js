@@ -338,10 +338,10 @@ function checkForVelociraptor() {
         // hide the Upload button
         let replaceBtn = document.getElementById("uploadModalBtn");
         changeBtn(replaceBtn, "Load Hunt", orgID);
-        loadDataFromDB()
+        loadDataFromDB(orgID)
         document.getElementById("casesBtnGrp").style.display = "none";
         getClientInfoFromVelo();
-        getHunts(orgID);
+        //getHunts(orgID);
     }).catch(error => {
         console.log("seems to be not connected to Velociraptor.");
     });
