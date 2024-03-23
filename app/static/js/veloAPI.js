@@ -259,6 +259,7 @@ function getFromMonitoringArtifact() {
         notebooks.forEach(notebook => {
             let notebookID = notebook.notebook_id;
             if (notebookID.startsWith(notebookIDStart)) {
+                console.log("found monitoring artifact in notebook: " + notebookID + "...")
                 let cellID = notebook.cell_metadata[0].cell_id;
                 let version = notebook.cell_metadata[0].timestamp;
                 fetch(url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
