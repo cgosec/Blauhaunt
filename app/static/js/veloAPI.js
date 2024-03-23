@@ -246,6 +246,8 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
         if (data.total_rows > toRow) {
             loadFromClientInfoCell(notebookID, cellID, version, startRow + toRow, toRow + 1000);
         }
+        // check every 10 seconds for monitoring data
+        setInterval(getFromMonitoringArtifact, 10000);
     });
 
 }
@@ -325,10 +327,7 @@ function checkForVelociraptor() {
         document.getElementById("uploadBtn").style.display = "none";
         document.getElementById("casesBtnGrp").style.display = "none";
         getClientInfoFromVelo();
-        //getHunts(orgID);
-// check every 30 seconds for monitoring data
-        getFromMonitoringArtifact()
-        setInterval(getFromMonitoringArtifact, 30000)
+        getHunts(orgID);
     }).catch(error => {
         console.log("seems to be not connected to Velociraptor.");
     });
