@@ -255,34 +255,50 @@ function getFromMonitoringArtifact() {
     let notebookIDStart = "N.E." + monitoringArtifact
     console.log("checking for monitoring artifact data...")
     // iterate over notebooks to find the one with the monitoring artifact
+    // check if caseData has clientMonitoringLatestUpdate set
+    if (caseData.clientMonitoringLatestUpdate === undefined) {
+        caseData.clientMonitoringLatestUpdate = {}
+    }
     caseData.clientIDs.forEach(clientID => {
         console.debug("checking monitoring artifact for clientID: " + clientID)
-        fetch(url + `/api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=0000000000&end_time=9999999999&rows=10000`, {
+        let latestUpdate = caseData.clientMonitoringLatestUpdate[clientID] || 0;
+        fetch(url + `/api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=${latestUpdate}&end_time=9999999999&rows=10000`, {
             headers: header
         }).then(response => {
             return response.json()
         }).then(data => {
             let rows = data.rows;
+            let serverTimeIndex = data.columns.indexOf("_ts");
             let monitoringData = []
+            let maxUpdatedTime = 0;
             rows.forEach(row => {
                 let entry = {}
                 row.cell.forEach((cell, i) => {
-                    try {
-                        cell = JSON.parse(cell);
-                    } catch (e) {
-                    }
-                    if (data.columns[i] === "LogonTimes") {
-                        // if the column is LogonTimes is not an array, make it one
-                        if (!Array.isArray(cell)) {
-                            cell = [cell];
+                    if (cell[serverTimeIndex] < latestUpdate) {
+                        if (cell[serverTimeIndex] > maxUpdatedTime) {
+                            maxUpdatedTime = cell[serverTimeIndex];
                         }
+                        try {
+                            cell = JSON.parse(cell);
+                        } catch (e) {
+                        }
+                        if (data.columns[i] === "LogonTimes") {
+                            // if the column is LogonTimes is not an array, make it one
+                            if (!Array.isArray(cell)) {
+                                cell = [cell];
+                            }
+                        }
+                        entry[data.columns[i]] = cell;
                     }
-                    entry[data.columns[i]] = cell;
                 });
                 console.debug(entry)
+                caseData.clientMonitoringLatestUpdate[clientID] = maxUpdatedTime;
                 monitoringData.push(JSON.stringify(entry));
             });
-            processJSONUpload(monitoringData.join("\n"));
+            processJSONUpload(monitoringData.join("\n")).then(() => {
+                console.log("monitoring data processed");
+                storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
+            });
         });
     });
 }
