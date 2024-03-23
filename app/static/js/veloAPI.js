@@ -72,6 +72,8 @@ function getNotebook(huntID) {
 
 function getCells(notebookID) {
     fetch(url + `/api/v1/GetNotebooks?notebook_id=${notebookID}&include_uploads=true`, {headers: header}).then(response => {
+        // get the X-Csrf-Token form the header of the response
+        localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
         return response.json()
     }).then(data => {
         let cells = data.items;
@@ -91,18 +93,19 @@ function getCells(notebookID) {
                 if (selectedCell === null) {
                     return;
                 }
-                loadData(notebookID, cellIDs[selectedCell].cell_id, cellIDs[selectedCell].version);
+                updateData(notebookID, cellIDs[selectedCell].cell_id, cellIDs[selectedCell].version, localStorage.getItem('csrf-token'));
             });
         }
         cells.forEach(cell => {
             cell.cell_metadata.forEach(metadata => {
-                loadData(notebookID, metadata.cell_id, metadata.timestamp);
+                updateData(notebookID, metadata.cell_id, metadata.timestamp, localStorage.getItem('csrf-token'));
             });
         });
     });
 }
 
-function updateData(notebookID, cellID, version) {
+function updateData(notebookID, cellID, version, csrf_token) {
+    header["X-Csrf-Token"] = csrf_token
     fetch(url + '/api/v1/UpdateNotebookCell', {
         method: 'POST',
         headers: header,
@@ -164,8 +167,27 @@ function getHunts(orgID) {
 }
 
 
+function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
+    header["X-Csrf-Token"] = csrf_token
+    fetch(url + '/api/v1/UpdateNotebookCell', {
+        method: 'POST',
+        headers: header,
+        body: JSON.stringify({
+            "notebook_id": notebookID,
+            "cell_id": cellID,
+            "env": [{"key": "ArtifactName", "value": artifactName}],
+            "input": "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n"
+        })
+    }).then(response => {
+        return response.json()
+    }).then(data => {
+        loadFromClientInfoCell(clientInfoNotebook, cellID, version);
+    });
+}
+
 function getClientInfoFromVelo() {
     fetch(url + '/api/v1/GetNotebooks?count=1000&offset=0', {headers: header}).then(response => {
+        localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
         return response.json()
     }).then(data => {
         let notebooks = data.items;
@@ -181,7 +203,7 @@ function getClientInfoFromVelo() {
                     if (query.trim() === 'SELECT * FROM clients()') {
                         clientInfoNotebook = notebookID
                         let version = metadata.timestamp
-                        loadFromClientInfoCell(clientInfoNotebook, cellID, version);
+                        updateClientInfoData(clientInfoNotebook, cellID, version, localStorage.getItem('csrf-token'));
                     }
                 });
             });
@@ -220,7 +242,6 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
     });
 
 }
-
 
 function checkForVelociraptor() {
     fetch(url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
