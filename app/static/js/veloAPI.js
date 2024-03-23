@@ -166,7 +166,6 @@ function getHunts(orgID) {
     })
 }
 
-
 function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
     header["X-Csrf-Token"] = csrf_token
     fetch(url + '/api/v1/UpdateNotebookCell', {
