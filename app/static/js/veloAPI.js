@@ -320,10 +320,11 @@ function getFromMonitoringArtifact() {
 function changeBtn(replaceBtn, text, ordID) {
     let newBtn = document.createElement("button");
     // get child btn from replaceBtn and copy the classes to the new btn
-    newBtn.className = replaceBtn.firstChild.className;
+    newBtn.className = replaceBtn.children[0].className;
     replaceBtn.innerHTML = ""
     newBtn.innerText = text;
-    newBtn.addEventListener("click", function () {
+    newBtn.addEventListener("click", evt => {
+        evt.preventDefault()
         getHunts(ordID);
     });
     replaceBtn.appendChild(newBtn)
