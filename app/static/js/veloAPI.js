@@ -257,7 +257,7 @@ function getFromMonitoringArtifact() {
     // iterate over notebooks to find the one with the monitoring artifact
     caseData.clientIDs.forEach(clientID => {
         console.debug("checking monitoring artifact for clientID: " + clientID)
-        fetch(url + ` /api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=0000000000&end_time=9999999999&rows=10000`, {
+        fetch(url + ` /api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=1000000000&end_time=2000000000&rows=10000`, {
             headers: header
         }).then(response => {
             return response.json()
