@@ -1,4 +1,4 @@
-name: Custom.Windows.Events.Blauhaunt_Dev
+name: Custom.Windows.Events.Blauhaunt
 description: |
         Blauhaunt Monitoring Artifact
 author: cgo SEC Consult
@@ -6,82 +6,254 @@ author: cgo SEC Consult
 type: CLIENT_EVENT
 
 parameters:
-  - name: eventLog
-    description: Path to the Security.evtx file.
-    default: C:\Windows\System32\winevt\Logs\Security.evtx
   - name: LogonTypeRegex
     description: Specify LogonTypes to monitor
     type: json_array
     default: '[1,2,3,4,5,6,7,8,9,9,10,11,12]'
+  - name: Security
+    description: path to Security event log.
+    default: '%SystemRoot%\System32\Winevt\Logs\Security.evtx'
+  #- name: System
+   # description: path to System event log.
+   # default: '%SystemRoot%\System32\Winevt\Logs\System.evtx'
+  - name: LocalSessionManager
+    description: path to TerminalServices-LocalSessionManager operational event log.
+    default: '%SystemRoot%\System32\Winevt\Logs\Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx'
+  - name: RemoteConnectionManager
+    description: path to TerminalServices-RemoteConnectionManager operational event log.
+    default: '%SystemRoot%\System32\Winevt\Logs\Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational.evtx'
+  - name: RDPClientOperational
+    description: path to TerminalServices-ClientActiveXCore RDPClient%4Operational event log.
+    default: '%SystemRoot%\System32\Winevt\Logs\Microsoft-Windows-TerminalServices-RDPClient%4Operational.evtx'
+  - name: SourceIPRegex
+    default: .*
+    type: regex
+  - name: UserNameRegex
+    default: .*
+    type: regex
+  - name: UserNameWhitelist
+    default: '^DWM-|^UMFD-|\$$'
+    type: regex
+
 
 sources:
   - precondition:
       SELECT OS From info() where OS = 'windows'
     query: |
-        LET files = SELECT * FROM glob(globs=eventLog)
-        LET logon = SELECT timestamp(epoch=System.TimeCreated.SystemTime) As LogonTimes,
-            System.EventID.Value as EventID,
-            System.Computer as Destination,
-            EventData.TargetUserName as UserName,
-            EventData.LogonType as LogonType,
-            EventData.IpAddress as SourceIP,
-            EventData.WorkstationName as SourceHostname
-        
-              FROM foreach(
-                row=files,
-                async=TRUE,
-                query={
-                  SELECT *
-                  FROM watch_evtx(filename=OSPath)
-                  WHERE System.EventID.Value in (4624, 4625)
-                      AND EventData.LogonType in LogonTypeRegex
-              })
-        
-        LET explicit =  SELECT timestamp(epoch=System.TimeCreated.SystemTime) As LogonTimes,
-                System.EventID.Value as EventID,
-                System.Computer as Destination,
-                EventData.TargetUserName as UserName,
-                EventData.LogonType as LogonType,
-                EventData.IpAddress as SourceIP,
-                EventData.WorkstationName as SourceHostname
-        
-              FROM foreach(
-                row=files,
-                async=TRUE,
-                query={
-                  SELECT *
-                  FROM watch_evtx(filename=OSPath)
-                  WHERE System.EventID.Value = 4648
-              })
-        
-        LET results = SELECT * FROM chain(
-        	a=logon,
-        	b=explicit)
+        LET fspaths <= SELECT OSPath
+        FROM glob(globs=[
+          expand(path=Security),
+          --expand(path=System),
+          expand(path=LocalSessionManager),
+          expand(path=RemoteConnectionManager),
+          expand(path=RDPClientOperational)])
+        LET process_security_events(path) = SELECT
+        timestamp(epoch=int(int=System.TimeCreated.SystemTime)) AS EventTime,
+        System.EventID.Value as EventID,
+        if(
+           condition=EventData.LogonType,
+           then=EventData.LogonType,
+           else="") as LogonType,
+        if(
+           condition=System.EventID.Value = 4624,
+           then=if(
+             condition=EventData.ElevatedToken="%%1843",
+             then="ELEVATED: YES",
+             else="ELEVATED: NO"),
+           else=if(
+             condition=System.EventID.Value = 4776,
+             then=if(
+                condition=EventData.Status= 0,
+                then="SUCCESS",
+                else="FAILURE: " + get(item=dict(
+                                `3221225572`='USER NAME DOES NOT EXIST',
+                                `3221225578`='WRONG PASSWORD',
+                                `3221225581`='GENERIC LOGON ERROR',
+                                `3221225583`='NOT AUTHORIZED WORKSTATION',
+                                `3221225585`='PASSWORD EXPIRED',
+                                `3221225586`='ACCOUNT DEACTIVATED BY ADMIN',
+                                `3221225875`='ACCOUNT EXPIRED',
+                                `3221226020`='PASSWORD HAS TO BE CHANGED ON NEXT LOGON',
+                                `3221226036`='ACCOUNT LOCKED',
+                                `3221226353`='NO SECRET IN LOCAL ACCOUNT STORAGE'),
+                                    member=str(str=EventData.Status))
+                ),
+             else=if(
+                  condition=System.EventID.Value = 4648,
+                  then="Process: " + EventData.ProcessName,
+                  else=if(
+                    condition=System.EventID.Value = 4778,
+                    then="",
+                    else="")
+                )
+            )
+            ) as Distinction,
+        if(
+          condition=System.EventID.Value = 4672,
+          then=EventData.SubjectUserName,
+          else=if(
+                 condition=System.EventID.Value = 4778,
+                 then=EventData.AccountName,
+                 else=EventData.TargetUserName)
+        ) as UserName,
+        if(condition=EventData.IpAddress,
+           then= EventData.IpAddress,
+           else=if(
+            condition=System.EventID.Value = 4778,
+            then=EventData.ClientAddress,
+            else="-")
+        )as SourceIP,
+                if(condition=System.EventID.Value = 4648,
+           then=System.Computer,
+           else=if(
+              condition=System.EventID.Value = 4776,
+              then=EventData.Workstation,
+              else=if(
+                condition=System.EventID.Value = 4778,
+                then=EventData.ClientName,
+                else=parse_string_with_regex(string=get(field="Message"),regex='''Workstation Name:\s(\S*)''').g1
+              )
+            )
+           ) as SourceHostname,
+        if(
+           condition=System.EventID.Value = 4648,
+           then=if(
+              condition=EventData.TargetServerName = 'localhost',
+              then=System.Computer,
+              else=EventData.TargetServerName),
+            else=if(
+                condition=System.EventID.Value = 4776,
+                then=EventData.Workstation,
+                else=System.Computer)
+        ) as Destination,
+        get(item=dict(
+            `4624`='SUCCESSFUL LOGON',
+            `4625`='FAILED LOGON',
+            `4648`='LOGON USING EXPLICIT CREDENTIALS',
+            `4672`='SPECIAL LOGON',
+            `4776`='NTLM LOGON',
+            `4778`='REMOTE SESSION RECONNECTED'),
+            member=str(str=System.EventID.Value)
+        ) as Description,
+        -- this is to avoid having a wrong SID in 4648 events:
+        if(
+          condition=System.EventID.Value=4648,
+          then="-",
+          else=get(field="Message")
+        )
+        as Message
 
-        LET package = SELECT array(a=array(a=LogonTimes)[9]) as LogonTimes, EventID, Destination, UserName, LogonType, SourceHostname, SourceIP FROM results
-        
-        LET response = 
-        SELECT * FROM http_client(
-          url='http://127.0.0.1:8082/app/blauhaunt/',
-          method='POST',
-          headers=dict(
-          `Content-Type`="multipart/form-data;boundary=83fcda3640aca670"
-          ),
-          data='test'
-          )
-          
-        
-        //LET package_zwo = 
-        SELECT * FROM 
-        if(condition=response,
-        then={
-        SELECT * FROM 
-        package
-            
-        },
-        else={
-        SELECT * FROM package
-            
-        })
-        //SELECT * FROM 
-        //package_zwo
+        FROM watch_evtx(filename=path)
+            WHERE (System.EventID.Value in (4624, 4625) AND EventData.LogonType in LogonTypeRegex)
+                      OR System.EventID.Value in (4648, 4776, 4778)
+
+        LET process_rdp_remote_connection_events(path) = SELECT
+            timestamp(epoch=int(int=System.TimeCreated.SystemTime)) AS EventTime,
+            System.EventID.Value as EventID,
+            UserData.EventXML.Param1 as UserName,
+            UserData.EventXML.Param3 as SourceIP,
+            "-" as LogonType,
+            "-" as SourceHostname,
+            "-" as Distinction,
+            "RDP User authentication succeeded" as Description,
+            System.Computer as Destination,
+            get(field="Message") as Message
+            FROM watch_evtx(filename=OSPath)
+            WHERE EventID IN (1149,)
+            AND UserName =~ UserNameRegex
+            AND NOT UserName =~ UserNameWhitelist
+            AND SourceIP =~ SourceIPRegex
+
+
+        LET process_rdp_local_session_events(path) = SELECT
+            timestamp(epoch=int(int=System.TimeCreated.SystemTime)) AS EventTime,
+            System.EventID.Value as EventID,
+            split(string=UserData.EventXML.User,sep='\\\\')[1] as UserName,
+            UserData.EventXML.Address as SourceIP,
+            "-" as LogonType,
+            "-" as SourceHostname,
+            "-" as Distinction,
+            "RDP Session Logon Succeeded" as Description,
+            System.Computer as Destination,
+            get(field="Message") as Message
+            FROM watch_evtx(filename=OSPath)
+            WHERE EventID IN (21,)
+            AND UserName =~ UserNameRegex
+            AND NOT UserName =~ UserNameWhitelist
+            AND SourceIP =~ SourceIPRegex
+
+         LET process_system_events(path) = SELECT
+            timestamp(epoch=int(int=System.TimeCreated.SystemTime)) AS EventTime,
+            System.EventID.Value as EventID,
+            EventData.TargetUserName as UserName,
+            UserData.EventXML.Address as SourceIP,
+            "-" as LogonType,
+            "-" as SourceHostname,
+            "-" as Distinction,
+            "-" as Description,
+            System.Computer as Destination
+            FROM watch_evtx(filename=OSPath)
+            WHERE EventID IN (9009,)
+            AND UserName =~ UserNameRegex
+            AND NOT UserName =~ UserNameWhitelist
+            AND SourceIP =~ SourceIPRegex
+
+
+          LET process_rdp_client_events(path) = SELECT
+            timestamp(epoch=int(int=System.TimeCreated.SystemTime)) AS EventTime,
+            System.EventID.Value as EventID,
+            System.Security.UserID as UserName,
+            UserData.EventXML.Address as SourceIP,
+            "-" as LogonType,
+            "-" as SourceIP,
+            System.Computer as SourceHostname,
+            "-" as Distinction,
+            "RDP ClientActiveX is trying to connect to the server (collected on origin system) from Microsoft-Windows-TerminalServices-RDPClient/Operational" as Description,
+            if(
+              condition=EventData.Value = "127.0.0.1",
+              then=System.Computer,
+              else=EventData.Value
+            ) as Destination,
+            EventData.Value as Destination,
+            Message as Message
+            FROM watch_evtx(filename=OSPath)
+            WHERE EventID IN (1024,)
+            AND UserName =~ UserNameRegex
+            AND NOT UserName =~ UserNameWhitelist
+            AND SourceIP =~ SourceIPRegex
+
+          LET evtxsearch(PathList) = SELECT * FROM
+            foreach(
+              row=PathList,
+              query={
+                SELECT * FROM
+                  if(
+                  condition=split(string=OSPath,sep='\\\\')[-1]=~"Security",
+                  then=process_security_events(path=OSPath),
+                  else=if(
+                    condition=split(string=OSPath,sep='\\\\')[-1]=~"Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational",
+                    then=process_rdp_local_session_events(path=OSPath),
+                    else=if(
+                      condition=split(string=OSPath,sep='\\\\')[-1]=~"Microsoft-Windows-TerminalServices-RemoteConnectionManager%4Operational",
+                      then=process_rdp_remote_connection_events(path=OSPath),
+                      else=if(
+                        condition=split(string=OSPath,sep='\\\\')[-1]=~"Microsoft-Windows-TerminalServices-RDPClient%4Operational",
+                        then=process_rdp_client_events(path=OSPath),
+                        else=if(
+                          condition=split(string=OSPath,sep='\\\\')[-1]=~"System",
+                          then=process_system_events(path=OSPath),
+                          else=scope()
+                        )
+                      )
+                    )
+                  )
+                )
+              },
+              async=true
+            )
+
+            LET search = SELECT *
+                 FROM evtxsearch(PathList={SELECT OSPath FROM fspaths})
+
+            SELECT EventTime, array(a=array(a=EventTime)[9]) as LogonTimes, Destination, UserName, parse_string_with_regex(string=Message,regex='''Security\sID:\s(.*)\s''').g1 as SID, EventID, LogonType, Description, Distinction, SourceIP, SourceHostname, "1" as LogonCount
+                FROM search
