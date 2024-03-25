@@ -1,5 +1,5 @@
 let artifactName = "Custom.Windows.EventLogs.Blauhaunt"
-let monitoringArtifact = "Custom.Windows.EventMonitoring.Blauhaunt"
+let monitoringArtifact = "Custom.Windows.Events.Blauhaunt"
 let url = window.location.origin
 let header = {}
 checkForVelociraptor()
