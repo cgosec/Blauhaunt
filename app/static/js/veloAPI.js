@@ -249,8 +249,6 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
         if (data.total_rows > toRow) {
             loadFromClientInfoCell(notebookID, cellID, version, startRow + toRow, toRow + 1000);
         }
-        // check every 10 seconds for monitoring data
-        setInterval(getFromMonitoringArtifact, 10000);
     });
 
 }
@@ -328,6 +326,7 @@ function changeBtn(replaceBtn, text, ordID) {
     newBtn.innerText = text;
     newBtn.addEventListener("click", evt => {
         evt.preventDefault()
+        getClientInfoFromVelo();
         getHunts(ordID);
     });
     replaceBtn.appendChild(newBtn)
@@ -338,6 +337,49 @@ function loadDataFromDB(orgID) {
     retrieveDataFromIndexDB(orgID);
 }
 
+function syncFromMonitoringArtifact() {
+    return setInterval(getFromMonitoringArtifact, 60000);
+}
+
+function stopMonitoringAync(id) {
+    clearInterval(id);
+}
+
+function createSyncBtn() {
+    let syncBtn = document.createElement("input");
+    /*
+    <div class="form-check form-switch ms-2">
+                        <input class="form-check-input" id="darkSwitch" type="checkbox">
+                        <label class="form-check-label" for="darkSwitch">Dark Mode</label>
+                    </div>
+     */
+    // add classes to make it a bootstrap toggle button
+    syncBtn.className = "form-check-input";
+    syncBtn.type = "checkbox";
+    syncBtn.id = "syncBtn";
+    let syncLabel = document.createElement("label");
+    syncLabel.className = "form-check-label";
+    syncLabel.innerText = "Life Data";
+    syncLabel.setAttribute("for", "syncBtn");
+    syncBtn.addEventListener("click", evt => {
+        let syncID = syncFromMonitoringArtifact();
+        evt.target.innerText = "Stop";
+        evt.target.removeEventListener("click", evt);
+        evt.target.addEventListener("click", evt => {
+            stopMonitoringAync(syncID);
+            evt.target.innerText = "Life Data";
+            evt.target.removeEventListener("click", evt);
+            evt.target.addEventListener("click", evt);
+        });
+    });
+    let wrapper = document.createElement("div");
+    wrapper.className = "form-check form-switch ms-2";
+    wrapper.appendChild(syncBtn);
+    wrapper.appendChild(syncLabel);
+    document.getElementById("casesBtnGrp").innerHTML = "";
+    document.getElementById("casesBtnGrp").appendChild(wrapper);
+
+}
 
 function checkForVelociraptor() {
     fetch(url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
@@ -349,7 +391,6 @@ function checkForVelociraptor() {
         let replaceBtn = document.getElementById("dataBtnWrapper");
         changeBtn(replaceBtn, "Load " + orgID, orgID);
         document.getElementById("casesBtnGrp").style.display = "none";
-        getClientInfoFromVelo();
         loadDataFromDB(orgID);
         //getHunts(orgID);
     }).catch(error => {
