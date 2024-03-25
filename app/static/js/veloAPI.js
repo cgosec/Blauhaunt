@@ -195,6 +195,9 @@ function getClientInfoFromVelo() {
         return response.json()
     }).then(data => {
         let notebooks = data.items;
+        if (!notebooks) {
+            return false;
+        }
         let clientInfoNotebook = ""
         notebooks.forEach(notebook => {
             let notebookID = notebook.notebook_id;
@@ -335,6 +338,7 @@ function loadDataFromDB(orgID) {
     retrieveDataFromIndexDB(orgID);
 }
 
+
 function checkForVelociraptor() {
     fetch(url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
         return response.json()
@@ -344,9 +348,9 @@ function checkForVelociraptor() {
         // hide the Upload button
         let replaceBtn = document.getElementById("dataBtnWrapper");
         changeBtn(replaceBtn, "Load " + orgID, orgID);
-        loadDataFromDB(orgID)
         document.getElementById("casesBtnGrp").style.display = "none";
         getClientInfoFromVelo();
+        loadDataFromDB(orgID);
         //getHunts(orgID);
     }).catch(error => {
         console.log("seems to be not connected to Velociraptor.");
