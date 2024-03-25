@@ -390,8 +390,8 @@ function checkForVelociraptor() {
         // hide the Upload button
         let replaceBtn = document.getElementById("dataBtnWrapper");
         changeBtn(replaceBtn, "Load " + orgID, orgID);
-        document.getElementById("casesBtnGrp").style.display = "none";
         loadDataFromDB(orgID);
+        createSyncBtn()
         //getHunts(orgID);
     }).catch(error => {
         console.log("seems to be not connected to Velociraptor.");
