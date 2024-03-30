@@ -2822,8 +2822,16 @@ function parseDataFromJSON(jsonText) {
             data = JSON.parse(line)
             objects.push(data)
         } catch (error) {
-            console.log("Error processing this line:")
-            console.log(line)
+            try {
+                line = line.replace('""','"').replace('"{', '{').replace('}"', '}')
+                data = JSON.parse(line)
+                objects.push(data)
+            }
+            catch (error){
+                console.log("Error processing this line:")
+                console.log(line)
+                console.log("trying to process data as exported by defender query...")
+            }
         }
     }
     return objects
