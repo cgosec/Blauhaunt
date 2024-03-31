@@ -292,8 +292,11 @@
                             </li>
                             <li class="nav-item">
                                 <div class="form-check form-switch ms-2">
-                                    <input class="form-check-input" id="darkSwitch" type="checkbox">
-                                    <label class="form-check-label" for="darkSwitch"></label>
+                                    <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                                           title="Switch to Darkmode">
+                                        <input class="form-check-input" id="darkSwitch" type="checkbox">
+                                        <label class="form-check-label" for="darkSwitch"></label>
+                                    </label>
                                 </div>
                                 <script src="static/js/dark-mode-switch.min.js"></script>
                             </li>
@@ -438,21 +441,21 @@
                 <div class="d-flex flex-column mt-2">
                     <p data-bs-placement="bottom" data-bs-toggle="tooltip"
                        title="Specify a timeframe you want to filter for">Time Frame</p>
-                        <div class="input-group fromdate" data-target-input="nearest" id="datetimepicker1">
-                            <input class="form-control datetimepicker-input" data-target="#datetimepicker1"
-                                   id="from-date"
-                                   placeholder="From"
-                                   type="text"/>
-                            <div class="input-group-text" data-target="#datetimepicker1"
-                                 data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
-                        </div>
-                        <div class="input-group todate" data-target-input="nearest" id="datetimepicker2">
-                            <input class="form-control datetimepicker-input" data-target="#datetimepicker2" id="to-date"
-                                   placeholder="To"
-                                   type="text"/>
-                            <div class="input-group-text" data-target="#datetimepicker2"
-                                 data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
-                        </div>
+                    <div class="input-group fromdate" data-target-input="nearest" id="datetimepicker1">
+                        <input class="form-control datetimepicker-input" data-target="#datetimepicker1"
+                               id="from-date"
+                               placeholder="From"
+                               type="text"/>
+                        <div class="input-group-text" data-target="#datetimepicker1"
+                             data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
+                    </div>
+                    <div class="input-group todate" data-target-input="nearest" id="datetimepicker2">
+                        <input class="form-control datetimepicker-input" data-target="#datetimepicker2" id="to-date"
+                               placeholder="To"
+                               type="text"/>
+                        <div class="input-group-text" data-target="#datetimepicker2"
+                             data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
+                    </div>
                     <script>
                         $('#datetimepicker1').datetimepicker({
                             format: 'YYYY-MM-DDTHH:mm:ss',
