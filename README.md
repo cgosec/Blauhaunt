@@ -330,6 +330,8 @@ You can import Data from Defender365 into Blauhaunt by using this Hunting Query:
 
 [Defender 365 Query](https://github.com/cgosec/Blauhaunt/blob/main/parser/Defender365_Query.md)
 
+run the query, export the csv and direktly load it into Blauhaunt...
+
 ### Usage
 _Comming soon: how to use Blauhaunt in Velo GUI_
 
