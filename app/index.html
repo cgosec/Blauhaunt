@@ -149,17 +149,20 @@
                                                for="calculated">calculated</label>
                                         <input autocomplete="off" class="btn-check" id="modeGrid" name="btnradio"
                                                type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item" for="modeGrid">grid</label>
+                                        <label class="btn btn-outline-secondary dropdown-item"
+                                               for="modeGrid">grid</label>
                                         <input autocomplete="off" class="btn-check" id="modeCose" name="btnradio"
                                                type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item" for="modeCose">cose</label>
+                                        <label class="btn btn-outline-secondary dropdown-item"
+                                               for="modeCose">cose</label>
                                         <input autocomplete="off" class="btn-check" id="modeCircle" name="btnradio"
                                                type="radio">
                                         <label class="btn btn-outline-secondary dropdown-item"
                                                for="modeCircle">circle</label>
                                         <input autocomplete="off" class="btn-check" id="modeTree" name="btnradio"
                                                type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item" for="modeTree">tree</label>
+                                        <label class="btn btn-outline-secondary dropdown-item"
+                                               for="modeTree">tree</label>
                                         <input autocomplete="off" class="btn-check" id="modeConcentric" name="btnradio"
                                                type="radio">
                                         <label class="btn btn-outline-secondary dropdown-item"
@@ -302,305 +305,282 @@
         </div>
     </nav>
 
-<div class="container-fluid h-100">
-    <div class="row align-items-start h-100">
-        <div class="col-2 sidebar dropdown-menu collapse overflow-auto h-100" id="filterSideBar">
-            <div class="row ps-3 pe-3 w-auto">
-                <button class="btn btn-secondary" data-bs-placement="bottom"
-                        data-bs-toggle="tooltip"
-                        onclick="createQuery()" title="Apply all selected filters below"
-                        type="button">
-                    Apply
-                </button>
-            </div>
-            <hr>
-            <label data-bs-placement="bottom" data-bs-toggle="tooltip"
-                   title="You can highlight edges permanently by holding CTRL and clicking on them.
+    <div class="container-fluid h-100">
+        <div class="row align-items-start h-100">
+            <div class="col-2 sidebar dropdown-menu collapse overflow-auto h-100" id="filterSideBar">
+                <div class="row ps-3 pe-3 w-auto">
+                    <button class="btn btn-success" data-bs-placement="bottom"
+                            data-bs-toggle="tooltip"
+                            onclick="createQuery()" title="Apply all selected filters below"
+                            type="button">
+                        Apply
+                    </button>
+                </div>
+                <hr>
+                <div class="d-flex flex-column">
+                    <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                           title="If this is active only highlighted connections will be displayed. You can highlight edges permanently by holding CTRL and clicking on them.
                    This works also for hover elements - simply click on the element that highlights edges while holding
                    CTRL to have them highlighted permanently">
-                <input class="btn-check " id="highlightedEdgesOnly" type="checkbox">
-                <label class="btn btn-outline-secondary" for="highlightedEdgesOnly">Only Show highlighted
-                    connections</label>
-            </label>
-            <hr>
-            <div class="row">
-                <div class="row">
-                    <div id="itemFormUser">
-                        <div class="row">
-                            <label>
-                                <input class="form-control" id="queryUser"
-                                       placeholder="User RegEx (history CTRL + Q)"
-                                       type="text"
-                                       value=""></label>
+                        <input class="btn-check " id="highlightedEdgesOnly" type="checkbox">
+                        <label class="btn btn-outline-secondary w-100" for="highlightedEdgesOnly">Highlighted</label>
+                    </label>
+                    <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                           title="Decide if edges with same source and targed are displayed">
+                        <input class="btn-check " id="selfCon" type="checkbox">
+                        <label class="btn btn-outline-secondary w-100" for="selfCon">ToSelf</label>
+                    </label>
+                </div>
+                <hr>
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-row">
+                        <label>
+                            <input class="form-control" id="queryUser"
+                                   placeholder="User RegEx (history CTRL + Q)"
+                                   type="text"
+                                   value=""></label>
+                        <div class="mw-25">
+                            <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                                   title="If active the matching Users will be excluded">
+                                <input class="btn-check " id="invertUserRegex" type="checkbox">
+                                <label class="btn btn-outline-danger" for="invertUserRegex">!</label>
+                            </label>
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div id="itemFormSrc">
-                        <div class="row">
-                            <label>
-                                <input class="form-control" id="queryHostSrc"
-                                       placeholder="Src Host RegEx (history CTRL + B)"
-                                       type="text"
-                                       value=""></label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div id="itemFormDest">
-                        <div class="row">
-                            <label>
-                                <input class="form-control" id="queryHostDst"
-                                       placeholder="Dst Host RegEx (history CTRL + Y)"
-                                       type="text"
-                                       value=""></label>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div id="itemFormCustomDistinction">
-                        <div class="row">
-                            <label>
-                                <input class="form-control" id="queryDistinction"
-                                       placeholder="Custom Distinction RegEx"
-                                       type="text"
-                                       value=""></label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="col-9">
-                <a data-bs-placement="bottom" data-bs-toggle="tooltip"
-                   title="Specify a time zone that will be added as an offset to the filters and time display">
-                    Time Zone
-                </a>
-                <br>
-                <select id="timeOffsetList" class="form-select">
-                    <option value="-12">UTC−12:00, Y</option>
-                    <option value="-11">UTC−11:00, X</option>
-                    <option value="-10">UTC−10:00, W</option>
-                    <option value="-9.5">UTC−09:30, V†</option>
-                    <option value="-9">UTC−09:00, V</option>
-                    <option value="-8">UTC−08:00, U</option>
-                    <option value="-7">UTC−07:00, T</option>
-                    <option value="-6">UTC−06:00, S</option>
-                    <option value="-5">UTC−05:00, R</option>
-                    <option value="-4">UTC−04:00, Q</option>
-                    <option value="-3.5">UTC−03:30, P†</option>
-                    <option value="-3">UTC−03:00, P</option>
-                    <option value="-2">UTC−02:00, O</option>
-                    <option value="-1">UTC−01:00, N</option>
-                    <option value="0" selected>UTC±00:00, Z</option>
-                    <option value="1">UTC+01:00, A</option>
-                    <option value="2">UTC+02:00, B</option>
-                    <option value="3">UTC+03:00, C</option>
-                    <option value="3.5">UTC+03:30, C†</option>
-                    <option value="4">UTC+04:00, D</option>
-                    <option value="4.5">UTC+04:30, D†</option>
-                    <option value="5">UTC+05:00, E</option>
-                    <option value="5.5">UTC+05:30, E†</option>
-                    <option value="5.75">UTC+05:45, E*</option>
-                    <option value="6">UTC+06:00, F</option>
-                    <option value="6.5">UTC+06:30, F†</option>
-                    <option value="7">UTC+07:00, G</option>
-                    <option value="8">UTC+08:00, H</option>
-                    <option value="8.75">UTC+08:45, H*</option>
-                    <option value="9">UTC+09:00, I</option>
-                    <option value="9.5">UTC+09:30, I†</option>
-                    <option value="10">UTC+10:00, K</option>
-                    <option value="10.5">UTC+10:30, K†</option>
-                    <option value="11">UTC+11:00, L</option>
-                    <option value="12">UTC+12:00, M</option>
-                    <option value="12.75">UTC+12:45, M*</option>
-                    <option value="13">UTC+13:00, M†</option>
-                </select>
-            </div>
-            <div class="row">
-                <a data-bs-placement="bottom" data-bs-toggle="tooltip"
-                   title="Specify a timeframe you want to filter for">Time Frame</a><br>
-                <div class="form-group col-auto">
-                    <div class="input-group fromdate" data-target-input="nearest" id="datetimepicker1">
-                        <input class="form-control datetimepicker-input" data-target="#datetimepicker1"
-                               id="from-date"
-                               placeholder="From"
-                               type="text"/>
-                        <div class="input-group-text" data-target="#datetimepicker1"
-                             data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
-                    </div>
-                </div>
-                <div class="col-auto mt-2">
-                </div>
-                <div class="form-group col-auto">
-                    <div class="input-group todate" data-target-input="nearest" id="datetimepicker2">
-                        <input class="form-control datetimepicker-input" data-target="#datetimepicker2" id="to-date"
-                               placeholder="To"
-                               type="text"/>
-                        <div class="input-group-text" data-target="#datetimepicker2"
-                             data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
-                    </div>
-                </div>
-                <script>
-                    $('#datetimepicker1').datetimepicker({
-                        format: 'YYYY-MM-DDTHH:mm:ss',
-                    });
-                    $('#datetimepicker2').datetimepicker({
-                        format: 'YYYY-MM-DDTHH:mm:ss'
-                    });
-                </script>
-                <div class="mt-2">
-                    <div class="">
+                    <div class="d-flex flex-row">
+                        <label>
+                            <input class="form-control" id="queryHostSrc"
+                                   placeholder="Src Host RegEx (history CTRL + B)"
+                                   type="text"
+                                   value=""></label>
                         <label data-bs-placement="bottom" data-bs-toggle="tooltip"
-                               title="Only display connections that happened on the weekend">
-                            <input class="btn-check " id="filterForWeekendsCkbx" type="checkbox">
-                            <label class="btn btn-outline-secondary" for="filterForWeekendsCkbx" onclick="{
-                    }">Weekends only</label>
+                               title="If active the matching source hosts will be excluded">
+                            <input class="btn-check " id="invertSrcHostRegex" type="checkbox">
+                            <label class="btn btn-outline-danger" for="invertSrcHostRegex">!</label>
+                        </label>
+                    </div>
+                    <div class="d-flex flex-row">
+                        <label>
+                            <input class="form-control" id="queryHostDst"
+                                   placeholder="Dst Host RegEx (history CTRL + Y)"
+                                   type="text"
+                                   value="">
+                        </label>
+                        <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                               title="If active the matching destination hosts will be excluded">
+                            <input class="btn-check " id="invertDstHostRegex" type="checkbox">
+                            <label class="btn btn-outline-danger" for="invertDstHostRegex">!</label>
+                        </label>
+                    </div>
+                    <div class="d-flex flex-row">
+                        <label>
+                            <input class="form-control" id="queryDistinction"
+                                   placeholder="Custom Distinction RegEx"
+                                   type="text"
+                                   value="">
+                        </label>
+                        <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                               title="If active the matching destination hosts will be excluded">
+                            <input class="btn-check " id="invertDistinctionRegex" type="checkbox">
+                            <label class="btn btn-outline-danger" for="invertDistinctionRegex">!</label>
                         </label>
                     </div>
                 </div>
-            </div>
-            <hr>
-            <div class="row">
-                <a data-bs-placement="bottom" data-bs-toggle="tooltip"
-                   title="Filter for events that happened during selected hours regardless of the day">Daily
-                    times</a><br>
-                <div class="form-group col-auto">
-                    <input class="form-control" id="from-clock" placeholder="From"
-                           type="time"/>
-                </div>
-                <div class="col-auto mt-2">
-                </div>
-                <div class="form-group col-auto">
-                    <input class="form-control" id="to-clock" placeholder="To"
-                           type="time"/>
-                </div>
-            </div>
-            <div class="d-none">
                 <hr>
-                <a data-bs-placement="top" data-bs-toggle="tooltip"
-                   title="Minimum of outgoing connections from a node">Outgoing
-                    connections</a><br>
-                <div class="row-8">
-                    <label data-bs-placement="bottom" data-bs-toggle="tooltip"
-                           title="Can only be enabled whe data is available">
-                        <input class="btn-check " disabled id="conMinSwitch" type="checkbox">
-                        <label class="btn btn-outline-secondary" for="conMinSwitch" onclick="{
-                        if (this.innerText === 'Enable'){
-                        document.getElementById('minConRange').disabled = false;
-                        this.innerText = 'Disable'
-                        }
-                        else {
-                            document.getElementById('minConRange').disabled = true;
-                            this.innerText = 'Enable'
-                        }
-                    }">Enable</label>
-                    </label>
-                    <label><input class="form-control" id="minConRange" disabled min="0" step="10" type="number"
-                                  value="0"/></label>
+                <div class="d-flex">
+                    <div class="input-group">
+                        <p class="mt-3" data-bs-placement="bottom" data-bs-toggle="tooltip"
+                           title="Specify a time zone that will be added as an offset to the filters and timeline display (time stamps in lists will ramin Z Time)">
+                            Offset
+                        </p>
+                        <br>
+                        <select id="timeOffsetList" class="form-select ms-3">
+                            <option value="-12">UTC−12:00, Y</option>
+                            <option value="-11">UTC−11:00, X</option>
+                            <option value="-10">UTC−10:00, W</option>
+                            <option value="-9.5">UTC−09:30, V†</option>
+                            <option value="-9">UTC−09:00, V</option>
+                            <option value="-8">UTC−08:00, U</option>
+                            <option value="-7">UTC−07:00, T</option>
+                            <option value="-6">UTC−06:00, S</option>
+                            <option value="-5">UTC−05:00, R</option>
+                            <option value="-4">UTC−04:00, Q</option>
+                            <option value="-3.5">UTC−03:30, P†</option>
+                            <option value="-3">UTC−03:00, P</option>
+                            <option value="-2">UTC−02:00, O</option>
+                            <option value="-1">UTC−01:00, N</option>
+                            <option value="0" selected>UTC±00:00, Z</option>
+                            <option value="1">UTC+01:00, A</option>
+                            <option value="2">UTC+02:00, B</option>
+                            <option value="3">UTC+03:00, C</option>
+                            <option value="3.5">UTC+03:30, C†</option>
+                            <option value="4">UTC+04:00, D</option>
+                            <option value="4.5">UTC+04:30, D†</option>
+                            <option value="5">UTC+05:00, E</option>
+                            <option value="5.5">UTC+05:30, E†</option>
+                            <option value="5.75">UTC+05:45, E*</option>
+                            <option value="6">UTC+06:00, F</option>
+                            <option value="6.5">UTC+06:30, F†</option>
+                            <option value="7">UTC+07:00, G</option>
+                            <option value="8">UTC+08:00, H</option>
+                            <option value="8.75">UTC+08:45, H*</option>
+                            <option value="9">UTC+09:00, I</option>
+                            <option value="9.5">UTC+09:30, I†</option>
+                            <option value="10">UTC+10:00, K</option>
+                            <option value="10.5">UTC+10:30, K†</option>
+                            <option value="11">UTC+11:00, L</option>
+                            <option value="12">UTC+12:00, M</option>
+                            <option value="12.75">UTC+12:45, M*</option>
+                            <option value="13">UTC+13:00, M†</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <hr>
-            <label data-bs-placement="bottom" data-bs-toggle="tooltip"
-                   title="Decide if edges with same source and targed are displayed">
-                <input class="btn-check " id="selfCon" type="checkbox">
-                <label class="btn btn-outline-secondary" for="selfCon">Show connections to own System</label>
-            </label>
-            <hr>
-            <!--   <label data-bs-placement="bottom" data-bs-toggle="tooltip"
-                      title="Decide if edges with same source and targed are displayed">
-                   <input class="btn-check " id="joinEdges" type="checkbox">
-                   <label class="btn btn-outline-secondary" for="joinEdges">Join Edges</label>
-               </label>
-               <hr>
-               -->
-            <a data-bs-placement="bottom" data-bs-toggle="tooltip" title="Select Events to display">Events</a><br>
-            <form name="EventIDs">
-                <!--this is created via JS -->
-            </form>
-            <form name="LogonTypes" style="display: none">
-                <a>Logon Types</a>
-                <div class="row">
-                </div>
-            </form>
+                <div class="d-flex flex-column mt-2">
+                    <p data-bs-placement="bottom" data-bs-toggle="tooltip"
+                       title="Specify a timeframe you want to filter for">Time Frame</p>
+                        <div class="input-group fromdate" data-target-input="nearest" id="datetimepicker1">
+                            <input class="form-control datetimepicker-input" data-target="#datetimepicker1"
+                                   id="from-date"
+                                   placeholder="From"
+                                   type="text"/>
+                            <div class="input-group-text" data-target="#datetimepicker1"
+                                 data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
+                        </div>
+                        <div class="input-group todate" data-target-input="nearest" id="datetimepicker2">
+                            <input class="form-control datetimepicker-input" data-target="#datetimepicker2" id="to-date"
+                                   placeholder="To"
+                                   type="text"/>
+                            <div class="input-group-text" data-target="#datetimepicker2"
+                                 data-toggle="datetimepicker"><i class="far fa-calendar-alt"></i></div>
+                        </div>
+                    <script>
+                        $('#datetimepicker1').datetimepicker({
+                            format: 'YYYY-MM-DDTHH:mm:ss',
+                        });
+                        $('#datetimepicker2').datetimepicker({
+                            format: 'YYYY-MM-DDTHH:mm:ss'
+                        });
+                    </script>
+                    <div class="mt-2">
+                        <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                               title="Only display connections that happened on the weekend">
+                            <input class="btn-check" id="filterForWeekendsCkbx" type="checkbox">
+                            <label class="btn btn-outline-secondary" for="filterForWeekendsCkbx">
+                                Weekends only
+                            </label>
+                        </label>
+                    </div>
+                    <hr>
+                    <div class="d-flex flex-row">
+                        <a data-bs-placement="bottom" data-bs-toggle="tooltip"
+                           title="Filter for events that happened during selected hours regardless of the day">Daily
+                            times</a><br>
+                        <div class="form-group mt-1">
+                            <input class="form-control" id="from-clock" placeholder="From"
+                                   type="time"/>
+                        </div>
+                        <div class="form-group mt-1">
+                            <input class="form-control" id="to-clock" placeholder="To"
+                                   type="time"/>
+                        </div>
+                    </div>
+                    <hr>
+                    <!--   <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                              title="Decide if edges with same source and targed are displayed">
+                           <input class="btn-check " id="joinEdges" type="checkbox">
+                           <label class="btn btn-outline-secondary" for="joinEdges">Join Edges</label>
+                       </label>
+                       <hr>
+                       -->
+                    <a data-bs-placement="bottom" data-bs-toggle="tooltip"
+                       title="Select Events to display">Events</a><br>
+                    <form name="EventIDs">
+                        <!--this is created via JS -->
+                    </form>
+                    <form name="LogonTypes" style="display: none">
+                        <a>Logon Types</a>
+                        <div class="row">
+                        </div>
+                    </form>
 
-            <hr>
-            <a data-bs-placement="bottom" data-bs-toggle="tooltip" title="Select Tags to display.">
-                <a data-bs-placement="bottom" data-bs-toggle="tooltip" title="Select Events to display">Tags</a><br>
-                <form name="Tags">
-                    <div class="row">
-                        <label data-bs-placement="top" data-bs-toggle="tooltip" title="Apply for all Tags">
-                            <input checked="checked" class="btn-check" id="applyAllTags" onclick="{
+                    <hr>
+                    <a data-bs-placement="bottom" data-bs-toggle="tooltip" title="Select Tags to display.">
+                        <a data-bs-placement="bottom" data-bs-toggle="tooltip" title="Select Events to display">Tags</a><br>
+                        <form name="Tags">
+                            <div class="row">
+                                <label data-bs-placement="top" data-bs-toggle="tooltip" title="Apply for all Tags">
+                                    <input checked="checked" class="btn-check" id="applyAllTags" onclick="{
                             this.value = this.value === 'checked' ? 'unchecked' : 'checked'
                             for (const b of document.getElementsByClassName('tagBtns'))
                                 b.checked = (this.value === 'checked')
                             document.getElementById('labelApplyAllTags').innerText = this.value === 'checked' ? 'Unselect all Tags' : 'Select all Tags'
                         }" type="checkbox"
-                                   value="checked">
-                            <label class="btn btn-outline-secondary" for="applyAllTags" id="labelApplyAllTags">Unselect
-                                all Tags</label>
-                        </label>
-                    </div>
-                    <div class="row cleanOnLoad" id="tagFilterFow"></div>
-                </form>
-            </a>
-        </div>
-
-        <!--THE MAIN STAGE -->
-        <div class="col main h-100" id="stage">
-            <div id="timespan" style="height: 90vh; z-index: 1"
-                 class="d-flex position-absolute align-items-start flex-column dynamic-display"></div>
-            <div id="timeline" style="height: 90vh"
-                 class="d-flex position-absolute container dynamic-display"></div>
-            <div id="heatmap" style="height: 90vh"
-                 class="d-flex position-absolute container dynamic-display"></div>
-            <div id="innerStage" class="dynamic-display h-100">
-                <div id="cy" class="h-100">
+                                           value="checked">
+                                    <label class="btn btn-outline-secondary" for="applyAllTags" id="labelApplyAllTags">Unselect
+                                        all Tags</label>
+                                </label>
+                            </div>
+                            <div class="row cleanOnLoad" id="tagFilterFow"></div>
+                        </form>
+                    </a>
                 </div>
             </div>
-            <div id="loading">
-                <span class="fa fa-refresh fa-spin"></span>
+
+            <!--THE MAIN STAGE -->
+            <div class="col main h-100" id="stage">
+                <div id="timespan" style="height: 90vh; z-index: 1"
+                     class="d-flex position-absolute align-items-start flex-column dynamic-display"></div>
+                <div id="timeline" style="height: 90vh"
+                     class="d-flex position-absolute container dynamic-display"></div>
+                <div id="heatmap" style="height: 90vh"
+                     class="d-flex position-absolute container dynamic-display"></div>
+                <div id="innerStage" class="dynamic-display h-100">
+                    <div id="cy" class="h-100">
+                    </div>
+                </div>
+                <div id="loading">
+                    <span class="fa fa-refresh fa-spin"></span>
+                </div>
             </div>
-        </div>
-        <!-- THE STATS SIDEBAR -->
-        <div class="col-3 dropdown-menu position-absolute h-75 end-0 collapse overflow-auto" id="statsSideBar">
-            <div class="container overflow-auto">
-                <br>
-                <details>
-                    <summary><b>System Stats</b></summary>
-                    <div class="scrollbar-young-passion">
-                        <table class="table table-hover">
+            <!-- THE STATS SIDEBAR -->
+            <div class="col-3 dropdown-menu position-absolute h-75 end-0 collapse overflow-auto" id="statsSideBar">
+                <div class="container overflow-auto">
+                    <br>
+                    <details>
+                        <summary><b>System Stats</b></summary>
+                        <div class="scrollbar-young-passion">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">To Systems</th>
+                                    <th scope="col">From Systems</th>
+                                    <th scope="col">Users out</th>
+                                    <th scope="col">Users in</th>
+                                </tr>
+                                </thead>
+                                <tbody id="sysTable"></tbody>
+                            </table>
+                        </div>
+                    </details>
+                    <div class="container"></div>
+                    <br>
+                    <details>
+                        <summary><b>User Stats</b></summary>
+                        <table class="table table-hover scrollbar-young-passion">
                             <thead>
                             <tr>
                                 <th scope="col">Name</th>
                                 <th scope="col">To Systems</th>
-                                <th scope="col">From Systems</th>
-                                <th scope="col">Users out</th>
-                                <th scope="col">Users in</th>
                             </tr>
                             </thead>
-                            <tbody id="sysTable"></tbody>
+                            <tbody id="userTable"></tbody>
                         </table>
-                    </div>
-                </details>
-                <div class="container"></div>
-                <br>
-                <details>
-                    <summary><b>User Stats</b></summary>
-                    <table class="table table-hover scrollbar-young-passion">
-                        <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">To Systems</th>
-                        </tr>
-                        </thead>
-                        <tbody id="userTable"></tbody>
-                    </table>
-                </details>
+                    </details>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 <!-- Modal -->
 <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="IP2HostConflict"

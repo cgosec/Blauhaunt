@@ -3,8 +3,6 @@ let loading = document.getElementById('loading');
 loading.classList.add('loaded');
 
 let ds = document.getElementById("darkSwitch");
-let minConRange = document.getElementById("minConRange")
-let minConSwitch = document.getElementById("conMinSwitch")
 let fromDate = document.getElementById("from-date")
 let toDate = document.getElementById("to-date")
 let min_size = 30
@@ -470,7 +468,6 @@ function retrieveDataFromIndexDB(caseName, callback) {
                     }
                     tagSetNew.add(tag)
                 })
-                minConSwitch.disabled = false
                 timeOffsetList.selectedIndex = caseData.timezoneSelection
                 processEdgesToNodes()
                 document.getElementById("newCaseName").value = caseName
@@ -851,30 +848,58 @@ function filter(filterObject) {
 
     // filter for source hosts
     if (!userModGraph && filterObject.srcHosts) {
-        filtered_edges = filtered_edges.filter(edge => {
-            return filterObject.srcHosts.test(edge.data.source)
-        })
+        let invertsrcHosts = document.getElementById("invertSrcHostRegex").checked
+        if (invertsrcHosts) {
+            filtered_edges = filtered_edges.filter(edge => {
+                return !filterObject.srcHosts.test(edge.data.source)
+            })
+        } else {
+            filtered_edges = filtered_edges.filter(edge => {
+                return filterObject.srcHosts.test(edge.data.source)
+            })
+        }
     }
 
     // filter for users
     if (filterObject.users) {
-        filtered_edges = filtered_edges.filter(event => {
-            return filterObject.users.test(event.data.UserName)
-        })
+        let invertUsers = document.getElementById("invertUserRegex").checked
+        if (invertUsers) {
+            filtered_edges = filtered_edges.filter(edge => {
+                return !filterObject.users.test(edge.data.UserName)
+            })
+        } else {
+            filtered_edges = filtered_edges.filter(event => {
+                return filterObject.users.test(event.data.UserName)
+            })
+        }
     }
 
     // filter for destination hosts
     if (filterObject.dstHosts) {
-        filtered_edges = filtered_edges.filter(edge => {
-            return filterObject.dstHosts.test(edge.data.target)
-        })
+        let invertDstHosts = document.getElementById("invertDstHostRegex").checked
+        if (invertDstHosts) {
+            filtered_edges = filtered_edges.filter(edge => {
+                return !filterObject.dstHosts.test(edge.data.target)
+            })
+        } else {
+            filtered_edges = filtered_edges.filter(edge => {
+                return filterObject.dstHosts.test(edge.data.target)
+            })
+        }
     }
 
     // filter for custom distinction
     if (filterObject.customDistinction) {
-        filtered_edges = filtered_edges.filter(edge => {
-            return filterObject.customDistinction.test(edge.data.Distinction)
-        })
+        let invertCustomDistinction = document.getElementById("invertDistinctionRegex").checked
+        if (invertCustomDistinction) {
+            filtered_edges = filtered_edges.filter(edge => {
+                return !filterObject.customDistinction.test(edge.data.Distinction)
+            })
+        } else {
+            filtered_edges = filtered_edges.filter(edge => {
+                return filterObject.customDistinction.test(edge.data.Distinction)
+            })
+        }
     }
 
     // filter for event
@@ -2831,11 +2856,10 @@ function parseDataFromJSON(jsonText) {
         } catch (error) {
             console.log("trying to process data as exported by defender query...")
             try {
-                line_ = line.replaceAll('""','"').replace('"{', '{').replace('}"', '}')
+                line_ = line.replaceAll('""', '"').replace('"{', '{').replace('}"', '}')
                 data = JSON.parse(line_)
                 objects.push(data)
-            }
-            catch (error){
+            } catch (error) {
                 console.log("Error processing this line:")
                 console.log(line_)
             }
