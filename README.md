@@ -324,16 +324,7 @@ You can simply take the json export from this artefact to import it into Blauhau
 
 The client_info import is designed to work directly with the client_info from Velociraptor too. You can simply export the json file and upload it into Blauhaunt.
 
-## Defender
-
-You can import Data from Defender365 into Blauhaunt by using this Hunting Query:
-
-[Defender 365 Query](https://github.com/cgosec/Blauhaunt/blob/main/parser/Defender365_Query.md)
-
-run the query, export the csv and direktly load it into Blauhaunt...
-
 ### Usage
-_Comming soon: how to use Blauhaunt in Velo GUI_
 
 If you want to parse event logs collected from a system offline using velociraptor, you can do so like this:
 
@@ -342,6 +333,15 @@ If you want to parse event logs collected from a system offline using velocirapt
 If you dislike typing long paths, feel free to use the provided quick script:
  
      .\quick_velo.ps1 -EventLogDirectory C:\my\awesome\storage\path 
+
+## Defender
+
+You can import Data from Defender365 into Blauhaunt by using this Hunting Query:
+
+[Defender 365 Query](https://github.com/cgosec/Blauhaunt/blob/main/parser/Defender365_Query.md)
+
+run the query, export the csv and direktly load it into Blauhaunt...
+
 
 ## Acknowledgements
  - [SEC Consult](https://sec-consult.com/de/) This work was massively motivated by my work in and with the SEC Defence team
