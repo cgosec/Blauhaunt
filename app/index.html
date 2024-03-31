@@ -54,7 +54,8 @@
 
 </head>
 
-<body>
+<body style="height: 100%; margin: 0; overflow: hidden">
+<div class="container-fluid vh-100">
 <nav id="navBar" class="navbar navbar-expand-lg navbar-light bg-light p-1 shadow">
     <a class="navbar-brand" href="#"><img alt="top" class="my_svg" src="static/images/blauhaunt.png"
                                           style="width: 80px"></a>
@@ -140,7 +141,8 @@
                            name="btnradio2"
                            type="radio">
                     <label class="btn btn-outline-secondary" for="modeSystem">System</label>
-                    <input autocomplete="off" class="btn-check graphStyle" id="modeUser" name="btnradio2" type="radio">
+                    <input autocomplete="off" class="btn-check graphStyle" id="modeUser" name="btnradio2"
+                           type="radio">
                     <label class="btn btn-outline-secondary" for="modeUser">User</label>
                 </div>
                 <div class="row ms-2 mt-1 h-50">
@@ -171,10 +173,12 @@
                                name="renderradio"
                                type="radio" value="graph">
                         <label class="btn btn-outline-secondary dropdown-item" for="renderGraph">Graph</label>
-                        <input autocomplete="off" class="btn-check render-radios" id="renderTimeline" name="renderradio"
+                        <input autocomplete="off" class="btn-check render-radios" id="renderTimeline"
+                               name="renderradio"
                                type="radio" value="timeline">
                         <label class="btn btn-outline-secondary dropdown-item" for="renderTimeline">Timeline</label>
-                        <input autocomplete="off" class="btn-check render-radios" id="renderHeatmap" name="renderradio"
+                        <input autocomplete="off" class="btn-check render-radios" id="renderHeatmap"
+                               name="renderradio"
                                type="radio" value="heatmap">
                         <label class="btn btn-outline-secondary dropdown-item" for="renderHeatmap">Heatmap</label>
                         <!--
@@ -205,13 +209,15 @@
                             <input autocomplete="off" checked="checked" class="btn-check" id="calculated"
                                    name="btnradio"
                                    type="radio">
-                            <label class="btn btn-outline-secondary dropdown-item" for="calculated">calculated</label>
+                            <label class="btn btn-outline-secondary dropdown-item"
+                                   for="calculated">calculated</label>
                             <input autocomplete="off" class="btn-check" id="modeGrid" name="btnradio"
                                    type="radio">
                             <label class="btn btn-outline-secondary dropdown-item" for="modeGrid">grid</label>
                             <input autocomplete="off" class="btn-check" id="modeCose" name="btnradio" type="radio">
                             <label class="btn btn-outline-secondary dropdown-item" for="modeCose">cose</label>
-                            <input autocomplete="off" class="btn-check" id="modeCircle" name="btnradio" type="radio">
+                            <input autocomplete="off" class="btn-check" id="modeCircle" name="btnradio"
+                                   type="radio">
                             <label class="btn btn-outline-secondary dropdown-item" for="modeCircle">circle</label>
                             <input autocomplete="off" class="btn-check" id="modeTree" name="btnradio" type="radio">
                             <label class="btn btn-outline-secondary dropdown-item" for="modeTree">tree</label>
@@ -256,11 +262,10 @@
         </form>
     </div>
 </nav>
-<div class="container-fluid">
-
-    <div class="row">
-        <div class="col-2 sidebar dropdown-menu position-absolute collapse" id="filterSideBar">
-            <div class="row ps-3 pe-3">
+<div class="container-fluid h-100">
+    <div class="row align-items-start h-100">
+        <div class="col-2 sidebar dropdown-menu collapse overflow-auto h-100" id="filterSideBar">
+            <div class="row ps-3 pe-3 w-auto">
                 <button class="btn btn-secondary" data-bs-placement="bottom"
                         data-bs-toggle="tooltip"
                         onclick="createQuery()" title="Apply all selected filters below"
@@ -283,7 +288,8 @@
                     <div id="itemFormUser">
                         <div class="row">
                             <label>
-                                <input class="form-control" id="queryUser" placeholder="User RegEx (history CTRL + Q)"
+                                <input class="form-control" id="queryUser"
+                                       placeholder="User RegEx (history CTRL + Q)"
                                        type="text"
                                        value=""></label>
                         </div>
@@ -376,7 +382,8 @@
                    title="Specify a timeframe you want to filter for">Time Frame</a><br>
                 <div class="form-group col-auto">
                     <div class="input-group fromdate" data-target-input="nearest" id="datetimepicker1">
-                        <input class="form-control datetimepicker-input" data-target="#datetimepicker1" id="from-date"
+                        <input class="form-control datetimepicker-input" data-target="#datetimepicker1"
+                               id="from-date"
                                placeholder="From"
                                type="text"/>
                         <div class="input-group-text" data-target="#datetimepicker1"
@@ -431,7 +438,8 @@
             </div>
             <div class="d-none">
                 <hr>
-                <a data-bs-placement="top" data-bs-toggle="tooltip" title="Minimum of outgoing connections from a node">Outgoing
+                <a data-bs-placement="top" data-bs-toggle="tooltip"
+                   title="Minimum of outgoing connections from a node">Outgoing
                     connections</a><br>
                 <div class="row-8">
                     <label data-bs-placement="bottom" data-bs-toggle="tooltip"
@@ -497,20 +505,30 @@
                 </form>
             </a>
         </div>
-        <div class="col main" id="stage">
+
+        <!--THE MAIN STAGE -->
+        <div class="col main h-100" id="stage">
             <div id="timespan" style="height: 90vh; z-index: 1"
                  class="d-flex position-absolute align-items-start flex-column dynamic-display"></div>
             <div id="timeline" style="height: 90vh"
                  class="d-flex position-absolute container dynamic-display"></div>
             <div id="heatmap" style="height: 90vh"
                  class="d-flex position-absolute container dynamic-display"></div>
-            <div class="col-3 dropdown-menu position-absolute end-0 collapse" style="height: 90vh; z-index: 1"
-                 id="statsSideBar">
-                <div class="container"></div>
+            <div id="innerStage" class="dynamic-display h-100">
+                <div id="cy" class="h-100">
+                </div>
+            </div>
+            <div id="loading">
+                <span class="fa fa-refresh fa-spin"></span>
+            </div>
+        </div>
+        <!-- THE STATS SIDEBAR -->
+        <div class="col-3 dropdown-menu position-absolute h-75 end-0 collapse overflow-auto" id="statsSideBar">
+            <div class="container overflow-auto">
                 <br>
                 <details>
                     <summary><b>System Stats</b></summary>
-                    <div class="scrollbar-young-passion overflow-auto">
+                    <div class="scrollbar-young-passion">
                         <table class="table table-hover">
                             <thead>
                             <tr>
@@ -540,42 +558,36 @@
                     </table>
                 </details>
             </div>
-            <div id="innerStage" class="dynamic-display" style="height: 92vh">
-                <div id="cy" style="height: 90vh">
-                </div>
-            </div>
-            <div id="loading">
-                <span class="fa fa-refresh fa-spin"></span>
-            </div>
-
         </div>
     </div>
-
-
-    <!-- Modal -->
-    <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="IP2HostConflict" role="dialog"
-         tabindex="-1">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="hostConflictModalLabel"></h5>
-                </div>
-                <div class="modal-body">
-                    <div class="row" id="hostSelectionDiv">
-                        <div aria-label="Basic radio toggle button group" class="btn-group" id="hostSelectionRadioGroup"
-                             role="group">
-                        </div>
+</div>
+</div>
+<!-- Modal -->
+<div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="IP2HostConflict"
+     role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="hostConflictModalLabel"></h5>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="hostSelectionDiv">
+                    <div aria-label="Basic radio toggle button group" class="btn-group"
+                         id="hostSelectionRadioGroup"
+                         role="group">
                     </div>
                 </div>
-                <div class="input-group">
-                    <input class="form-control" id="customHost" placeholder="Custom Hostname" type="text">
-                    <button class="btn btn-primary" id="selectHostBtn" type="button">Set</button>
-                    <button class="btn btn-primary" id="cancelBtn" type="button">Skip</button>
-                </div>
+            </div>
+            <div class="input-group">
+                <input class="form-control" id="customHost" placeholder="Custom Hostname" type="text">
+                <button class="btn btn-primary" id="selectHostBtn" type="button">Set</button>
+                <button class="btn btn-primary" id="cancelBtn" type="button">Skip</button>
             </div>
         </div>
     </div>
 </div>
+
 <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="searchHistory" role="dialog"
      tabindex="-1">
     <div class="modal-dialog" role="document">
@@ -675,7 +687,8 @@
                     </div>
                     <div class="col-2">
                         <div class="input-group">
-                            <input class="form-control" id="hostMapDelimiter" placeholder="Delimiter (,)" type="text">
+                            <input class="form-control" id="hostMapDelimiter" placeholder="Delimiter (,)"
+                                   type="text">
                             <span class="input-group-btn"><button class="btn btn-info" disabled id="mapProcessBtn"
                                                                   onclick="mapPrePorcessBtnClick()"
                                                                   type="button">Load Map</button></span>
@@ -686,7 +699,8 @@
 
                 </div>
                 <div class="modal-footer" id="uploadButtons">
-                    <button id="uploadBtn" class="btn btn-primary" onclick="fileUpload()" type="submit">Upload</button>
+                    <button id="uploadBtn" class="btn btn-primary" onclick="fileUpload()" type="submit">Upload
+                    </button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
                 </div>
             </div>
