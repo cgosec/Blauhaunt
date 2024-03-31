@@ -9,6 +9,7 @@ A tool collection for filtering and visualizing logon events. Designed to help a
 - [Architecture](#architekture)
 - [PowerShell Script](#powershell-script)
 - [Velociraptor Artifact](#velociraptor-artifact)
+- [Defender 365 KUSTO Query](#defender)
 - [Acknowledgements](#acknowledgements)
 
 ### Interactive User Graph
@@ -322,6 +323,12 @@ I recommend creating a notebook (template may be provided soon here too) where a
 You can simply take the json export from this artefact to import it into Blauhaunt
 
 The client_info import is designed to work directly with the client_info from Velociraptor too. You can simply export the json file and upload it into Blauhaunt.
+
+## Defender
+
+You can import Data from Defender365 into Blauhaunt by using this Hunting Query:
+
+[Defender 365 Query](https://github.com/cgosec/Blauhaunt/blob/main/parser/Defender365_Query.md)
 
 ### Usage
 _Comming soon: how to use Blauhaunt in Velo GUI_
