@@ -1276,7 +1276,7 @@ function setNodeColor(node) {
                     latestPrio = parseInt(colorVals.priority)
                 }
             }
-    }
+        }
     }
     if (node.data.ntype === "User") {
         node.data.nfcolor = nfcolor_user
@@ -2143,42 +2143,40 @@ function drawGraph(graph, rootNode) {
         loading_bar.classList.add("loaded");
     });
     cy.nodes().forEach(function (ele) {
-        try{
-        ele.qtip({
-            content: {
-                title: "<b>Node Details</b>",
-                text: qtipNode(ele)
-            }, style: {
-                classes: "qtip-bootstrap"
-            }, position: {
-                my: "top center", at: "bottom center", target: ele
-            }
-        });
-        ele.on('mousedown', e => nodeMouseDown(ele))
-        ele.on('mouseup', e => nodeMouseUp(ele))
-        }
-        catch(error){
+        try {
+            ele.qtip({
+                content: {
+                    title: "<b>Node Details</b>",
+                    text: qtipNode(ele)
+                }, style: {
+                    classes: "qtip-bootstrap"
+                }, position: {
+                    my: "top center", at: "bottom center", target: ele
+                }
+            });
+            ele.on('mousedown', e => nodeMouseDown(ele))
+            ele.on('mouseup', e => nodeMouseUp(ele))
+        } catch (error) {
             console.log("error creating qtip");
             console.error(error);
         }
     });
     cy.edges().forEach(function (ele) {
-        try{
-        ele.qtip({
-            content: {
-                title: "<b>Details</b>",
-                text: qtipEdge(ele)
-            }, style: {
-                classes: "qtip-bootstrap"
-            }, position: {
-                my: "top center",
-                at: "bottom center",
-                target: ele
-            }
-        });
-        ele.on('mousedown', e => edgeMouseDown(ele))
-        }
-        catch(error){
+        try {
+            ele.qtip({
+                content: {
+                    title: "<b>Details</b>",
+                    text: qtipEdge(ele)
+                }, style: {
+                    classes: "qtip-bootstrap"
+                }, position: {
+                    my: "top center",
+                    at: "bottom center",
+                    target: ele
+                }
+            });
+            ele.on('mousedown', e => edgeMouseDown(ele))
+        } catch (error) {
             console.log("error creating qtip");
             console.error(error);
         }
@@ -2461,6 +2459,7 @@ function getIPsHost(ip) {
                 btn.classList.add("btn-primary")
                 btn.innerText = h
                 btn.addEventListener("click", e => {
+                    e.preventDefault()
                     rGroup.innerHTML = ""
                     caseData.ip2hostMapperFromFile[ip] = [h] // this is set to the FromFile dict because this is prioritized in the next selection
                     hostSelect.hide();
@@ -2473,8 +2472,15 @@ function getIPsHost(ip) {
             let selectBtn = document.getElementById("selectHostBtn")
             let cancleBtn = document.getElementById("cancelBtn")
             cancleBtn.addEventListener("click", e => {
+                e.preventDefault()
                 hostSelect.hide();
                 resolve(null)
+            });
+            let cancelAllBtn = document.getElementById("cancelAllBtn")
+            cancelAllBtn.addEventListener("click", e => {
+                e.preventDefault()
+                hostSelect.hide();
+                resolve(-999) // this is the signal to cancel the whole process
             });
             let customButtonSet = e => {
                 hDiv.innerHTML = ""
@@ -2772,13 +2778,14 @@ async function createNodesAndEdges(objects) {
 }
 
 async function resolveIP2Host() {
-    console.log("ip resover called")
+    console.log("ip resolver called")
     for (const [key, value] of caseData.nodeTranslation) {
         if (ipRegex.test(key)) {
             if (caseData.ip2hostMapperFromFile[key])
                 caseData.nodeTranslation.set(key, caseData.ip2hostMapperFromFile[key][0])
             else {
                 let selection = await getIPsHost(key)
+                if (selection === -999) return // cancel all (the cancel button returns -999)
                 if (selection) caseData.nodeTranslation.set(key, selection) // skip if no selection was made
             }
         }
