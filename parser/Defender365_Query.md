@@ -17,4 +17,15 @@
 
 Simply export it and upload it to Blauhaunt...
 
-(Likely you have to chunk by using the starttime and endtime variable since Denfender is limited to 10k lines of export *measly*
+(Likely you have to chunk by using the starttime and endtime variable since Denfender is limited to 10k lines of export *measly*)
+
+# IP to Host Mapping:
+        DeviceLogonEvents
+        | where RemoteDeviceName != ""
+        | where RemoteIP !startswith "127."
+        | where RemoteIP !in ("", "-")
+        | project RemoteDeviceName, RemoteIP
+        | summarize by RemoteDeviceName, RemoteIP
+
+Import this into last input field:
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/60983c02-e2e2-41f0-9b2c-d8953614b22d)
