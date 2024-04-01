@@ -1013,13 +1013,14 @@ function filter(filterObject) {
         })
     }
 
+    // filter for source hosts and destination hosts - todo actually I am not sure why I did this and if it is still needed - but it does not destroy anything so far...
     if (filterObject.srcHosts && filterObject.dstHosts && !filterObject.users) {
         filtered_edges = filtered_edges.filter(edge => {
             return (filterObject.srcHosts.test(edge.data.source) && filterObject.dstHosts.test(edge.data.target))
         })
     }
 
-
+    // filter for Tags
     if (filterObject.tags && filterObject.tags.length > 0) {
         filtered_edges = filtered_edges.filter(event => {
             try {
@@ -1031,6 +1032,18 @@ function filter(filterObject) {
             } catch (error) {
                 return false
             }
+        })
+    }
+
+    // filter for min connections out
+    let minConnectionsOut = document.getElementById("minOutgoingConnections").value
+    if (minConnectionsOut) {
+        let conCount = new Map()
+        filtered_edges.forEach(edge => {
+            conCount.set(edge.data.source, (conCount.get(edge.data.source) || 0) + 1)
+        })
+        filtered_edges = filtered_edges.filter(edge => {
+            return conCount.get(edge.data.source) >= minConnectionsOut
         })
     }
     processFilteredEdgesToNodes()
