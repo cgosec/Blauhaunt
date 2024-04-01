@@ -77,8 +77,7 @@
                                 <div class="btn-group">
                                     <label data-bs-placement="bottom" data-bs-toggle="tooltip"
                                            title="Find a path from one System to an other">
-                                        <button type="button" class="btn btn-outline-secondary"
-                                                onclick="resolveIP2Host()">
+                                        <button type="button" class="btn btn-outline-secondary">
                                             Path
                                         </button>
                                     </label>
@@ -90,10 +89,10 @@
                                     <div aria-labelledby="findPathBtn" class="dropdown-menu">
                                         <div>Find paths to system</div>
                                         <div class="">
-                                            <label for="oldNodeName"></label><input type="text" class="form-control"
+                                            <label for="oldNodeName"></label><input type="text" class="form-control cleanOnLoad"
                                                                                     id="findPathSrcSystem"
                                                                                     placeholder="SOURCE">
-                                            <label for="newNodeName"></label><input type="text" class="form-control"
+                                            <label for="newNodeName"></label><input type="text" class="form-control cleanOnLoad"
                                                                                     id="findPathDstSystem"
                                                                                     placeholder="DESTINATION">
                                             <button class="btn btn-success"
@@ -522,7 +521,7 @@
                     <div class="d-flex flex-row">
                         <label data-bs-placement="bottom" data-bs-toggle="tooltip"
                                title="A threshold for the least amount of systems the source needs to have connections to. This happens after the other filers applied">
-                            <input class="form-control" id="minOutgoingConnections"
+                            <input class="form-control cleanOnLoad" id="minOutgoingConnections"
                                    placeholder="Min Outgoing Connections"
                                    type="number"/>
                         </label>

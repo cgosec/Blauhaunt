@@ -1094,7 +1094,7 @@ function findPath(source, destination, path, dateLaterThan = null, initial = tru
                 console.debug(edge.data.EventTimes)
                 findPath(edge.data.target, destination, tmp_path, earliestDateThatIsLaterThan, false)
             }
-            filtered_edges = matches
+            filtered_edges = [...new Set(matches)]
             processFilteredEdgesToNodes()
         }
     })
