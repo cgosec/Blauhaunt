@@ -9,11 +9,15 @@ A tool collection for filtering and visualizing logon events. Designed to help a
 - [Architecture](#architekture)
 - [PowerShell Script](#powershell-script)
 - [Velociraptor Artifact](#velociraptor-artifact)
+- [Defender 365 KUSTO Query](#defender)
 - [Acknowledgements](#acknowledgements)
 
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/15c59e4a-1827-4c6e-ad06-af1813966d0c)
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/a262a8f1-b6e2-418a-aa0b-c85ad7e20168)
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/8add5635-1ef2-417d-93e7-2fe05b40b04d)
+### Interactive User Graph
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/3e15114d-6413-4a4c-9c7b-51b3903f7c71)
+### Heatmap of User activities
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/af2eb726-5621-4c2d-bd2b-0720100f6d9a)
+### Timeline
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/db54d02c-b315-42dc-9f8a-498b3e3f8bd7)
 
 ## Get started
 Running Blauhaunt is as simple as that:
@@ -32,8 +36,26 @@ Now you can navigate to http://localhost:8000/ in your browser and start blau ha
 
 Some random test data is in the directory test_data to get started. However this is just randomly generated and nothing to start investigate with.
 
+## Integrate into Velociraptor
+
+You can use Velociraptors reverse proxy capability to host Blauhaunt directly within your instance. Blauhaunt is Velo Aware. If You do so, Blauhaunt will get the Data automaticall from Velociraptor and you do not have to upload data.
+
+You need to start a Hunt with the Velo Artifact. You can use the Monitoring Artifact too to get real time data form Velo.
+
+### Velo Settings:
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/7f4d2b98-cc47-4da8-9931-0d08155a61d3)
+
+see: [Velo Docs](https://docs.velociraptor.app/docs/deployment/references/#GUI.reverse_proxy)
+
+*hint* the url is absolute. I did not test yet, if you can just reference the hosted instance elsewhere...
+
+Thats basically all you have to do.... :)
+
+big big thanks to Mike Cohen who helped me with the workflow for CSRF-Tokens and the not documented REST-API of Velo.
+
 ### Upload Data
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c1176bd5-b3e5-4208-80d6-2bdf02e218e9)
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/ae87f5f5-f95b-4c8b-88fc-2845a334030f)
 Klick "Upload Data" (surprising isn't it :-P)
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/23d391c9-af24-44b2-853e-cf064eb2bcb2)
@@ -74,25 +96,18 @@ When everything is correct click ![image](https://github.com/cgosec/Blauhaunt/as
 
 When done click ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/014b2359-02ec-44b5-943b-28d8c5f61025)
 
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/993df0ce-9f77-4117-b775-23650fd0f20d)
-
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/a56c1b26-c949-4e3d-b9c3-a8828bb2af6d)
 If everything was processed as intended you should now see the number of total nodes and edges
 
 ### Filtering
 
 Click ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/2df6081e-6041-46b6-b905-53e2fc5955d2) to open the sidebar.
 
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/52d54b5d-c63e-4f6d-b379-9f645d26fe3c)
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/a28f4794-f30e-4d12-8fd7-4a4d57e15743)
 
-The User Filter applies to the users. All Usernames are set to uppercase when parsing. This is important for filtering!
+The Filter Sidepar shows up
 
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/e898c429-7474-4814-8303-8ec091415013)
-
-The Src Host Filter specifies systems from where the user initiated the connection. Filtering for Src Hosts only works when the graph is set to System ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/37c81db6-75cb-4d87-b8ca-355314eeb0c6)
-
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/aee5d6bb-e1c3-4f1d-89cb-cb210208c9de)
-
-The Dst Host filter specifies systems that where target of logons.
+**MOST FILTERS HAVE TOOLTIPS SO I WILL NOT EXPLAIN EVERY FILTER IN DETAIL**
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/76cd7b27-e476-4bb5-8fe6-45d8983bb7e0)
 
@@ -102,9 +117,11 @@ Filter for a time span for activities.
 
 The Daily times filter specifies from what time we are interested in the events. This is useful if nightly user logons are not common in your environment. This is regardless of the date - that means in your timespan only events that occurred during that hourly timespan are in the set. (Works over night like in the example picture too)
 
-![image](https://github.com/cgosec/Blauhaunt/assets/147876916/e7447115-cd1f-4455-975a-06eb066fc68c)
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/406cdc5a-799f-4aa6-8315-3c8391cb2907)
 
-By default events where source and destination are the same node are not displayed. If you want to display them active it by clicking.
+**Highlighted**: You can permanently highlight edges by holding CTRL and clicking on them. This also works for every element where temporary highlighting is actice - just hold CRL and click on the element to highlight edges permanently. (Elements are e.g. Timeline on the left; Stats on mouse over; when clicking the destination host) 
+
+**ToSelf**: By default events where source and destination are the same node are not displayed. If you want to display them active it by clicking.
 
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c6cbe668-e6c8-4f54-b1a4-41e1085dc26b)
 
@@ -129,34 +146,75 @@ When your filters are set you need to press render to display the results.
 ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/c35535fa-4a23-4437-8abd-15c630b57050)
 
 #### Graph
-comming soon
+The default Graph calculates the position of systems according to their activitie median time (Y-Axis) and their total number of connections (X-Axis). 
+
+**Y-Axis**: Calculated Activitie time early-top to latest-down
+
+**X-Axis**: The more centered a system is, the more connections have this system either as source or destination. Left to right is randomly distributed. (The more outside the less active a system has been)
+
+**Size**: The Size of the nodes indicates their outgoing activities
+
+The Graph is calculated every time before rendering. Position and size is always relative according to the filters set.
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/691043c5-e218-4ea7-8df9-8ec1de6d7caf)
+
+When clicking on a Node you can get further systems information. (Some need the clients() output like OS or Tags.
+
+IPs can be more than one. When data is loaded every Event that has the hostname and an IP in it, will create a list that is presented here. (Multiple entries can be e.g. because of NAT-Devices or Multiple Network Adapters / IP Changes)
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/95cc3271-4eb3-447d-beb9-c5935431589d)
+
+When clicking on an edge you get further information about the connection. You can open up a list of Timestamps that shows you when this event has occured.
+
 
 #### Timeline
-comming soon
+
+The Timeline is the timeline...
 
 #### Heatmap
-comming soon
+
+The heatmap gives you a quick overview of the usual day by day behavior of users. You can click on a day to quickly switch to the graph of the day and the users connections.
+
+The color indicator is not per user but in total. It takes account of your filters.
+
 
 If you want to change from one view to another: choose the view you need and then click render.
 'Be careful with Timeline! Few nodes and edges can still have a huge timeline!* Checking the Stats ![image](https://github.com/cgosec/Blauhaunt/assets/147876916/29429607-9a31-4633-a86e-70a9b70fa5ee) is a good idea before rendering a timeline.
 
 ### Graph Style
-comming soon
+
+You can choose between some variations...
 
 ### Tag vizualisation
-comming soon
+
+You can choose a color for a Tag. The number to specify indicates the priorities when multiple Tags match. The highest number wins.
 
 ### Exports
-comming soon
+
+You can Export:
+
+- Timeline as CSV
+- Graph as PNG / JPEG
+- GraphJSON (from the library cytoscape)
 
 ### Stats
-comming soon
 
-### Node information
-comming soon
+Stats give you a good indication for what to filter out or to pivot for when starting the investigation.
+Stats take account of your filters.
 
-### Edge information
-comming soon
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/aa01e14e-3ecd-4ef8-97e3-ef4cce2182c0)
+
+System Stats:
+- To Systems = Number of Systems connected to followed by (Sum of connections to systems in total)
+- From Systems = Number of Systems that connected to this System followed by (Sum of connections to this systems in total)
+- Users out = Number of Users that were observed connection to other systems from this System
+- Users in = Number of Users that were observed connecting to this System
+
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/eb8c4131-7bd4-4d1e-8d24-a8d4ce6f7aec)
+
+User Stats:
+- To Systems = Number of Systems the User connected to followed by (Sum of connections in total)
+
 
 ## Integration in investigation
 I recommend using Blauhaunt with [Velociraptor](https://github.com/Velocidex/velociraptor) since it is the fastest way to get data from multiple systems. The Blauhaunt import format for event data and client info is the one that can be exported from Velo.
@@ -196,8 +254,6 @@ To not have too many nodes at the same spot there is some movement when there ar
 
 The other layouts are defaults from the cytoscape universe that can be chosen as well.
 
-### Filters
-description comming soon
 
 ### Displays
 description comming soon
@@ -246,7 +302,7 @@ This is the input Schema for the Event data that is needed by Blauhaunt to proce
 Can be any CSV File. Delimiter can be specified and cols for Hostname and IP can be choosen
 
 
-## PowerShell Script
+## PowerShell Script (deprectated - use the quick velo instead)
 blauhaunt_script.ps1
 If you face any issues with execution policy the easiest thing to do is to spawn a powershell with execution policy bypass like this:
 
@@ -269,7 +325,6 @@ You can simply take the json export from this artefact to import it into Blauhau
 The client_info import is designed to work directly with the client_info from Velociraptor too. You can simply export the json file and upload it into Blauhaunt.
 
 ### Usage
-_Comming soon: how to use Blauhaunt in Velo GUI_
 
 If you want to parse event logs collected from a system offline using velociraptor, you can do so like this:
 
@@ -278,6 +333,15 @@ If you want to parse event logs collected from a system offline using velocirapt
 If you dislike typing long paths, feel free to use the provided quick script:
  
      .\quick_velo.ps1 -EventLogDirectory C:\my\awesome\storage\path 
+
+## Defender
+
+You can import Data from Defender365 into Blauhaunt by using this Hunting Query:
+
+[Defender 365 Query](https://github.com/cgosec/Blauhaunt/blob/main/parser/Defender365_Query.md)
+
+run the query, export the csv and direktly load it into Blauhaunt...
+
 
 ## Acknowledgements
  - [SEC Consult](https://sec-consult.com/de/) This work was massively motivated by my work in and with the SEC Defence team
