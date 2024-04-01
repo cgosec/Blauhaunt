@@ -1049,6 +1049,58 @@ function filter(filterObject) {
     processFilteredEdgesToNodes()
 }
 
+let matches = []
+
+function findPath(source, destination, path, dateLaterThan = null, initial = true) {
+    if (initial)
+        matches = []
+    if (!path)
+        path = []
+    let current_path = []
+    dateLaterThan = dateLaterThan || new Date(0)
+    console.debug(`finding path from ${source} to ${destination} with date later than ${dateLaterThan}`)
+    filtered_edges.forEach(edge => {
+        if (edge.data.source === source) {
+            if (edge.data.EventTimes.filter(t => {
+                return new Date(t) >= dateLaterThan
+            }).length === 0) {
+                console.debug("no event times later than " + dateLaterThan)
+                console.debug(edge.data.EventTimes)
+                return;
+            }
+            if (edge.data.target === destination) {
+                console.debug("found path")
+                path.push(edge)
+                matches.push(...path)
+            } else {
+                // check if the target is already in the path to avoid loops
+                if (path.filter(p => {
+                    return p.data.source === edge.data.target
+                }).length > 0) {
+                    console.debug(edge.data.target + " is already in the path")
+                    console.debug(path)
+                    return
+                }
+                console.debug(`going deeper: ${edge.data.target}`)
+                let tmp_path = [...path]
+                tmp_path.push(edge)
+                let datesLaterThan = edge.data.EventTimes.filter(t => {
+                    return new Date(t) >= dateLaterThan
+                })
+                let earliestDateThatIsLaterThan = new Date(Math.min(...datesLaterThan.map(d => {
+                    return new Date(d).getTime()
+                })))
+                console.debug("earliest date that is later than " + dateLaterThan + " is " + earliestDateThatIsLaterThan)
+                console.debug(edge.data.EventTimes)
+                findPath(edge.data.target, destination, tmp_path, earliestDateThatIsLaterThan, false)
+            }
+            filtered_edges = matches
+            processFilteredEdgesToNodes()
+        }
+    })
+
+}
+
 function joinEdges(edges) {
     // this function joins edges that have the same source and target, in order to reduce the number of edges
     // toDo this can not be applied with the custom ranking / sorting algorithm

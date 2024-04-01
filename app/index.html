@@ -64,7 +64,7 @@
             </button>
             <div class="collapse navbar-collapse nav-fill" id="navbarNav">
                 <div class="row w-100 justify-content-center">
-                    <div class="col-3 justify-content-start">
+                    <div class="col-4 justify-content-start">
                         <ul class="navbar-nav">
                             <li class="nav-item">
                                 <button class="btn btn-outline-primary" onclick="{
@@ -73,6 +73,37 @@
                                     Filters
                                 </button>
                             </li>
+                            <li class="nav-item">
+                                <div class="btn-group">
+                                    <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                                           title="Find a path from one System to an other">
+                                        <button type="button" class="btn btn-outline-secondary"
+                                                onclick="resolveIP2Host()">
+                                            Path
+                                        </button>
+                                    </label>
+                                    <button aria-expanded="false" aria-haspopup="true"
+                                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                                            data-bs-toggle="dropdown" id="findPathBtn" role="button" type="button">
+                                        <span class="sr-only"></span>
+                                    </button>
+                                    <div aria-labelledby="findPathBtn" class="dropdown-menu">
+                                        <div>Find paths to system</div>
+                                        <div class="">
+                                            <label for="oldNodeName"></label><input type="text" class="form-control"
+                                                                                    id="findPathSrcSystem"
+                                                                                    placeholder="SOURCE">
+                                            <label for="newNodeName"></label><input type="text" class="form-control"
+                                                                                    id="findPathDstSystem"
+                                                                                    placeholder="DESTINATION">
+                                            <button class="btn btn-success"
+                                                    onclick="findPath(document.getElementById('findPathSrcSystem').value,
+                                                    document.getElementById('findPathDstSystem').value)"
+                                                    type="button">Find
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             <li class="nav-item">
                                 <div class="btn-group">
                                     <button class="btn btn-outline-secondary" type="button" id="currentDisplayBtn"
@@ -491,9 +522,9 @@
                     <div class="d-flex flex-row">
                         <label data-bs-placement="bottom" data-bs-toggle="tooltip"
                                title="A threshold for the least amount of systems the source needs to have connections to. This happens after the other filers applied">
-                                <input class="form-control" id="minOutgoingConnections"
-                                       placeholder="Min Outgoing Connections"
-                                       type="number"/>
+                            <input class="form-control" id="minOutgoingConnections"
+                                   placeholder="Min Outgoing Connections"
+                                   type="number"/>
                         </label>
                     </div>
                     <hr>
