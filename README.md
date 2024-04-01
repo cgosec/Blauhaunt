@@ -2,6 +2,8 @@
 A tool collection for filtering and visualizing logon events. Designed to help answering the "Cotton Eye Joe" question (Where did you come from where did you go) in Security Incidents and Threat Hunts.
 
 ***This tool is designed for experienced DFIR specialists. You may have little to none usage from it without experience in Threat Hunting*** 
+![image](https://github.com/cgosec/Blauhaunt/assets/147876916/5b5c7ddb-1a89-479d-9f61-2dd34edc3e6e)
+
 
 ## Table of Contents  
 - [Get started](#get-started)
