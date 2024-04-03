@@ -2436,13 +2436,13 @@ function exportCaseJSON(caseName) {
 }
 
 function exportPNG() {
-    var png64 = cy.png({scale: 15});
+    var png64 = cy.png({scale: 10});
     var exptag = document.getElementById('export-png');
     exptag.href = png64;
 }
 
 function exportJPEG() {
-    var jpg64 = cy.png({scale: 15});
+    var jpg64 = cy.png({scale: 10});
     var exptag = document.getElementById('export-jpeg');
     exptag.href = jpg64;
 }
