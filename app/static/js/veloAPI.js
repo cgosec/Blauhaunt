@@ -57,6 +57,9 @@ function getNotebook(huntID) {
                 notebooks.push(notebookID);
             }
         });
+        if (notebooks.length === 0) {
+            return;
+        }
         // if there are more notebooks wit the artifact name, show a modal to select the notebook to use
         if (notebooks.length > 1) {
             selectionModal("Select Notebook", notebooks).then(selectedNotebook => {
@@ -66,7 +69,7 @@ function getNotebook(huntID) {
                 getCells(selectedNotebook);
             });
         } else {
-            getCells(notebookID);
+            getCells(notebooks[0]);
         }
     });
 }
@@ -133,6 +136,9 @@ function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
     ).then(response => {
         return response.json()
     }).then(data => {
+        if (data.rows === undefined) {
+            return;
+        }
         data.rows.forEach(row => {
             row = row.cell;
             let entry = {}
@@ -378,7 +384,6 @@ function createSyncBtn() {
     wrapper.appendChild(syncLabel);
     document.getElementById("casesBtnGrp").innerHTML = "";
     document.getElementById("casesBtnGrp").appendChild(wrapper);
-
 }
 
 function checkForVelociraptor() {
@@ -386,6 +391,10 @@ function checkForVelociraptor() {
         return response.json()
     }).then(data => {
         let orgID = data.interface_traits.org;
+        if (orgID === undefined) {
+            console.log("No ordID available. Running in standalone mode... may you try to select an organization.");
+            return;
+        }
         header = {"Grpc-Metadata-Orgid": orgID}
         // hide the Upload button
         let replaceBtn = document.getElementById("dataBtnWrapper");

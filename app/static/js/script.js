@@ -479,6 +479,7 @@ function retrieveDataFromIndexDB(caseName, callback) {
                 if (callback)
                     callback()
             } catch (e) {
+                console.log("some case Data could not be loaded... the error message was caught and is only for display")
                 console.error(e)
             }
         }
