@@ -1049,16 +1049,19 @@ function filter(filterObject) {
     processFilteredEdgesToNodes()
 }
 
-let matches = []
 
-function findPath(source, destination, path, dateLaterThan = null, initial = true) {
+function findPath(source, destination, path, result_collector, dateLaterThan = null, initial = true, depth = 0, maxIterations = 100) {
     if (initial)
-        matches = []
+        console.log("initial call for path search")
     if (!path)
         path = []
     let current_path = []
     dateLaterThan = dateLaterThan || new Date(0)
     console.debug(`finding path from ${source} to ${destination} with date later than ${dateLaterThan}`)
+    if (depth >= maxIterations) {
+        console.log("max iterations reached")
+        return
+    }
     filtered_edges.forEach(edge => {
         if (edge.data.source === source) {
             if (edge.data.EventTimes.filter(t => {
@@ -1071,7 +1074,7 @@ function findPath(source, destination, path, dateLaterThan = null, initial = tru
             if (edge.data.target === destination) {
                 console.debug("found path")
                 path.push(edge)
-                matches.push(...path)
+                result_collector.push(...path)
             } else {
                 // check if the target is already in the path to avoid loops
                 if (path.filter(p => {
@@ -1092,13 +1095,18 @@ function findPath(source, destination, path, dateLaterThan = null, initial = tru
                 })))
                 console.debug("earliest date that is later than " + dateLaterThan + " is " + earliestDateThatIsLaterThan)
                 console.debug(edge.data.EventTimes)
-                findPath(edge.data.target, destination, tmp_path, earliestDateThatIsLaterThan, false)
+                findPath(edge.data.target, destination, tmp_path, result_collector, earliestDateThatIsLaterThan, false, depth + 1, maxIterations)
             }
-            filtered_edges = [...new Set(matches)]
-            processFilteredEdgesToNodes()
         }
     })
+    return [...new Set(path)] // the path is returned, of the source itself is not relevant for the search it can be ignored if a path form to is intended and not iterations back
+}
 
+function findPathBtnClick(source, destination) {
+    let matches = []
+    findPath(source, destination, null, matches, null, true)
+    filtered_edges = [...new Set(matches)]
+    processFilteredEdgesToNodes()
 }
 
 function joinEdges(edges) {
