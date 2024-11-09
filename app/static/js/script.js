@@ -451,6 +451,12 @@ function retrieveDataFromIndexDB(caseName, callback) {
 
         getRequest.onsuccess = function (event) {
             caseData = event.target.result
+            if (!caseData) {
+                console.error("No data found for case " + caseName)
+                console.log("Generating blank case data")
+                generateBlankCaseData()
+                return
+            }
             console.log(`${caseName} data loaded from IndexDB:`)
             console.log(caseData)
             try {
@@ -646,6 +652,15 @@ function createEventIDBtn(eventID, description) {
     // this function creates the buttons dynamically to filter for eventIDs
     if (caseData.eventIDs.has(eventID)) return
     caseData.eventIDs.add(eventID)
+    for (const btnGrp of document.getElementsByClassName("eventBtnGroup")){
+        // we have to check each button group if the id is already in
+        for (const btn of btnGrp.children){
+            if (btn.innerText === ('' + eventID)){
+                console.log("Event ID already in btnGroup")
+                return
+            }
+        }
+    }
     let eventBtnGroups = document.getElementsByClassName("eventBtnGroup")
     let currentBtnGroupForEventBtns;
     try {
