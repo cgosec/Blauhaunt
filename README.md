@@ -50,7 +50,9 @@ You need to start a Hunt with the Velo Artifact. You can use the Monitoring Arti
 
 see: [Velo Docs](https://docs.velociraptor.app/docs/deployment/references/#GUI.reverse_proxy)
 
-*hint* the url is absolute. I did not test yet, if you can just reference the hosted instance elsewhere...
+*hint* I did not get this running having the GUI hosted on windows. But you can use the URI to a hosted instance on a https server there too
+
+**UPDATE** Since you can set Tags for Hunts now you need to add the Tag "Blauhaunt" to your Hunt to be processed. Otherwise Blauhaunt will not find it!
 
 Thats basically all you have to do.... :)
 
