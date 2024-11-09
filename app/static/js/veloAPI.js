@@ -1,6 +1,7 @@
 let artifactName = "Custom.Windows.EventLogs.Blauhaunt"
 let monitoringArtifact = "Custom.Windows.Events.Blauhaunt"
-let url = window.location.origin
+let velo_url = window.location.origin
+let BLAUHAUNT_TAG = "Blauhaunt"
 let header = {}
 checkForVelociraptor()
 
@@ -46,7 +47,7 @@ function selectionModal(title, selectionList) {
 
 function getNotebook(huntID) {
     let notebooks = []
-    fetch(url + '/api/v1/GetHunt?hunt_id=' + huntID, {headers: header}).then(response => {
+    fetch(velo_url + '/api/v1/GetHunt?hunt_id=' + huntID, {headers: header}).then(response => {
         return response.json()
     }).then(data => {
         let artifacts = data.artifacts;
@@ -75,11 +76,13 @@ function getNotebook(huntID) {
 }
 
 function getCells(notebookID) {
-    fetch(url + `/api/v1/GetNotebooks?notebook_id=${notebookID}&include_uploads=true`, {headers: header}).then(response => {
+    fetch(velo_url + `/api/v1/GetNotebooks?notebook_id=${notebookID}&include_uploads=true`, {headers: header}).then(response => {
         // get the X-Csrf-Token form the header of the response
         localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
         return response.json()
     }).then(data => {
+        console.log("Notebook Data:")
+        console.log(data)
         let cells = data.items;
         if (cells.length > 1) {
             let cellIDs = {}
@@ -89,7 +92,7 @@ function getCells(notebookID) {
                     let i = 0
                     while (cellIDs[metadata.cell_id + suffix] !== undefined) {
                         suffix = "_" + i
-                    }
+                    } // check if the cell_id is already in the list, if so add a suffix to it
                     cellIDs[metadata.cell_id + suffix] = {cell_id: metadata.cell_id, version: metadata.timestamp};
                 });
             });
@@ -110,7 +113,7 @@ function getCells(notebookID) {
 
 function updateData(notebookID, cellID, version, csrf_token) {
     header["X-Csrf-Token"] = csrf_token
-    fetch(url + '/api/v1/UpdateNotebookCell', {
+    fetch(velo_url + '/api/v1/UpdateNotebookCell', {
         method: 'POST',
         headers: header,
         body: JSON.stringify({
@@ -123,31 +126,32 @@ function updateData(notebookID, cellID, version, csrf_token) {
     }).then(response => {
         return response.json()
     }).then(data => {
-
-        loadData(notebookID, cellID, version);
+        console.log("Notebook Data:")
+        console.log(data)
+        loadData(notebookID, data.cell_id, data.current_version);
     });
 }
 
 let dataRows = []
 
 function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
-    fetch(url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
+    fetch(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
     }).then(data => {
-        if (data.rows === undefined) {
+        console.log("Cell Data:")
+        console.log(data)
+        if (!data.rows) {
+            console.log("no data found")
             return;
         }
+        let keys = data.columns;
         data.rows.forEach(row => {
-            row = row.cell;
+            let rowData = JSON.parse(row.json)
             let entry = {}
-            for (i = 0; i < row.length; i++) {
-                if (data.columns[i] === "LogonTimes") {
-                    entry[data.columns[i]] = JSON.parse(row[i]);
-                    continue;
-                }
-                entry[data.columns[i]] = row[i];
+            for (i = 0; i < rowData.length; i++) {
+                entry[keys[i]] = rowData[i];
             }
             dataRows.push(JSON.stringify(entry));
         });
@@ -165,20 +169,44 @@ function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
 }
 
 function getHunts(orgID) {
-    url = window.location.origin
-    fetch(url + '/api/v1/ListHunts?count=2000&offset=0&summary=true&user_filter=', {headers: header}).then(response => {
+    velo_url = window.location.origin
+    const oldAPI = '/api/v1/ListHunts?count=2000&offset=0&summary=true&user_filter=';
+    const newAPI = "/api/v1/GetHuntTable?version=1&start_row=0&rows=20000&sort_direction=false"
+    fetch(velo_url + newAPI, {headers: header}).then(response => {
         return response.json()
     }).then(data => {
-        let hunts = data.items;
-        hunts.forEach(hunt => {
-            getNotebook(hunt.hunt_id);
-        });
+        try {
+            console.log(data)
+            let keys = data.columns;
+            let huntList = []
+            for (let hunt of data.rows) {
+                let h = {}
+                let huntData = JSON.parse(hunt.json);
+                for (let i = 0; i < keys.length; i++) {
+                    h[keys[i]] = huntData[i];
+                }
+                h.Tags = h.Tags || [] // to prevent errors when Tags is not set
+                huntList.push(h);
+            }
+            huntList.forEach(hunt => {
+                console.log(hunt)
+                console.log(hunt.Tags.includes(BLAUHAUNT_TAG))
+                if (hunt.Tags.includes(BLAUHAUNT_TAG)) {
+                    console.log("Blauhaunt Hunt found:")
+                    console.log(hunt)
+                    getNotebook(hunt.HuntId);
+                }
+            });
+        } catch (error) {
+            console.log(error)
+            console.log("error in getHunts")
+        }
     })
 }
 
 function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
     header["X-Csrf-Token"] = csrf_token
-    fetch(url + '/api/v1/UpdateNotebookCell', {
+    fetch(velo_url + '/api/v1/UpdateNotebookCell', {
         method: 'POST',
         headers: header,
         body: JSON.stringify({
@@ -196,7 +224,7 @@ function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
 }
 
 function getClientInfoFromVelo() {
-    fetch(url + '/api/v1/GetNotebooks?count=1000&offset=0', {headers: header}).then(response => {
+    fetch(velo_url + '/api/v1/GetNotebooks?count=1000&offset=0', {headers: header}).then(response => {
         localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
         return response.json()
     }).then(data => {
@@ -209,7 +237,7 @@ function getClientInfoFromVelo() {
             let notebookID = notebook.notebook_id;
             notebook.cell_metadata.forEach(metadata => {
                 let cellID = metadata.cell_id;
-                fetch(url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+                fetch(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
                     return response.json()
                 }).then(data => {
                     let query = data.input;
@@ -225,12 +253,13 @@ function getClientInfoFromVelo() {
 }
 
 function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow = 1000) {
-    fetch(url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
+    fetch(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
     }).then(data => {
-        clientIDs = []
+        console.log(data)
+        let clientIDs = []
         let clientRows = []
         data.rows.forEach(row => {
             row = row.cell;
@@ -268,60 +297,62 @@ function getFromMonitoringArtifact() {
     if (caseData.clientMonitoringLatestUpdate === undefined) {
         caseData.clientMonitoringLatestUpdate = {}
     }
-    caseData.clientIDs.forEach(clientID => {
-        console.debug("checking monitoring artifact for clientID: " + clientID)
-        let latestUpdate = caseData.clientMonitoringLatestUpdate[clientID] || 0;
-        fetch(url + `/api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=${latestUpdate}&end_time=9999999999&rows=10000`, {
-            headers: header
-        }).then(response => {
-            return response.json()
-        }).then(data => {
-            console.debug("monitoring data for clientID: " + clientID)
-            console.debug(data)
-            if (data.rows === undefined) {
-                return;
-            }
-            let rows = data.rows;
-            let serverTimeIndex = data.columns.indexOf("_ts");
-            let monitoringData = []
-            let maxUpdatedTime = 0;
-            rows.forEach(row => {
-                console.debug(`row time: ${row.cell[serverTimeIndex]}, lastUpdatedTime: ${latestUpdate}`)
-                if (row.cell[serverTimeIndex] > latestUpdate) {
-                    if (row.cell[serverTimeIndex] > maxUpdatedTime) {
-                        console.debug("updating maxUpdatedTime to" + row.cell[serverTimeIndex])
-                        maxUpdatedTime = row.cell[serverTimeIndex];
-                    }
-                    let entry = {}
-                    row.cell.forEach((cell, i) => {
-                        try {
-                            cell = JSON.parse(cell);
-                        } catch (e) {
+    if (caseData.clientIDs) {
+        caseData.clientIDs.forEach(clientID => {
+            console.debug("checking monitoring artifact for clientID: " + clientID)
+            let latestUpdate = caseData.clientMonitoringLatestUpdate[clientID] || 0;
+            fetch(velo_url + `/api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=${latestUpdate}&end_time=9999999999&rows=10000`, {
+                headers: header
+            }).then(response => {
+                return response.json()
+            }).then(data => {
+                console.debug("monitoring data for clientID: " + clientID)
+                console.debug(data)
+                if (data.rows === undefined) {
+                    return;
+                }
+                let rows = data.rows;
+                let serverTimeIndex = data.columns.indexOf("_ts");
+                let monitoringData = []
+                let maxUpdatedTime = 0;
+                rows.forEach(row => {
+                    console.debug(`row time: ${row.cell[serverTimeIndex]}, lastUpdatedTime: ${latestUpdate}`)
+                    if (row.cell[serverTimeIndex] > latestUpdate) {
+                        if (row.cell[serverTimeIndex] > maxUpdatedTime) {
+                            console.debug("updating maxUpdatedTime to" + row.cell[serverTimeIndex])
+                            maxUpdatedTime = row.cell[serverTimeIndex];
                         }
-                        if (data.columns[i] === "LogonTimes") {
-                            // if the column is LogonTimes is not an array, make it one
-                            if (!Array.isArray(cell)) {
-                                cell = [cell];
+                        let entry = {}
+                        row.cell.forEach((cell, i) => {
+                            try {
+                                cell = JSON.parse(cell);
+                            } catch (e) {
                             }
+                            if (data.columns[i] === "LogonTimes") {
+                                // if the column is LogonTimes is not an array, make it one
+                                if (!Array.isArray(cell)) {
+                                    cell = [cell];
+                                }
+                            }
+                            entry[data.columns[i]] = cell;
+                        });
+                        if (entry) {
+                            console.debug(entry)
+                            monitoringData.push(JSON.stringify(entry));
                         }
-                        entry[data.columns[i]] = cell;
-                    });
-                    if (entry) {
-                        console.debug(entry)
-                        monitoringData.push(JSON.stringify(entry));
                     }
+                });
+                caseData.clientMonitoringLatestUpdate[clientID] = maxUpdatedTime;
+                if (monitoringData.length > 0) {
+                    console.debug("monitoring data for clientID: " + clientID + " is being processed with " + monitoringData.length + " entries")
+                    processJSONUpload(monitoringData.join("\n")).then(() => {
+                        console.log("monitoring data processed");
+                        storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
+                    });
                 }
             });
-            caseData.clientMonitoringLatestUpdate[clientID] = maxUpdatedTime;
-            if (monitoringData.length > 0) {
-                console.debug("monitoring data for clientID: " + clientID + " is being processed with " + monitoringData.length + " entries")
-                processJSONUpload(monitoringData.join("\n")).then(() => {
-                    console.log("monitoring data processed");
-                    storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
-                });
-            }
         });
-    });
+    }
 }
 
 function changeBtn(replaceBtn, text, ordID) {
@@ -387,14 +418,10 @@ function createSyncBtn() {
 }
 
 function checkForVelociraptor() {
-    fetch(url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
+    fetch(velo_url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
         return response.json()
     }).then(data => {
-        let orgID = data.interface_traits.org;
-        if (orgID === undefined) {
-            console.log("No ordID available. Running in standalone mode... may you try to select an organization.");
-            return;
-        }
+        let orgID = data.interface_traits.org || 'root';
         header = {"Grpc-Metadata-Orgid": orgID}
         // hide the Upload button
         let replaceBtn = document.getElementById("dataBtnWrapper");
@@ -403,6 +430,7 @@ function checkForVelociraptor() {
         createSyncBtn()
         //getHunts(orgID);
     }).catch(error => {
+        console.log(error)
         console.log("seems to be not connected to Velociraptor.");
     });
 }
