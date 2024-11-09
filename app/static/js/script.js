@@ -3,8 +3,6 @@ let loading = document.getElementById('loading');
 loading.classList.add('loaded');
 
 let ds = document.getElementById("darkSwitch");
-let minConRange = document.getElementById("minConRange")
-let minConSwitch = document.getElementById("conMinSwitch")
 let fromDate = document.getElementById("from-date")
 let toDate = document.getElementById("to-date")
 let min_size = 30
@@ -476,7 +474,6 @@ function retrieveDataFromIndexDB(caseName, callback) {
                     }
                     tagSetNew.add(tag)
                 })
-                minConSwitch.disabled = false
                 timeOffsetList.selectedIndex = caseData.timezoneSelection
                 processEdgesToNodes()
                 document.getElementById("newCaseName").value = caseName
@@ -488,6 +485,7 @@ function retrieveDataFromIndexDB(caseName, callback) {
                 if (callback)
                     callback()
             } catch (e) {
+                console.log("some case Data could not be loaded... the error message was caught and is only for display")
                 console.error(e)
             }
         }
@@ -866,30 +864,58 @@ function filter(filterObject) {
 
     // filter for source hosts
     if (!userModGraph && filterObject.srcHosts) {
-        filtered_edges = filtered_edges.filter(edge => {
-            return filterObject.srcHosts.test(edge.data.source)
-        })
+        let invertsrcHosts = document.getElementById("invertSrcHostRegex").checked
+        if (invertsrcHosts) {
+            filtered_edges = filtered_edges.filter(edge => {
+                return !filterObject.srcHosts.test(edge.data.source)
+            })
+        } else {
+            filtered_edges = filtered_edges.filter(edge => {
+                return filterObject.srcHosts.test(edge.data.source)
+            })
+        }
     }
 
     // filter for users
     if (filterObject.users) {
-        filtered_edges = filtered_edges.filter(event => {
-            return filterObject.users.test(event.data.UserName)
-        })
+        let invertUsers = document.getElementById("invertUserRegex").checked
+        if (invertUsers) {
+            filtered_edges = filtered_edges.filter(edge => {
+                return !filterObject.users.test(edge.data.UserName)
+            })
+        } else {
+            filtered_edges = filtered_edges.filter(event => {
+                return filterObject.users.test(event.data.UserName)
+            })
+        }
     }
 
     // filter for destination hosts
     if (filterObject.dstHosts) {
-        filtered_edges = filtered_edges.filter(edge => {
-            return filterObject.dstHosts.test(edge.data.target)
-        })
+        let invertDstHosts = document.getElementById("invertDstHostRegex").checked
+        if (invertDstHosts) {
+            filtered_edges = filtered_edges.filter(edge => {
+                return !filterObject.dstHosts.test(edge.data.target)
+            })
+        } else {
+            filtered_edges = filtered_edges.filter(edge => {
+                return filterObject.dstHosts.test(edge.data.target)
+            })
+        }
     }
 
     // filter for custom distinction
     if (filterObject.customDistinction) {
-        filtered_edges = filtered_edges.filter(edge => {
-            return filterObject.customDistinction.test(edge.data.Distinction)
-        })
+        let invertCustomDistinction = document.getElementById("invertDistinctionRegex").checked
+        if (invertCustomDistinction) {
+            filtered_edges = filtered_edges.filter(edge => {
+                return !filterObject.customDistinction.test(edge.data.Distinction)
+            })
+        } else {
+            filtered_edges = filtered_edges.filter(edge => {
+                return filterObject.customDistinction.test(edge.data.Distinction)
+            })
+        }
     }
 
     // filter for event
@@ -1003,13 +1029,14 @@ function filter(filterObject) {
         })
     }
 
+    // filter for source hosts and destination hosts - todo actually I am not sure why I did this and if it is still needed - but it does not destroy anything so far...
     if (filterObject.srcHosts && filterObject.dstHosts && !filterObject.users) {
         filtered_edges = filtered_edges.filter(edge => {
             return (filterObject.srcHosts.test(edge.data.source) && filterObject.dstHosts.test(edge.data.target))
         })
     }
 
-
+    // filter for Tags
     if (filterObject.tags && filterObject.tags.length > 0) {
         filtered_edges = filtered_edges.filter(event => {
             try {
@@ -1023,6 +1050,78 @@ function filter(filterObject) {
             }
         })
     }
+
+    // filter for min connections out
+    let minConnectionsOut = document.getElementById("minOutgoingConnections").value
+    if (minConnectionsOut) {
+        let conCount = new Map()
+        filtered_edges.forEach(edge => {
+            conCount.set(edge.data.source, (conCount.get(edge.data.source) || 0) + 1)
+        })
+        filtered_edges = filtered_edges.filter(edge => {
+            return conCount.get(edge.data.source) >= minConnectionsOut
+        })
+    }
+    processFilteredEdgesToNodes()
+}
+
+
+function findPath(source, destination, path, result_collector, dateLaterThan = null, initial = true, depth = 0, maxIterations = 100) {
+    if (initial)
+        console.log("initial call for path search")
+    if (!path)
+        path = []
+    let current_path = []
+    dateLaterThan = dateLaterThan || new Date(0)
+    console.debug(`finding path from ${source} to ${destination} with date later than ${dateLaterThan}`)
+    if (depth >= maxIterations) {
+        console.log("max iterations reached")
+        return
+    }
+    filtered_edges.forEach(edge => {
+        if (edge.data.source === source) {
+            if (edge.data.EventTimes.filter(t => {
+                return new Date(t) >= dateLaterThan
+            }).length === 0) {
+                console.debug("no event times later than " + dateLaterThan)
+                console.debug(edge.data.EventTimes)
+                return;
+            }
+            if (edge.data.target === destination) {
+                console.debug("found path")
+                path.push(edge)
+                result_collector.push(...path)
+            } else {
+                // check if the target is already in the path to avoid loops
+                if (path.filter(p => {
+                    return p.data.source === edge.data.target
+                }).length > 0) {
+                    console.debug(edge.data.target + " is already in the path")
+                    console.debug(path)
+                    return
+                }
+                console.debug(`going deeper: ${edge.data.target}`)
+                let tmp_path = [...path]
+                tmp_path.push(edge)
+                let datesLaterThan = edge.data.EventTimes.filter(t => {
+                    return new Date(t) >= dateLaterThan
+                })
+                let earliestDateThatIsLaterThan = new Date(Math.min(...datesLaterThan.map(d => {
+                    return new Date(d).getTime()
+                })))
+                console.debug("earliest date that is later than " + dateLaterThan + " is " + earliestDateThatIsLaterThan)
+                console.debug(edge.data.EventTimes)
+                findPath(edge.data.target, destination, tmp_path, result_collector, earliestDateThatIsLaterThan, false, depth + 1, maxIterations)
+            }
+        }
+    })
+    return [...new Set(path)] // the path is returned, of the source itself is not relevant for the search it can be ignored if a path form to is intended and not iterations back
+}
+
+function findPathBtnClick(source, destination) {
+    let matches = []
+    findPath(source, destination, null, matches, null, true)
+    filtered_edges = [...new Set(matches)]
     processFilteredEdgesToNodes()
 }
 
@@ -2361,13 +2460,13 @@ function exportCaseJSON(caseName) {
 }
 
 function exportPNG() {
-    var png64 = cy.png({scale: 5});
+    var png64 = cy.png({scale: 10});
     var exptag = document.getElementById('export-png');
     exptag.href = png64;
 }
 
 function exportJPEG() {
-    var jpg64 = cy.png({scale: 5});
+    var jpg64 = cy.png({scale: 10});
     var exptag = document.getElementById('export-jpeg');
     exptag.href = jpg64;
 }
@@ -2844,8 +2943,15 @@ function parseDataFromJSON(jsonText) {
             data = JSON.parse(line)
             objects.push(data)
         } catch (error) {
-            console.log("Error processing this line:")
-            console.log(line)
+            console.log("trying to process data as exported by defender query...")
+            try {
+                line_ = line.replaceAll('""', '"').replace('"{', '{').replace('}"', '}')
+                data = JSON.parse(line_)
+                objects.push(data)
+            } catch (error) {
+                console.log("Error processing this line:")
+                console.log(line_)
+            }
         }
     }
     return objects

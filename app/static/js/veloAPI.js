@@ -58,6 +58,9 @@ function getNotebook(huntID) {
                 notebooks.push(notebookID);
             }
         });
+        if (notebooks.length === 0) {
+            return;
+        }
         // if there are more notebooks wit the artifact name, show a modal to select the notebook to use
         if (notebooks.length > 1) {
             selectionModal("Select Notebook", notebooks).then(selectedNotebook => {
@@ -67,7 +70,7 @@ function getNotebook(huntID) {
                 getCells(selectedNotebook);
             });
         } else {
-            getCells(notebookID);
+            getCells(notebooks[0]);
         }
     });
 }
