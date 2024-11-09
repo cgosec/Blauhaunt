@@ -344,35 +344,27 @@ function getFromMonitoringArtifact() {
             }).then(response => {
                 return response.json()
             }).then(data => {
-                console.debug("monitoring data for clientID: " + clientID)
+                console.debug("monitoring data for clientID: ")
                 console.debug(data)
                 if (data.rows === undefined) {
                     return;
                 }
+                let keys = data.columns;
                 let rows = data.rows;
                 let serverTimeIndex = data.columns.indexOf("_ts");
                 let monitoringData = []
                 let maxUpdatedTime = 0;
                 rows.forEach(row => {
-                    console.debug(`row time: ${row.cell[serverTimeIndex]}, lastUpdatedTime: ${latestUpdate}`)
-                    if (row.cell[serverTimeIndex] > latestUpdate) {
-                        if (row.cell[serverTimeIndex] > maxUpdatedTime) {
-                            console.debug("updating maxUpdatedTime to" + row.cell[serverTimeIndex])
-                            maxUpdatedTime = row.cell[serverTimeIndex];
+                    row = JSON.parse(row.json);
+                    console.debug(`row time: ${row[serverTimeIndex]}, lastUpdatedTime: ${latestUpdate}`)
+                    if (row[serverTimeIndex] > latestUpdate) {
+                        if (row[serverTimeIndex] > maxUpdatedTime) {
+                            console.debug("updating maxUpdatedTime to" + row[serverTimeIndex])
+                            maxUpdatedTime = row[serverTimeIndex];
                         }
                         let entry = {}
-                        row.cell.forEach((cell, i) => {
-                            try {
-                                cell = JSON.parse(cell);
-                            } catch (e) {
-                            }
-                            if (data.columns[i] === "LogonTimes") {
-                                // if the column is LogonTimes is not an array, make it one
-                                if (!Array.isArray(cell)) {
-                                    cell = [cell];
-                                }
-                            }
-                            entry[data.columns[i]] = cell;
+                        keys.forEach((key, index) => {
+                            entry[key] = row[index];
                         });
                         if (entry) {
                             console.debug(entry)
