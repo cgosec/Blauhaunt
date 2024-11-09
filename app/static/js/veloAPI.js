@@ -204,8 +204,8 @@ function getHunts(orgID) {
     })
 }
 
-function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
-    header["X-Csrf-Token"] = csrf_token
+function updateClientInfoData(clientInfoNotebook, cellID, version) {
+    header["X-Csrf-Token"] = localStorage.getItem('csrf-token')
     fetch(velo_url + '/api/v1/UpdateNotebookCell', {
         method: 'POST',
         headers: header,
@@ -219,7 +219,12 @@ function updateClientInfoData(clientInfoNotebook, cellID, version, csrf_token) {
     }).then(response => {
         return response.json()
     }).then(data => {
-        loadFromClientInfoCell(clientInfoNotebook, cellID, version);
+        console.log("Notebook Data:")
+        console.log(data)
+        cellID = data.cell_id;
+        version = data.current_version;
+        let timestamp = data.timestamp;
+        loadFromClientInfoCell(clientInfoNotebook, cellID, version, timestamp);
     });
 }
 
@@ -230,48 +235,81 @@ function getClientInfoFromVelo() {
     }).then(data => {
         let notebooks = data.items;
         if (!notebooks) {
-            return false;
-        }
-        let clientInfoNotebook = ""
-        notebooks.forEach(notebook => {
-            let notebookID = notebook.notebook_id;
-            notebook.cell_metadata.forEach(metadata => {
-                let cellID = metadata.cell_id;
-                fetch(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
-                    return response.json()
-                }).then(data => {
-                    let query = data.input;
-                    if (query.trim().toLowerCase() === 'select * from clients()') {
-                        clientInfoNotebook = notebookID
-                        let version = metadata.timestamp
-                        updateClientInfoData(clientInfoNotebook, cellID, version, localStorage.getItem('csrf-token'));
-                    }
+            createClientinfoNotebook()
+        } else {
+            let clientInfoNotebook = ""
+            notebooks.forEach(notebook => {
+                let notebookID = notebook.notebook_id;
+                notebook.cell_metadata.forEach(metadata => {
+                    let cellID = metadata.cell_id;
+                    fetch(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+                        return response.json()
+                    }).then(data => {
+                        let query = data.input;
+                        if (query.trim().toLowerCase() === 'select * from clients()') {
+                            let version = metadata.current_version;
+                            let timestamp = metadata.timestamp;
+                            updateClientInfoData(notebookID, cellID, version, timestamp);
+                        }
+                    });
                 });
             });
-        });
+        }
     });
 }
 
-function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow = 1000) {
-    fetch(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
+function createClientinfoNotebook() {
+    header["X-Csrf-Token"] = localStorage.getItem('csrf-token')
+    fetch("/api/v1/NewNotebook", {
+        headers: header,
+        "referrerPolicy": "strict-origin-when-cross-origin",
+        "body": "{\"name\":\"Blauhaunt Clientinfo\",\"description\":\"Auto created\",\"public\":true,\"artifacts\":[\"Notebooks.Default\"],\"specs\":[]}",
+        "method": "POST",
+        "mode": "cors",
+        "credentials": "include"
+    }).then(response => {
+        return response.json().then(data => {
+            console.log("Notebook for client info created")
+            console.log(data)
+            let clientInfoNotebook = data.notebook_id;
+            let cellID = data.cell_metadata[0].cell_id;
+            let version = data.cell_metadata[0].current_version;
+            fetch("/api/v1/UpdateNotebookCell", {
+                headers: header,
+                "body": `{"notebook_id":"${clientInfoNotebook}","cell_id":"${cellID}","type":"vql","currently_editing":false,"input":"select * from clients()"}`,
+                "method": "POST",
+                "mode": "cors",
+                "credentials": "include"
+            }).then(response => {
+                return response.json().then(data => {
+                    console.log("Notebook Data:")
+                    console.log(data)
+                    cellID = data.cell_id;
+                    version = data.current_version;
+                    let timestamp = data.timestamp;
+                    loadFromClientInfoCell(clientInfoNotebook, cellID, version, timestamp);
+                });
+            });
+        })
+    });
+}
+
+function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow = 0, toRow = 1000) {
+    fetch(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${timestamp}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
     }).then(data => {
+        console.log("Client Data:")
         console.log(data)
         let clientIDs = []
+        let keys = data.columns;
         let clientRows = []
         data.rows.forEach(row => {
-            row = row.cell;
+            row = JSON.parse(row.json);
             let entry = {}
             for (i = 0; i < row.length; i++) {
-                let value = null
-                try {
-                    value = JSON.parse(row[i]);
-                } catch (e) {
-                    value = row[i];
-                }
-                entry[data.columns[i]] = value;
+                entry[keys[i]] = row[i];
             }
             clientRows.push(JSON.stringify(entry));
             console.debug(entry)
@@ -282,7 +320,7 @@ function loadFromClientInfoCell(notebookID, cellID, version, startRow = 0, toRow
         caseData.clientIDs = clientIDs;
         // if there are more rows, load them
         if (data.total_rows > toRow) {
-            loadFromClientInfoCell(notebookID, cellID, version, startRow + toRow, toRow + 1000);
+            loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow + toRow, toRow + 1000);
         }
     });
 

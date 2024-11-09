@@ -467,6 +467,8 @@ function retrieveDataFromIndexDB(caseName, callback) {
                     }
                     eventSetNew.add(id)
                 })
+                console.log("Tags:")
+                console.log(caseData.tags)
                 caseData.tags.forEach(tag => {
                     if (!tagSetNew.has(tag)) {
                         caseData.tags.delete(tag)
@@ -476,7 +478,9 @@ function retrieveDataFromIndexDB(caseName, callback) {
                 })
                 timeOffsetList.selectedIndex = caseData.timezoneSelection
                 processEdgesToNodes()
-                document.getElementById("newCaseName").value = caseName
+                let caseNameElement = document.getElementById("newCaseName")
+                if (caseNameElement)
+                    caseNameElement.value = caseName
             } catch (e) {
                 console.error(e)
                 generateBlankCaseData()
@@ -650,10 +654,10 @@ function createEventIDBtn(eventID, description) {
     // this function creates the buttons dynamically to filter for eventIDs
     if (caseData.eventIDs.has(eventID)) return
     caseData.eventIDs.add(eventID)
-    for (const btnGrp of document.getElementsByClassName("eventBtnGroup")){
+    for (const btnGrp of document.getElementsByClassName("eventBtnGroup")) {
         // we have to check each button group if the id is already in
-        for (const btn of btnGrp.children){
-            if (btn.innerText === ('' + eventID)){
+        for (const btn of btnGrp.children) {
+            if (btn.innerText === ('' + eventID)) {
                 console.log("Event ID already in btnGroup")
                 return
             }
@@ -756,8 +760,10 @@ function createTagColorPicker(tag) {
 
 
 function createTagBtn(tag) {
+    tag = '' + tag
+    tag = tag.trim()
     // create filter buttons for tags
-    if (caseData.tags.has(tag) || ipRegex.test(tag)) return
+    if (caseData.tags.has(tag) || ipRegex.test(tag)) return // if the tag is an IP address it will not be displayed as a tag
     caseData.tags.add(tag)
     createTagColorPicker(tag)
     let tagBtnGroup = document.getElementsByClassName("tagBtnGroup")
@@ -772,13 +778,30 @@ function createTagBtn(tag) {
         currentBtnGrouForTagsBtns.role = "group"
         currentBtnGrouForTagsBtns.classList.add("btn-group")
         currentBtnGrouForTagsBtns.classList.add("tagBtnGroup")
-        document.getElementById("tagFilterFow").appendChild(currentBtnGrouForTagsBtns)
+        document.getElementById("tagFilterRow").appendChild(currentBtnGrouForTagsBtns)
     }
     let newEventBtn = `<label data-bs-toggle="tooltip" data-bs-placement="top" title="${tag}">
                         <input type="checkbox" id=${"tagBtn" + tag.replace(" ", "-")} value="${tag}" class="btn-check tagBtns">
                         <label class="btn btn-outline-secondary" for=${"tagBtn" + tag.replace(" ", "-")}>${tag}</label>
                     </label>`
-    currentBtnGrouForTagsBtns.innerHTML += newEventBtn //toDo someday with createNode
+    let evtBtnLabel = document.createElement("label")
+    evtBtnLabel.setAttribute("data-bs-toggle", "tooltip")
+    evtBtnLabel.setAttribute("data-bs-placement", "top")
+    evtBtnLabel.title = tag
+    let evtBtnInput = document.createElement("input")
+    evtBtnInput.type = "checkbox"
+    evtBtnInput.id = "tagBtn" + tag.replace(" ", "-")
+    evtBtnInput.value = tag
+    evtBtnInput.classList.add("btn-check")
+    evtBtnInput.classList.add("tagBtns")
+    let evtBtnInnerLabel = document.createElement("label")
+    evtBtnInnerLabel.classList.add("btn")
+    evtBtnInnerLabel.classList.add("btn-outline-secondary")
+    evtBtnInnerLabel.htmlFor = "tagBtn" + tag.replace(" ", "-")
+    evtBtnInnerLabel.innerText = tag
+    evtBtnLabel.appendChild(evtBtnInput)
+    evtBtnLabel.appendChild(evtBtnInnerLabel)
+    currentBtnGrouForTagsBtns.appendChild(evtBtnLabel)
 }
 
 
