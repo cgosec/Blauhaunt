@@ -592,64 +592,63 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!--THE MAIN STAGE -->
-    <div class="col main h-100" id="stage">
-        <div id="timespan" style="height: 90vh; z-index: 1"
-             class="d-flex position-absolute align-items-start flex-column dynamic-display"></div>
-        <div id="timeline" style="height: 90vh"
-             class="d-flex position-absolute container dynamic-display"></div>
-        <div id="heatmap" style="height: 90vh"
-             class="d-flex position-absolute container dynamic-display"></div>
-        <div id="innerStage" class="dynamic-display h-100">
-            <div id="cy" class="h-100">
-            </div>
-        </div>
-        <div id="loading">
-            <span class="fa fa-refresh fa-spin"></span>
-        </div>
-    </div>
-    <!-- THE STATS SIDEBAR -->
-    <div class="col-3 dropdown-menu position-absolute h-75 end-0 collapse overflow-auto" id="statsSideBar">
-        <div class="container overflow-auto">
-            <br>
-            <details>
-                <summary><b>System Stats</b></summary>
-                <div class="scrollbar-young-passion">
-                    <table class="table table-hover">
-                        <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">To Systems</th>
-                            <th scope="col">From Systems</th>
-                            <th scope="col">Users out</th>
-                            <th scope="col">Users in</th>
-                        </tr>
-                        </thead>
-                        <tbody id="sysTable"></tbody>
-                    </table>
+            <!--THE MAIN STAGE -->
+            <div class="col main" style="height: 90vh" id="stage">
+                <div id="timespan" style="height: 90vh; z-index: 1"
+                     class="d-flex position-absolute align-items-start flex-column dynamic-display"></div>
+                <div id="timeline" style="height: 90vh"
+                     class="d-flex position-absolute container dynamic-display"></div>
+                <div id="heatmap" style="height: 90vh"
+                     class="d-flex position-absolute container dynamic-display"></div>
+                <div id="innerStage" class="dynamic-display h-100">
+                    <div id="cy" class="h-100">
+                    </div>
                 </div>
-            </details>
-            <div class="container"></div>
-            <br>
-            <details>
-                <summary><b>User Stats</b></summary>
-                <table class="table table-hover scrollbar-young-passion">
-                    <thead>
-                    <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">To Systems</th>
-                    </tr>
-                    </thead>
-                    <tbody id="userTable"></tbody>
-                </table>
-            </details>
+                <div id="loading">
+                    <span class="fa fa-refresh fa-spin"></span>
+                </div>
+            </div>
+            <div class="col-4 dropdown-menu position-absolute end-0 collapse overflow-auto" id="statsSideBar"
+                 style="height: 90% !important;">
+                <div class="container overflow-auto">
+                    <br>
+                    <details>
+                        <summary><b>System Stats</b></summary>
+                        <div class="scrollbar-young-passion">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">To Systems</th>
+                                    <th scope="col">From Systems</th>
+                                    <th scope="col">Users out</th>
+                                    <th scope="col">Users in</th>
+                                </tr>
+                                </thead>
+                                <tbody id="sysTable"></tbody>
+                            </table>
+                        </div>
+                    </details>
+                    <div class="container"></div>
+                    <br>
+                    <details>
+                        <summary><b>User Stats</b></summary>
+                        <table class="table table-hover scrollbar-young-passion">
+                            <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">To Systems</th>
+                            </tr>
+                            </thead>
+                            <tbody id="userTable"></tbody>
+                        </table>
+                    </details>
+                </div>
+            </div>
+            <!-- THE STATS SIDEBAR -->
         </div>
     </div>
-</div>
-</div>
 </div>
 <!-- Modal -->
 <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="IP2HostConflict"

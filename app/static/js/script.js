@@ -58,7 +58,7 @@ for (const btn of graphStyle) {
     // the graph style buttons are used to switch between the different ways to display the graph.
     btn.addEventListener("click", e => {
         let mode = e.target.id
-        console.log(`Graph Style switched to ${mode}`)
+        console.debug(`Graph Style switched to ${mode}`)
         switch (mode) {
             case "modeUser":
                 // user --event--> system
@@ -155,7 +155,7 @@ function applyTimeOffsetToTimeString(isoString) {
 // Attach the event listener to the page to trigger defined short cuts
 document.addEventListener("keypress", e => {
     if (e.ctrlKey && e.key === "\x11" && !searchOpen) {
-        console.log("history")
+        console.debug("history")
         userSearchHistory()
         e.preventDefault(); // Prevent the default browser refresh
 
@@ -169,7 +169,7 @@ document.addEventListener("keypress", e => {
     }
     // store caseData to IndexDB with Ctrl + M
     else if (e.ctrlKey && e.code === "KeyM") {
-        console.log("saving case")
+        console.debug("saving case")
         e.preventDefault(); // Prevent the default browser refresh
         let caseName = document.getElementById("newCaseName").value
         // if no case name is give the user will be prompted to enter a case name
@@ -322,7 +322,7 @@ function storeDataToIndexDB(caseName) {
         // Store the data object with the given case name
         objectStore.put(caseData, caseName);
         transaction.oncomplete = function () {
-            console.log('Data stored in IndexedDB successfully.');
+            console.debug('Data stored in IndexedDB successfully.');
         };
         transaction.onerror = function (event) {
             console.error('Error storing data:', event.target.error);
@@ -338,7 +338,7 @@ function getCases() {
         const db = event.target.result;
         // Create an object store (table) in the database
         const objectStore = db.createObjectStore("BlauHauntCases");
-        console.log("BlauHaunt IndexDB created or updated")
+        console.debug("BlauHaunt IndexDB created or updated")
     };
     request.onerror = function (event) {
         console.error('Error opening database:', event.target.error);
@@ -410,7 +410,7 @@ function deleteCasefromIdexDB(caseName) {
         const deleteRequest = objectStore.delete(caseName);
 
         deleteRequest.onsuccess = function () {
-            console.log('Entry deleted successfully.');
+            console.debug('Entry deleted successfully.');
         };
 
         deleteRequest.onerror = function (event) {
@@ -418,7 +418,7 @@ function deleteCasefromIdexDB(caseName) {
         };
 
         transaction.oncomplete = function () {
-            console.log('Transaction completed.');
+            console.debug('Transaction completed.');
         };
 
         transaction.onerror = function (event) {
@@ -451,12 +451,12 @@ function retrieveDataFromIndexDB(caseName, callback) {
             caseData = event.target.result
             if (!caseData) {
                 console.error("No data found for case " + caseName)
-                console.log("Generating blank case data")
+                console.debug("Generating blank case data")
                 generateBlankCaseData()
                 return
             }
-            console.log(`${caseName} data loaded from IndexDB:`)
-            console.log(caseData)
+            console.debug(`${caseName} data loaded from IndexDB:`)
+            console.debug(caseData)
             try {
                 let eventSetNew = new Set()
                 let tagSetNew = new Set()
@@ -467,8 +467,8 @@ function retrieveDataFromIndexDB(caseName, callback) {
                     }
                     eventSetNew.add(id)
                 })
-                console.log("Tags:")
-                console.log(caseData.tags)
+                console.debug("Tags:")
+                console.debug(caseData.tags)
                 caseData.tags.forEach(tag => {
                     if (!tagSetNew.has(tag)) {
                         caseData.tags.delete(tag)
@@ -489,7 +489,7 @@ function retrieveDataFromIndexDB(caseName, callback) {
                 if (callback)
                     callback()
             } catch (e) {
-                console.log("some case Data could not be loaded... the error message was caught and is only for display")
+                console.debug("some case Data could not be loaded... the error message was caught and is only for display")
                 console.error(e)
             }
         }
@@ -619,7 +619,7 @@ function renderGraphBtnClick(currentDisplay) {
             }
         }
     }
-    console.log("Rendering. Current display is set to " + currentDisplay)
+    console.debug("Rendering. Current display is set to " + currentDisplay)
     switch (currentDisplay) {
         case "graph":
             //check if there are more than 500 nodes raise a modeal with a warning
@@ -658,7 +658,7 @@ function createEventIDBtn(eventID, description) {
         // we have to check each button group if the id is already in
         for (const btn of btnGrp.children) {
             if (btn.innerText === ('' + eventID)) {
-                console.log("Event ID already in btnGroup")
+                console.debug("Event ID already in btnGroup")
                 return
             }
         }
@@ -1091,14 +1091,14 @@ function filter(filterObject) {
 
 function findPath(source, destination, path, result_collector, dateLaterThan = null, initial = true, depth = 0, maxIterations = 100) {
     if (initial)
-        console.log("initial call for path search")
+        console.debug("initial call for path search")
     if (!path)
         path = []
     let current_path = []
     dateLaterThan = dateLaterThan || new Date(0)
     console.debug(`finding path from ${source} to ${destination} with date later than ${dateLaterThan}`)
     if (depth >= maxIterations) {
-        console.log("max iterations reached")
+        console.debug("max iterations reached")
         return
     }
     filtered_edges.forEach(edge => {
@@ -1653,12 +1653,12 @@ function setDisplayTimeSpan(timestamplist) {
     let lastDay = new Date(dayList[dayList.length - 1])
     // if the timespan is only one day we do not display the timespan
     if (dayList.length === 1) {
-        console.log("Timespan only one day - no timespan will be displayed")
+        console.debug("Timespan only one day - no timespan will be displayed")
         return
     }
     //if the timespan is more than 3 months we do not display the timespan
     if (lastDay.getTime() - firstDay.getTime() > 1000 * 60 * 60 * 24 * 90) {
-        console.log("Timespan too long to display")
+        console.debug("Timespan too long to display")
         return
     }
 
@@ -2183,7 +2183,7 @@ function drawGraph(graph, rootNode) {
                 let ret = a._private.edges.length - b._private.edges.length
                 if (ret === 0)
                     ret = a._private.position.x - b._private.position.x
-                console.log(ret)
+                console.debug(ret)
                 return ret
             },
             animate: false, // whether to transition the node positions
@@ -2294,7 +2294,7 @@ function drawGraph(graph, rootNode) {
             ele.on('mousedown', e => nodeMouseDown(ele))
             ele.on('mouseup', e => nodeMouseUp(ele))
         } catch (error) {
-            console.log("error creating qtip");
+            console.debug("error creating qtip");
             console.error(error);
         }
     });
@@ -2314,7 +2314,7 @@ function drawGraph(graph, rootNode) {
             });
             ele.on('mousedown', e => edgeMouseDown(ele))
         } catch (error) {
-            console.log("error creating qtip");
+            console.debug("error creating qtip");
             console.error(error);
         }
         if (caseData.permanentHighlightedEdges.has(ele._private.data.id)) {
@@ -2559,8 +2559,8 @@ function fillHostAndIpMaps(csv_data, ipColName, hostColName, valueSeperator, exc
                 }
             }
         } catch (error) {
-            console.log(error)
-            console.log(l)
+            console.debug(error)
+            console.debug(l)
         }
     }
 }
@@ -2771,9 +2771,9 @@ function mappingFromData(objects) {
             let sid = data.SID.trim()
             if (caseData.userSidMapper[user]) {
                 if (caseData.userSidMapper[user] !== sid) {
-                    console.log(`Conflict: User ${user} is mapped to SID ${caseData.userSidMapper[user]} and ${sid}`)
+                    console.debug(`Conflict: User ${user} is mapped to SID ${caseData.userSidMapper[user]} and ${sid}`)
                     // console output to show the SID that is kept
-                    console.log(`Keeping ${caseData.userSidMapper[user]}`)
+                    console.debug(`Keeping ${caseData.userSidMapper[user]}`)
                 }
             } else {
                 caseData.userSidMapper[user] = sid
@@ -2915,7 +2915,7 @@ async function createNodesAndEdges(objects) {
 }
 
 async function resolveIP2Host() {
-    console.log("ip resolver called")
+    console.debug("ip resolver called")
     for (const [key, value] of caseData.nodeTranslation) {
         if (ipRegex.test(key)) {
             if (caseData.ip2hostMapperFromFile[key])
@@ -2945,7 +2945,7 @@ function replaceNodeNamesClick() {
     let oldName = oldNameInput.value
     let newName = newNodeInput.value
     if (!oldName || !newName) {
-        console.log("Error in replaceNodeNames: oldName or newName is empty")
+        console.debug("Error in replaceNodeNames: oldName or newName is empty")
         return
     }
     caseData.nodeTranslation.set(oldName, newName.toUpperCase())
@@ -2966,14 +2966,14 @@ function parseDataFromJSON(jsonText) {
             data = JSON.parse(line)
             objects.push(data)
         } catch (error) {
-            console.log("trying to process data as exported by defender query...")
+            console.debug("trying to process data as exported by defender query...")
             try {
                 line_ = line.replaceAll('""', '"').replace('"{', '{').replace('}"', '}')
                 data = JSON.parse(line_)
                 objects.push(data)
             } catch (error) {
-                console.log("Error processing this line:")
-                console.log(line_)
+                console.debug("Error processing this line:")
+                console.debug(line_)
             }
         }
     }
@@ -3035,8 +3035,8 @@ function loadClientInfo(results) {
             }
             caseData.hostInfo.set(hostName, hostData)
         } catch (error) {
-            console.log("Error processing this line:")
-            console.log(line)
+            console.debug("Error processing this line:")
+            console.debug(line)
         }
     }
 }
