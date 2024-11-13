@@ -108,7 +108,8 @@
                             <li class="nav-item">
                                 <div class="btn-group">
                                     <button class="btn btn-outline-secondary" type="button" id="currentDisplayBtn"
-                                            title="Render the current graph - click this after applying changes to the filter or the render menu"
+                                            title="Render the current graph
+click this after applying changes to the filter or the render menu"
                                             onclick="renderGraphBtnClick(null)">Render
                                     </button>
                                     <button aria-expanded="false" aria-haspopup="true"
@@ -364,8 +365,8 @@
                     <div class="row">
                         <label data-bs-placement="bottom" data-bs-toggle="tooltip"
                                title="If this is active only highlighted connections will be displayed. You can highlight edges permanently by holding CTRL and clicking on them.
-                   This works also for hover elements - simply click on the element that highlights edges while holding
-                   CTRL to have them highlighted permanently">
+This works also for hover elements - simply click on the element that highlights edges while holding
+CTRL to have them highlighted permanently">
                             <input class="btn-check " id="highlightedEdgesOnly" type="checkbox">
                             <label class="btn btn-outline-secondary w-100"
                                    for="highlightedEdgesOnly">Highlighted</label>
@@ -433,8 +434,8 @@
                     <div class="row mt-2">
                         <div class="col-5 align-self-center" data-bs-placement="bottom" data-bs-toggle="tooltip"
                              title="Specify a time zone that will be added
-                           as an offset to the filters and timeline display
-                           (time stamps in lists of nodes and edges will ramin Z Time)">
+as an offset to the filters and timeline display
+(time stamps in lists of nodes and edges will ramin Z Time)">
                             Display Time Offset
                         </div>
                         <div class="col-6">
@@ -596,7 +597,11 @@
             <!--THE MAIN STAGE -->
             <div class="col main" style="height: 90vh" id="stage">
                 <div id="timespan" style="height: 90vh; z-index: 1"
-                     class="d-flex position-absolute align-items-start flex-column dynamic-display"></div>
+                     class="d-flex position-absolute align-items-start flex-column dynamic-display" title="
+The timespan will only be displayed when the timespan selected in filters is below 3 months and
+more than one day. It will show the amount of events per day in the selected timespan.
+Weekends are highlighted in red and the width indicates the number of events written in the brackets ">
+                </div>
                 <div id="timeline" style="height: 90vh"
                      class="d-flex position-absolute container dynamic-display"></div>
                 <div id="heatmap" style="height: 90vh"
