@@ -678,11 +678,27 @@ function createEventIDBtn(eventID, description) {
         currentBtnGroupForEventBtns.classList.add("eventBtnGroup")
         document.EventIDs.appendChild(currentBtnGroupForEventBtns)
     }
-    let newEventBtn = `<label data-bs-toggle="tooltip" data-bs-placement="top" title="${description}">
-                        <input type="checkbox" id=${"evtBtn" + eventID} value="${eventID}" class="btn-check eventIdBtns" checked="checked">
-                        <label class="btn btn-outline-secondary" for=${"evtBtn" + eventID}>${eventID}</label>
-                    </label>`
-    currentBtnGroupForEventBtns.innerHTML += newEventBtn //toDo someday with createNode
+
+    let newEventBtn = document.createElement("label")
+    newEventBtn.setAttribute("data-bs-toggle", "tooltip")
+    newEventBtn.setAttribute("data-bs-placement", "top")
+    newEventBtn.title = description
+    let newEventBtnInput = document.createElement("input")
+    newEventBtnInput.type = "checkbox"
+    newEventBtnInput.id = "evtBtn" + eventID
+    newEventBtnInput.value = eventID
+    newEventBtnInput.classList.add("btn-check")
+    newEventBtnInput.classList.add("eventIdBtns")
+    newEventBtnInput.checked = true
+    let newEventBtnInnerLabel = document.createElement("label")
+    newEventBtnInnerLabel.classList.add("btn")
+    newEventBtnInnerLabel.classList.add("btn-outline-secondary")
+    newEventBtnInnerLabel.htmlFor = "evtBtn" + eventID
+    newEventBtnInnerLabel.innerText = eventID
+    newEventBtn.appendChild(newEventBtnInput)
+    newEventBtn.appendChild(newEventBtnInnerLabel)
+
+    currentBtnGroupForEventBtns.appendChild(newEventBtn)
     eventID = "" + eventID
     if (eventID === "4624" || eventID === "4625") {
         createLogonTypeBtn(2)
@@ -702,12 +718,27 @@ function createLogonTypeBtn(logonType) {
     // create filter buttions for logon types (only has effect on 4624 and 4625 events)
     if (logonTypes.has(logonType)) return
     logonTypes.add(logonType)
-    let newLogonTypeBtn = `<label>
-                    <label data-bs-toggle="tooltip" data-bs-placement="top" title="LogonType ${logonType}">
-                        <input type="checkbox" id="logonType${logonType}Btn" class="btn-check logonTypeBtns" value="${logonType}" checked="checked">
-                        <label class="btn btn-outline-secondary" for="logonType${logonType}Btn" >${logonType}</label>
-                    </label>`
-    document.LogonTypes.innerHTML += newLogonTypeBtn //toDo someday with createNode
+
+    let logonTypeBtn = document.createElement("label")
+    logonTypeBtn.setAttribute("data-bs-toggle", "tooltip")
+    logonTypeBtn.setAttribute("data-bs-placement", "top")
+    logonTypeBtn.title = `LogonType ${logonType}`
+    let logonTypeBtnInput = document.createElement("input")
+    logonTypeBtnInput.type = "checkbox"
+    logonTypeBtnInput.id = "logonType" + logonType + "Btn"
+    logonTypeBtnInput.classList.add("btn-check")
+    logonTypeBtnInput.classList.add("logonTypeBtns")
+    logonTypeBtnInput.value = logonType
+    logonTypeBtnInput.checked = true
+    let logonTypeBtnInnerLabel = document.createElement("label")
+    logonTypeBtnInnerLabel.classList.add("btn")
+    logonTypeBtnInnerLabel.classList.add("btn-outline-secondary")
+    logonTypeBtnInnerLabel.htmlFor = "logonType" + logonType + "Btn"
+    logonTypeBtnInnerLabel.innerText = logonType
+    logonTypeBtn.appendChild(logonTypeBtnInput)
+    logonTypeBtn.appendChild(logonTypeBtnInnerLabel)
+    document.LogonTypes.appendChild(logonTypeBtn)
+
 }
 
 function createTagColorPicker(tag) {
@@ -3084,7 +3115,7 @@ function fileUpload() {
     spinner.classList.add("spinner-grow-sm")
     spinner.setAttribute("role", "status")
     spinner.setAttribute("aria-hidden", "true")
-    uploadBtn.innerHTML = ""
+    uploadBtn.innerText = ""
     uploadBtn.innerText = "Loading..."
     uploadBtn.appendChild(spinner)
 

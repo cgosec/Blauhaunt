@@ -81,8 +81,8 @@ function getCells(notebookID) {
         localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
         return response.json()
     }).then(data => {
-        console.log("Notebook Data:")
-        console.log(data)
+        console.debug("Notebook Data:")
+        console.debug(data)
         let cells = data.items;
         if (cells.length > 1) {
             let cellIDs = {}
@@ -126,8 +126,8 @@ function updateData(notebookID, cellID, version, csrf_token) {
     }).then(response => {
         return response.json()
     }).then(data => {
-        console.log("Notebook Data:")
-        console.log(data)
+        console.debug("Notebook Data:")
+        console.debug(data)
         loadData(notebookID, data.cell_id, data.current_version);
     });
 }
@@ -140,10 +140,10 @@ function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
     ).then(response => {
         return response.json()
     }).then(data => {
-        console.log("Cell Data:")
-        console.log(data)
+        console.debug("Cell Data:")
+        console.debug(data)
         if (!data.rows) {
-            console.log("no data found")
+            console.debug("no data found")
             return;
         }
         let keys = data.columns;
@@ -176,7 +176,7 @@ function getHunts(orgID) {
         return response.json()
     }).then(data => {
         try {
-            console.log(data)
+            console.debug(data)
             let keys = data.columns;
             let huntList = []
             for (let hunt of data.rows) {
@@ -189,17 +189,17 @@ function getHunts(orgID) {
                 huntList.push(h);
             }
             huntList.forEach(hunt => {
-                console.log(hunt)
-                console.log(hunt.Tags.includes(BLAUHAUNT_TAG))
+                console.debug(hunt)
+                console.debug(hunt.Tags.includes(BLAUHAUNT_TAG))
                 if (hunt.Tags.includes(BLAUHAUNT_TAG)) {
-                    console.log("Blauhaunt Hunt found:")
-                    console.log(hunt)
+                    console.debug("Blauhaunt Hunt found:")
+                    console.debug(hunt)
                     getNotebook(hunt.HuntId);
                 }
             });
         } catch (error) {
-            console.log(error)
-            console.log("error in getHunts")
+            console.debug(error)
+            console.debug("error in getHunts")
         }
     })
 }
@@ -219,8 +219,8 @@ function updateClientInfoData(clientInfoNotebook, cellID, version) {
     }).then(response => {
         return response.json()
     }).then(data => {
-        console.log("Notebook Data:")
-        console.log(data)
+        console.debug("Notebook Data:")
+        console.debug(data)
         cellID = data.cell_id;
         version = data.current_version;
         let timestamp = data.timestamp;
@@ -269,8 +269,8 @@ function createClientinfoNotebook() {
         "credentials": "include"
     }).then(response => {
         return response.json().then(data => {
-            console.log("Notebook for client info created")
-            console.log(data)
+            console.debug("Notebook for client info created")
+            console.debug(data)
             let clientInfoNotebook = data.notebook_id;
             let cellID = data.cell_metadata[0].cell_id;
             let version = data.cell_metadata[0].current_version;
@@ -282,8 +282,8 @@ function createClientinfoNotebook() {
                 "credentials": "include"
             }).then(response => {
                 return response.json().then(data => {
-                    console.log("Notebook Data:")
-                    console.log(data)
+                    console.debug("Notebook Data:")
+                    console.debug(data)
                     cellID = data.cell_id;
                     version = data.current_version;
                     let timestamp = data.timestamp;
@@ -300,8 +300,8 @@ function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow
     ).then(response => {
         return response.json()
     }).then(data => {
-        console.log("Client Data:")
-        console.log(data)
+        console.debug("Client Data:")
+        console.debug(data)
         let clientIDs = []
         let keys = data.columns;
         let clientRows = []
@@ -329,7 +329,7 @@ function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow
 
 function getFromMonitoringArtifact() {
     let notebookIDStart = "N.E." + monitoringArtifact
-    console.log("checking for monitoring artifact data...")
+    console.debug("checking for monitoring artifact data...")
     // iterate over notebooks to find the one with the monitoring artifact
     // check if caseData has clientMonitoringLatestUpdate set
     if (caseData.clientMonitoringLatestUpdate === undefined) {
@@ -376,7 +376,7 @@ function getFromMonitoringArtifact() {
                 if (monitoringData.length > 0) {
                     console.debug("monitoring data for clientID: " + clientID + " is being processed with " + monitoringData.length + " entries")
                     processJSONUpload(monitoringData.join("\n")).then(() => {
-                        console.log("monitoring data processed");
+                        console.debug("monitoring data processed");
                         storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
                     });
                 }
@@ -460,7 +460,7 @@ function checkForVelociraptor() {
         createSyncBtn()
         //getHunts(orgID);
     }).catch(error => {
-        console.log(error)
-        console.log("seems to be not connected to Velociraptor.");
+        console.debug(error)
+        console.debug("seems to be not connected to Velociraptor.");
     });
 }
