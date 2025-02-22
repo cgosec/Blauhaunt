@@ -1,3 +1,5 @@
+**Basic Worflow: Set Filters -> click Apply Filters -> click Render**
+
 # Blauhaunt
 A tool collection for filtering and visualizing logon events. Designed to help answering the "Cotton Eye Joe" question (Where did you come from where did you go) in Security Incidents and Threat Hunts.
 
