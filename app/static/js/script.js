@@ -2985,6 +2985,20 @@ function replaceNodeNamesClick() {
     processFilteredEdgesToNodes()
 }
 
+function validateDataInputData(data) {
+    /*
+    * validate the data input data for having at least UserName, Destination, EventID
+    *  and one of SourceHostname, SourceIP set.
+    * */
+
+    if (!data.UserName || !data.Destination || !data.EventID || (!data.SourceHostname && !data.SourceIP)) {
+        console.warn("Data is missing in this line:")
+        console.warn(data)
+        return false
+    }
+    return true
+}
+
 function parseDataFromJSON(jsonText) {
     /*
     This function is called when the user uploads the Event file to directly parse each line into the objects array
@@ -2993,15 +3007,18 @@ function parseDataFromJSON(jsonText) {
     let objects = []
     let json_objects = jsonText.split("\n")
     for (const line of json_objects) {
+        let data = {}
         try {
             data = JSON.parse(line)
-            objects.push(data)
+            if (validateDataInputData(data))
+                objects.push(data)
         } catch (error) {
             console.debug("trying to process data as exported by defender query...")
             try {
                 line_ = line.replaceAll('""', '"').replace('"{', '{').replace('}"', '}')
                 data = JSON.parse(line_)
-                objects.push(data)
+                if (validateDataInputData(data))
+                    objects.push(data)
             } catch (error) {
                 console.debug("Error processing this line:")
                 console.debug(line_)
