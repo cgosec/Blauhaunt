@@ -1677,6 +1677,7 @@ function setDisplayTimeSpan(timestamplist) {
     on the left side of the graph
      */
     document.getElementById("timespan").innerHTML = ""
+    try{
     let dayList = Object.keys(timestamplist).sort()
     let maxDayCount = Math.max(...Object.values(timestamplist))
     let firstDay = new Date(dayList[0])
@@ -1786,6 +1787,10 @@ function setDisplayTimeSpan(timestamplist) {
     lastDaySpan.innerText = lastDayString
     lastDaySpan.style.backgroundColor = "orange"
     document.getElementById("timespan").appendChild(lastDaySpan)
+    }
+    catch {
+        console.log("Error creating TimeSpan... so I just skipped it :(")
+    }
 }
 
 function getSVG(element) {
