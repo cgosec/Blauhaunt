@@ -1678,115 +1678,115 @@ function setDisplayTimeSpan(timestamplist) {
      */
     document.getElementById("timespan").innerHTML = ""
     try{
-    let dayList = Object.keys(timestamplist).sort()
-    let maxDayCount = Math.max(...Object.values(timestamplist))
-    let firstDay = new Date(dayList[0])
-    let firstDay_double = new Date(dayList[0])
-    let lastDay = new Date(dayList[dayList.length - 1])
-    // if the timespan is only one day we do not display the timespan
-    if (dayList.length === 1) {
-        console.debug("Timespan only one day - no timespan will be displayed")
-        return
-    }
-    //if the timespan is more than 3 months we do not display the timespan
-    if (lastDay.getTime() - firstDay.getTime() > 1000 * 60 * 60 * 24 * 90) {
-        console.debug("Timespan too long to display")
-        return
-    }
-
-    dayList = []
-    while (firstDay.getTime() <= lastDay.getTime()) {
-        dayList.push(firstDay.toISOString().split("T")[0])
-        firstDay.setDate(firstDay.getUTCDate() + 1)
-    }
-    let lastDayString = lastDay.toISOString().split("T")[0]
-    if (!dayList.includes(lastDayString))
-        dayList.push(lastDayString)
-
-    let firstDaySpan = document.createElement("span")
-    firstDaySpan.classList.add("mt-auto")
-    firstDaySpan.classList.add("pe-2")
-    firstDaySpan.classList.add("border-bottom")
-    firstDaySpan.innerText = "Timezone: " + offsetMap.get(timeOffsetList.value || 0) + "\n" + firstDay_double.toISOString().split("T")[0]
-    firstDaySpan.style.backgroundColor = "orange"
-    document.getElementById("timespan").appendChild(firstDaySpan)
-
-    dayList.forEach(day => {
-        let daySpan = document.createElement("span")
-        daySpan.classList.add("mt-auto")
-        daySpan.classList.add("border-bottom")
-        daySpan.classList.add("flex-grow-1")
-        daySpan.classList.add("rounded-5")
-        daySpan.classList.add("rounded-start")
-        // daySpan.innerText = day
-        let dayCountPercentage = ((timestamplist[day] || 0) / maxDayCount) * 100
-        daySpan.style.width = 5 + ((dayCountPercentage) / 2) + "px"
-        // color light red when weekend else color it orange
-        daySpan.style.backgroundColor = new Date(day).getUTCDay() === 0 || new Date(day).getUTCDay() === 6 ? "red" : "orange"
-
-        // add mouse over to display the date and the number of events and disappears on mouse out
-        daySpan.addEventListener("mouseover", (e) => {
-            let oldWidth = daySpan.style.width
-            let oldBackground = daySpan.style.backgroundColor
-            let oldColor = daySpan.style.color
-            let oldWeight = daySpan.style.fontWeight
-            let oldPadding = daySpan.style.padding
-            daySpan.innerText = day + " (" + (timestamplist[day] || 0) + ")"
-            daySpan.style.width = "auto"
-            daySpan.style.backgroundColor = "green"
-            daySpan.style.color = "white"
-            daySpan.style.fontWeight = "bold"
-            daySpan.style.paddingRight = "15px"
-            daySpan.style.paddingTop = "2px"
-            filtered_edges.forEach(edge => {
-                for (const time of edge.data.EventTimes) {
-                    if (new Date(applyTimeOffset(new Date(time).getTime())).toISOString().split("T")[0] === day) {
-                        highlightEdge(edge)
-                        break
-                    }
-                }
-            })
-            // turn style back to normal on mouse out
-            daySpan.addEventListener("mouseout", (e) => {
-                daySpan.innerText = ""
-                daySpan.style.width = oldWidth
-                daySpan.style.backgroundColor = oldBackground
-                daySpan.style.padding = oldPadding
-                daySpan.style.color = oldColor
+        let dayList = Object.keys(timestamplist).sort()
+        let maxDayCount = Math.max(...Object.values(timestamplist))
+        let firstDay = new Date(dayList[0])
+        let firstDay_double = new Date(dayList[0])
+        let lastDay = new Date(dayList[dayList.length - 1])
+        // if the timespan is only one day we do not display the timespan
+        if (dayList.length === 1) {
+            console.debug("Timespan only one day - no timespan will be displayed")
+            return
+        }
+        //if the timespan is more than 3 months we do not display the timespan
+        if (lastDay.getTime() - firstDay.getTime() > 1000 * 60 * 60 * 24 * 90) {
+            console.debug("Timespan too long to display")
+            return
+        }
+    
+        dayList = []
+        while (firstDay.getTime() <= lastDay.getTime()) {
+            dayList.push(firstDay.toISOString().split("T")[0])
+            firstDay.setDate(firstDay.getUTCDate() + 1)
+        }
+        let lastDayString = lastDay.toISOString().split("T")[0]
+        if (!dayList.includes(lastDayString))
+            dayList.push(lastDayString)
+    
+        let firstDaySpan = document.createElement("span")
+        firstDaySpan.classList.add("mt-auto")
+        firstDaySpan.classList.add("pe-2")
+        firstDaySpan.classList.add("border-bottom")
+        firstDaySpan.innerText = "Timezone: " + offsetMap.get(timeOffsetList.value || 0) + "\n" + firstDay_double.toISOString().split("T")[0]
+        firstDaySpan.style.backgroundColor = "orange"
+        document.getElementById("timespan").appendChild(firstDaySpan)
+    
+        dayList.forEach(day => {
+            let daySpan = document.createElement("span")
+            daySpan.classList.add("mt-auto")
+            daySpan.classList.add("border-bottom")
+            daySpan.classList.add("flex-grow-1")
+            daySpan.classList.add("rounded-5")
+            daySpan.classList.add("rounded-start")
+            // daySpan.innerText = day
+            let dayCountPercentage = ((timestamplist[day] || 0) / maxDayCount) * 100
+            daySpan.style.width = 5 + ((dayCountPercentage) / 2) + "px"
+            // color light red when weekend else color it orange
+            daySpan.style.backgroundColor = new Date(day).getUTCDay() === 0 || new Date(day).getUTCDay() === 6 ? "red" : "orange"
+    
+            // add mouse over to display the date and the number of events and disappears on mouse out
+            daySpan.addEventListener("mouseover", (e) => {
+                let oldWidth = daySpan.style.width
+                let oldBackground = daySpan.style.backgroundColor
+                let oldColor = daySpan.style.color
+                let oldWeight = daySpan.style.fontWeight
+                let oldPadding = daySpan.style.padding
+                daySpan.innerText = day + " (" + (timestamplist[day] || 0) + ")"
+                daySpan.style.width = "auto"
+                daySpan.style.backgroundColor = "green"
+                daySpan.style.color = "white"
+                daySpan.style.fontWeight = "bold"
+                daySpan.style.paddingRight = "15px"
+                daySpan.style.paddingTop = "2px"
                 filtered_edges.forEach(edge => {
-                    unhighlightEdge(edge)
+                    for (const time of edge.data.EventTimes) {
+                        if (new Date(applyTimeOffset(new Date(time).getTime())).toISOString().split("T")[0] === day) {
+                            highlightEdge(edge)
+                            break
+                        }
+                    }
+                })
+                // turn style back to normal on mouse out
+                daySpan.addEventListener("mouseout", (e) => {
+                    daySpan.innerText = ""
+                    daySpan.style.width = oldWidth
+                    daySpan.style.backgroundColor = oldBackground
+                    daySpan.style.padding = oldPadding
+                    daySpan.style.color = oldColor
+                    filtered_edges.forEach(edge => {
+                        unhighlightEdge(edge)
+                    })
+                })
+                daySpan.addEventListener("click", (e) => {
+                    //highlight edges permanently when clicked on and crtl is pressed
+                    if (ctrlPressed) {
+                        filtered_edges.forEach(edge => {
+                            for (const time of edge.data.EventTimes) {
+                                if (new Date(applyTimeOffset(new Date(time).getTime())).toISOString().split("T")[0] === day) {
+                                    if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
+                                        removeFromPermanentHighlightEdge(edge)
+                                        unhighlightEdge(edge)
+                                    } else {
+                                        permanentHighlightEdge(edge)
+                                        highlightEdge(edge)
+                                    }
+                                    break
+                                }
+                            }
+                        })
+                    }
                 })
             })
-            daySpan.addEventListener("click", (e) => {
-                //highlight edges permanently when clicked on and crtl is pressed
-                if (ctrlPressed) {
-                    filtered_edges.forEach(edge => {
-                        for (const time of edge.data.EventTimes) {
-                            if (new Date(applyTimeOffset(new Date(time).getTime())).toISOString().split("T")[0] === day) {
-                                if (caseData.permanentHighlightedEdges.has(edge.data.id)) {
-                                    removeFromPermanentHighlightEdge(edge)
-                                    unhighlightEdge(edge)
-                                } else {
-                                    permanentHighlightEdge(edge)
-                                    highlightEdge(edge)
-                                }
-                                break
-                            }
-                        }
-                    })
-                }
-            })
+    
+            document.getElementById("timespan").appendChild(daySpan)
         })
-
-        document.getElementById("timespan").appendChild(daySpan)
-    })
-    let lastDaySpan = document.createElement("span")
-    lastDaySpan.classList.add("mt-auto")
-    lastDaySpan.classList.add("pe-2")
-    lastDaySpan.classList.add("border-bottom")
-    lastDaySpan.innerText = lastDayString
-    lastDaySpan.style.backgroundColor = "orange"
-    document.getElementById("timespan").appendChild(lastDaySpan)
+        let lastDaySpan = document.createElement("span")
+        lastDaySpan.classList.add("mt-auto")
+        lastDaySpan.classList.add("pe-2")
+        lastDaySpan.classList.add("border-bottom")
+        lastDaySpan.innerText = lastDayString
+        lastDaySpan.style.backgroundColor = "orange"
+        document.getElementById("timespan").appendChild(lastDaySpan)
     }
     catch {
         console.log("Error creating TimeSpan... so I just skipped it :(")
