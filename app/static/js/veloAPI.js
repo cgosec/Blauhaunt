@@ -228,22 +228,20 @@ function updateClientInfoData(clientInfoNotebook, cellID, version) {
     });
 }
 
-function getClientInfoNotebook(){
+async function getClientInfoNotebook(){
     try {
-    fetch(velo_url + '/api/v1/GetTable?type=NOTEBOOKS&start_row=0&rows=1000&sort_direction=false', {headers: header}).then(response => {
-        localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
-        return response.json()
-    }).then(data => {
-        let notebookIDCol = data.columns.indexOf("NotebookId");
-        let notebookNameCol = data.columns.indexOf("Name");
-        for (const row of data.rows) {
-            let row_content = JSON.parse(row.json);
-            if (row_content[notebookNameCol] === "Blauhaunt Clientinfo"){
-                return row_content[notebookIDCol]
+    let response = await fetch(velo_url + '/api/v1/GetTable?type=NOTEBOOKS&start_row=0&rows=1000&sort_direction=false', {headers: header})
+    localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
+    let data = await response.json()
+    let notebookIDCol = data.columns.indexOf("NotebookId");
+    let notebookNameCol = data.columns.indexOf("Name");
+    for (const row of data.rows) {
+        let row_content = JSON.parse(row.json);
+        if (row_content[notebookNameCol] === "Blauhaunt Clientinfo"){
+            return row_content[notebookIDCol]
             }
-        };
-      })
-  }
+        }
+    }
     catch (err) {
         console.error("Could not load notebooks", err);
     }
