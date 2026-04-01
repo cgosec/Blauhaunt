@@ -236,12 +236,12 @@ function getClientInfoNotebook(){
     }).then(data => {
         let notebookIDCol = data.columns.indexOf("NotebookId");
         let notebookNameCol = data.columns.indexOf("Name");
-        data.rows.forEach(row => {
+        for (const row of data.rows) {
             let row_content = JSON.parse(row.json);
             if (row_content[notebookNameCol] === "Blauhaunt Clientinfo"){
                 return row_content[notebookIDCol]
             }
-        });
+        };
       })
   }
     catch (err) {
