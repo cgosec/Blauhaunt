@@ -237,7 +237,7 @@ function getClientInfoNotebook(){
         let noteBookIDCol = data.columns.indexOf("NotebookId");
         let notebookNameCol = data.columns.indexOf("Name");
         data.rows.forEach(row => {
-            row_content = JSON.parse(.row.json);
+            row_content = JSON.parse(row.row.json);
             if (row_content[notbookNameCol] === "Blauhaunt Clientinfo"){
                 return row_content[notebookIDCol]
         }
