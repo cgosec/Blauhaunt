@@ -243,9 +243,10 @@ function getClientInfoNotebook(){
             }
         }
       })
+  }
     catch (err) {
         console.error("Could not load notebooks", err);
-        }
+    }
 }
 
 function getClientInfoFromVelo() {
