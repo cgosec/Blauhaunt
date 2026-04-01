@@ -241,7 +241,7 @@ function getClientInfoNotebook(){
             if (row_content[notbookNameCol] === "Blauhaunt Clientinfo"){
                 return row_content[notebookIDCol]
             }
-        }
+        });
       })
   }
     catch (err) {
