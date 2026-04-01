@@ -242,9 +242,9 @@ function getClientInfoNotebook(){
                 return row_content[notebookIDCol]
         }
     }
-
-catch (err) {
-    console.error("Could not load notebooks", err);
+    catch (err) {
+        console.error("Could not load notebooks", err);
+        }
 }
 
 function getClientInfoFromVelo() {
