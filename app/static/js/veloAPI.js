@@ -238,6 +238,7 @@ async function getClientInfoNotebook(){
     for (const row of data.rows) {
         let row_content = JSON.parse(row.json);
         if (row_content[notebookNameCol] === "Blauhaunt Clientinfo"){
+            console.log("Notebook ID is: ", row_content[notebookIDCol]) 
             return row_content[notebookIDCol]
             }
         }
@@ -247,8 +248,8 @@ async function getClientInfoNotebook(){
     }
 }
 
-function getClientInfoFromVelo() {
-    let noteBookID = getClientInfoNotebook();
+async function getClientInfoFromVelo() {
+    let noteBookID = await getClientInfoNotebook();
     if (!noteBookID) {
             createClientinfoNotebook();
             noteBookID = getClientInfoNotebook();
