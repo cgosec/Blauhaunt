@@ -240,8 +240,9 @@ function getClientInfoNotebook(){
             row_content = JSON.parse(row.row.json);
             if (row_content[notbookNameCol] === "Blauhaunt Clientinfo"){
                 return row_content[notebookIDCol]
+            }
         }
-    }
+      })
     catch (err) {
         console.error("Could not load notebooks", err);
         }
