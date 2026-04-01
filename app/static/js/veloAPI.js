@@ -228,34 +228,59 @@ function updateClientInfoData(clientInfoNotebook, cellID, version) {
     });
 }
 
-function getClientInfoFromVelo() {
-    fetch(velo_url + '/api/v1/GetNotebooks?count=1000&offset=0', {headers: header}).then(response => {
+function getClientInfoNotebook(){
+    try {
+    fetch(velo_url + '/api/v1/GetTable?type=NOTEBOOKS&start_row=0&rows=1000&sort_direction=false', {headers: header}).then(response => {
         localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
         return response.json()
     }).then(data => {
-        let notebooks = data.items;
-        if (!notebooks) {
-            createClientinfoNotebook()
-        } else {
-            let clientInfoNotebook = ""
-            notebooks.forEach(notebook => {
-                let notebookID = notebook.notebook_id;
-                notebook.cell_metadata.forEach(metadata => {
-                    let cellID = metadata.cell_id;
-                    fetch(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
-                        return response.json()
-                    }).then(data => {
-                        let query = data.input;
-                        if (query.trim().toLowerCase() === 'select * from clients()') {
-                            let version = metadata.current_version;
-                            let timestamp = metadata.timestamp;
-                            updateClientInfoData(notebookID, cellID, version, timestamp);
-                        }
+        let noteBookIDCol = data.columns.indexOf("NotebookId");
+        let notebookNameCol = data.columns.indexOf("Name");
+        data.rows.forEach(row => {
+            row_content = JSON.parse(.row.json);
+            if (row_content[notbookNameCol] === "Blauhaunt Clientinfo"){
+                return row_content[notebookIDCol]
+        }
+    }
+
+catch (err) {
+    console.error("Could not load notebooks", err);
+}
+
+function getClientInfoFromVelo() {
+    let noteBookID = getClientInfoNotebook();
+    if (!noteBookID) {
+            createClientinfoNotebook();
+            noteBookID = getClientInfoNotebook();
+        }
+    try {
+        fetch(velo_url + `/api/v1/GetNotebooks?notebook_id=${noteBookID}`, {headers: header}).then(response => {
+            localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
+            return response.json()
+        }).then(data => {
+            let notebooks = data.items;
+                let clientInfoNotebook = ""
+                notebooks.forEach(notebook => {
+                    let notebookID = notebook.notebook_id;
+                    notebook.cell_metadata.forEach(metadata => {
+                        let cellID = metadata.cell_id;
+                        fetch(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+                            return response.json()
+                        }).then(data => {
+                            let query = data.input;
+                            if (query.trim().toLowerCase() === 'select * from clients()') {
+                                let version = metadata.current_version;
+                                let timestamp = metadata.timestamp;
+                                updateClientInfoData(notebookID, cellID, version, timestamp);
+                            }
+                        });
                     });
                 });
-            });
+        });
         }
-    });
+    catch (err){
+        console.error("Error loading Clientinfo", err)
+    }
 }
 
 function createClientinfoNotebook() {
