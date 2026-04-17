@@ -3015,6 +3015,9 @@ function parseDataFromJSON(jsonText) {
         let data = {}
         try {
             data = JSON.parse(line)
+            // for CrowdStrike (LogScale) Export:
+            if (typeof(data.LogonTimes) === "string")
+                data.LogonTimes = JSON.parse(data.LogonTimes)
             if (validateDataInputData(data))
                 objects.push(data)
         } catch (error) {
