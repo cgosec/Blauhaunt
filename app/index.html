@@ -50,6 +50,7 @@
             src="https://cdn.jsdelivr.net/npm/desvg@1.0.2/desvg.min.js"></script>
     <link href="static/css/style.css" rel="stylesheet">
     <link href="static/css/dark-mode.css" rel="stylesheet">
+    <link href="static/css/modern.css" rel="stylesheet">
 
 </head>
 
@@ -70,7 +71,7 @@
                                 <button class="btn btn-outline-primary" onclick="{
                                       document.getElementById('filterSideBar').classList.toggle('show')
                                         }" type="button">
-                                    Filters
+                                    <i class="fa fa-filter"></i>Filters
                                 </button>
                             </li>
                             <li class="nav-item">
@@ -78,7 +79,7 @@
                                     <label data-bs-placement="bottom" data-bs-toggle="tooltip"
                                            title="Find a path from one System to an other">
                                         <button type="button" class="btn btn-outline-secondary" disabled>
-                                            Path
+                                            <i class="fa fa-route"></i>Path
                                         </button>
                                     </label>
                                     <button aria-expanded="false" aria-haspopup="true"
@@ -110,7 +111,7 @@
                                     <button class="btn btn-outline-secondary" type="button" id="currentDisplayBtn"
                                             title="Render the current graph
 click this after applying changes to the filter or the render menu"
-                                            onclick="renderGraphBtnClick(null)">Render
+                                            onclick="renderGraphBtnClick(null)"><i class="fa fa-play"></i>Render
                                     </button>
                                     <button aria-expanded="false" aria-haspopup="true"
                                             class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
@@ -166,179 +167,24 @@ click this after applying changes to the filter or the render menu"
                                     <div>Edges:&nbsp&nbsp<a id="edgesCounter">0</a></div>
                                 </div>
                             </li>
-                            <li class="nav-item">
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-outline-secondary" type="button" id="currentGraphBtn"
-                                            title="Select the layout of the graph" disabled
-                                    >GraphStyle
-                                    </button>
-                                    <button aria-expanded="false" aria-haspopup="true"
-                                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                                            data-bs-toggle="dropdown" id="currentGraph" role="button"
-                                            type="button">
-                                        <span class="sr-only"></span>
-                                    </button>
-                                    <div class="dropdown-menu">
-                                        <input autocomplete="off" checked="checked" class="btn-check" id="calculated"
-                                               name="btnradio"
-                                               type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item"
-                                               for="calculated">calculated</label>
-                                        <input autocomplete="off" class="btn-check" id="modeGrid" name="btnradio"
-                                               type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item"
-                                               for="modeGrid">grid</label>
-                                        <input autocomplete="off" class="btn-check" id="modeCose" name="btnradio"
-                                               type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item"
-                                               for="modeCose">cose</label>
-                                        <input autocomplete="off" class="btn-check" id="modeCircle" name="btnradio"
-                                               type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item"
-                                               for="modeCircle">circle</label>
-                                        <input autocomplete="off" class="btn-check" id="modeTree" name="btnradio"
-                                               type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item"
-                                               for="modeTree">tree</label>
-                                        <input autocomplete="off" class="btn-check" id="modeConcentric" name="btnradio"
-                                               type="radio">
-                                        <label class="btn btn-outline-secondary dropdown-item"
-                                               for="modeConcentric">concentric</label>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-outline-secondary" onclick="resolveIP2Host()"
-                                            title="click here to resolve system names to their mapping - until you click no manual set hostnames nor automatically detected hostnames are applied">
-                                        Resolve
-                                    </button>
-                                    <button aria-expanded="false" aria-haspopup="true"
-                                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                                            data-bs-toggle="dropdown" id="nodeNamesBtn" role="button" type="button">
-                                        <span class="sr-only"></span>
-                                    </button>
-                                    <div aria-labelledby="nodeNamesBtn" class="dropdown-menu">
-                                        <div class="row-10">
-                                            <button class="btn btn-secondary" type="button" id="trimNodeDomain"
-                                                    title="Trim the domain from the node names"
-                                                    onclick="trimDomainNodesNames()">
-                                                Trim Domain
-                                            </button>
-                                        </div>
-                                        <div class="dropdown-divider"></div>
-                                        <div>Manually Rename</div>
-                                        <div class="">
-                                            <label for="oldNodeName"></label><input type="text" class="form-control"
-                                                                                    id="oldNodeName"
-                                                                                    placeholder="OLD NODE NAME">
-                                            <label for="newNodeName"></label><input type="text" class="form-control"
-                                                                                    id="newNodeName"
-                                                                                    placeholder="NEW NODE NAME">
-                                            <button class="btn btn-success"
-                                                    onclick="replaceNodeNamesClick()"
-                                                    title="Click Resolve to apply the changes"
-                                                    type="button">Rename
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary" type="button" disabled>Tags</button>
-                                    <button aria-expanded="false" aria-haspopup="true"
-                                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                                            data-bs-toggle="dropdown" id="tagColorDropdown" role="button"
-                                            type="button">
-                                        <span class="sr-only"></span>
-                                    </button>
-                                    <div aria-labelledby="navbarDropdown" class="dropdown-menu cleanOnLoad"
-                                         id="tagColorList">
-                                    </div>
-                                </div>
-                            </li>
                         </ul>
                     </div>
                     <div class="col justify-content-end">
                         <ul class="navbar-nav">
                             <li class="nav-item">
-                                <div id="dataBtnWrapper">
-                                    <button class="btn btn-secondary" data-bs-target="#UploadEVTX"
-                                            data-bs-toggle="modal"
-                                            type="button" id="uploadModalBtn">
-                                        Upload
-                                    </button>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="btn-group" id="casesBtnGrp">
-                                    <button class="btn btn-outline-secondary" type="button">Cases</button>
-                                    <button aria-expanded="false" aria-haspopup="true"
-                                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                                            data-bs-toggle="dropdown" id="casesDropdown" role="button"
-                                            type="button">
-                                        <span class="sr-only"></span>
-                                    </button>
-                                    <ul aria-labelledby="navbarDropdown" class="dropdown-menu" id="caseDropdown">
-                                        <li class=" dropdown-item">
-                                            <div class="row">
-                                                <label for="newCaseName"><input id="newCaseName" placeholder="Case Name"
-                                                                                type="text"
-                                                                                class="form-control"></label>
-                                                <button class="btn btn-success mr-4"
-                                                        onclick="{
-                                storeDataToIndexDB(document.getElementById('newCaseName').value)
-                                document.getElementById('case_list').innerHTML = ''
-                                getCases()
-                            }"
-                                                        type="button">Save
-                                                </button>
-                                                <hr>
-                                                <div id="case_list" class="row"></div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="btn-group">
-                                    <button class="btn btn-outline-secondary" type="button" disabled>Export</button>
-                                    <button aria-expanded="false" aria-haspopup="true"
-                                            class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                                            data-bs-toggle="dropdown" id="navbarDropdown" role="button"
-                                            type="button">
-                                        <span class="sr-only"></span>
-                                    </button>
-                                    <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-                                        <a class="dropdown-item" href="#" onclick="exportCSV()">Timeline</a>
-                                        <a class="dropdown-item" download="image.json" href="#" id="export-json"
-                                           onclick="exportJSON()">GraphJSON</a>
-                                        <!--    <a class="dropdown-item" download="case.json" href="#" id="caseexport-json"
-                                               onclick="exportCaseJSON()">CaseJSON</a> -->
-                                        <a class="dropdown-item" download="image.png" href="#" id="export-png"
-                                           onclick="exportPNG()">PNG</a>
-                                        <a class="dropdown-item" download="image.jpeg" href="#" id="export-jpeg"
-                                           onclick="exportJPEG()">JPEG</a>
-                                    </div>
-                                </div>
-                            </li>
-                            <li class="nav-item">
                                 <button class="btn btn-outline-primary" onclick="{
                                         document.getElementById('statsSideBar').classList.toggle('show')
                                     }" type="button">
-                                    Stats
+                                    <i class="fa fa-chart-column"></i>Stats
                                 </button>
                             </li>
                             <li class="nav-item">
-                                <div class="form-check form-switch ms-2">
-                                    <label data-bs-placement="bottom" data-bs-toggle="tooltip"
-                                           title="Switch to Darkmode">
-                                        <input class="form-check-input" id="darkSwitch" type="checkbox">
-                                        <label class="form-check-label" for="darkSwitch"></label>
-                                    </label>
-                                </div>
-                                <script src="static/js/dark-mode-switch.min.js"></script>
+                                <button class="btn btn-primary" type="button" id="toolsMenuBtn"
+                                        title="Data, styling and export tools"
+                                        data-explain="Opens the tools menu with everything that is not about exploring the data itself: data upload, name resolving, tags, cases, graph layout, export and the light/dark theme."
+                                        onclick="document.getElementById('toolsMenu').classList.toggle('show')">
+                                    <i class="fa fa-bars"></i>Menu
+                                </button>
                             </li>
                             <!-- Add more nav items here if needed -->
                         </ul>
@@ -347,6 +193,201 @@ click this after applying changes to the filter or the render menu"
             </div>
         </div>
     </nav>
+
+    <!-- Tools / settings menu (collapsed by default) -->
+    <div id="toolsMenu" class="tools-menu">
+        <div class="tools-menu-header">
+            <span><i class="fa fa-sliders"></i> Tools &amp; Settings</span>
+            <button type="button" class="btn-close" aria-label="Close"
+                    onclick="document.getElementById('toolsMenu').classList.remove('show')"></button>
+        </div>
+
+        <div class="tools-menu-row">
+            <div class="tools-menu-label">Data</div>
+            <div id="dataBtnWrapper">
+                <button class="btn btn-secondary w-100" data-bs-target="#UploadEVTX"
+                        data-bs-toggle="modal"
+                        type="button" id="uploadModalBtn">
+                    <i class="fa fa-upload"></i>Upload
+                </button>
+            </div>
+        </div>
+
+        <div class="tools-menu-row">
+            <div class="tools-menu-label">Node names</div>
+            <div class="btn-group w-100">
+                <button type="button" class="btn btn-outline-secondary" onclick="resolveIP2Host()"
+                        title="click here to resolve system names to their mapping - until you click no manual set hostnames nor automatically detected hostnames are applied">
+                    <i class="fa fa-wand-magic-sparkles"></i>Resolve
+                </button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="nodeNamesBtn" role="button" type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div aria-labelledby="nodeNamesBtn" class="dropdown-menu">
+                    <div class="row-10">
+                        <button class="btn btn-secondary" type="button" id="trimNodeDomain"
+                                title="Trim the domain from the node names"
+                                onclick="trimDomainNodesNames()">
+                            Trim Domain
+                        </button>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div>Manually Rename</div>
+                    <div class="">
+                        <label for="oldNodeName"></label><input type="text" class="form-control"
+                                                                id="oldNodeName"
+                                                                placeholder="OLD NODE NAME">
+                        <label for="newNodeName"></label><input type="text" class="form-control"
+                                                                id="newNodeName"
+                                                                placeholder="NEW NODE NAME">
+                        <button class="btn btn-success"
+                                onclick="replaceNodeNamesClick()"
+                                title="Click Resolve to apply the changes"
+                                type="button">Rename
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-menu-row">
+            <div class="tools-menu-label">Tags</div>
+            <div class="btn-group w-100">
+                <button class="btn btn-outline-secondary" type="button" disabled><i class="fa fa-tags"></i>Tags</button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="tagColorDropdown" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div aria-labelledby="navbarDropdown" class="dropdown-menu cleanOnLoad"
+                     id="tagColorList">
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-menu-row">
+            <div class="tools-menu-label">Cases</div>
+            <div class="btn-group w-100" id="casesBtnGrp">
+                <button class="btn btn-outline-secondary" type="button"><i class="fa fa-folder-open"></i>Cases</button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="casesDropdown" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <ul aria-labelledby="navbarDropdown" class="dropdown-menu" id="caseDropdown">
+                    <li class=" dropdown-item">
+                        <div class="row">
+                            <label for="newCaseName"><input id="newCaseName" placeholder="Case Name"
+                                                            type="text"
+                                                            class="form-control"></label>
+                            <button class="btn btn-success mr-4"
+                                    onclick="{
+                                storeDataToIndexDB(document.getElementById('newCaseName').value)
+                                document.getElementById('case_list').innerHTML = ''
+                                getCases()
+                            }"
+                                    type="button">Save
+                            </button>
+                            <hr>
+                            <div id="case_list" class="row"></div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tools-menu-row">
+            <div class="tools-menu-label">Graph style</div>
+            <div class="btn-group w-100" role="group">
+                <button class="btn btn-outline-secondary" type="button" id="currentGraphBtn"
+                        title="Select the layout of the graph" disabled
+                >GraphStyle
+                </button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="currentGraph" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div class="dropdown-menu">
+                    <input autocomplete="off" checked="checked" class="btn-check" id="calculated"
+                           name="btnradio"
+                           type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item"
+                           for="calculated">calculated</label>
+                    <input autocomplete="off" class="btn-check" id="modeGrid" name="btnradio"
+                           type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item"
+                           for="modeGrid">grid</label>
+                    <input autocomplete="off" class="btn-check" id="modeCose" name="btnradio"
+                           type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item"
+                           for="modeCose">cose</label>
+                    <input autocomplete="off" class="btn-check" id="modeCircle" name="btnradio"
+                           type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item"
+                           for="modeCircle">circle</label>
+                    <input autocomplete="off" class="btn-check" id="modeTree" name="btnradio"
+                           type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item"
+                           for="modeTree">tree</label>
+                    <input autocomplete="off" class="btn-check" id="modeConcentric" name="btnradio"
+                           type="radio">
+                    <label class="btn btn-outline-secondary dropdown-item"
+                           for="modeConcentric">concentric</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-menu-row">
+            <div class="tools-menu-label">Export</div>
+            <div class="btn-group w-100">
+                <button class="btn btn-outline-secondary" type="button" disabled><i class="fa fa-file-export"></i>Export</button>
+                <button aria-expanded="false" aria-haspopup="true"
+                        class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                        data-bs-toggle="dropdown" id="navbarDropdown" role="button"
+                        type="button">
+                    <span class="sr-only"></span>
+                </button>
+                <div aria-labelledby="navbarDropdown" class="dropdown-menu">
+                    <a class="dropdown-item" href="#" onclick="exportCSV()">Timeline</a>
+                    <a class="dropdown-item" download="image.json" href="#" id="export-json"
+                       onclick="exportJSON()">GraphJSON</a>
+                    <!--    <a class="dropdown-item" download="case.json" href="#" id="caseexport-json"
+                           onclick="exportCaseJSON()">CaseJSON</a> -->
+                    <a class="dropdown-item" download="image.png" href="#" id="export-png"
+                       onclick="exportPNG()">PNG</a>
+                    <a class="dropdown-item" download="image.jpeg" href="#" id="export-jpeg"
+                       onclick="exportJPEG()">JPEG</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-menu-row">
+            <div class="tools-menu-label">Help</div>
+            <label class="explain-switch w-100" title="Turn on to see a short explanation when you hover over any control">
+                <input class="form-check-input" id="explainSwitch" type="checkbox">
+                <i class="fa fa-circle-info"></i>
+                <label for="explainSwitch">Explain mode</label>
+            </label>
+        </div>
+
+        <div class="tools-menu-row">
+            <div class="tools-menu-label">Appearance</div>
+            <div class="form-check form-switch tools-theme-switch">
+                <label data-bs-placement="bottom" data-bs-toggle="tooltip"
+                       title="Switch to Darkmode">
+                    <input class="form-check-input" id="darkSwitch" type="checkbox">
+                    <label class="form-check-label" for="darkSwitch">Light / Dark</label>
+                </label>
+            </div>
+            <script src="static/js/dark-mode-switch.min.js"></script>
+        </div>
+    </div>
 
     <div class="container-fluid">
         <div class="row align-items-start">
@@ -618,17 +659,21 @@ Weekends are highlighted in red and the width indicates the number of events wri
                  style="height: 90% !important;">
                 <div class="container overflow-auto">
                     <br>
-                    <details>
-                        <summary><b>System Stats</b></summary>
+                    <div class="stats-intro" data-explain="The Stats pane summarises the currently filtered data so you can decide what to filter out or pivot on. All numbers respect your active filters and update when you apply them.">
+                        <i class="fa fa-circle-info"></i>
+                        Overview of the currently filtered data. Use it to spot noisy systems/users to filter out or interesting ones to pivot on. All counts respect your active filters.
+                    </div>
+                    <details open>
+                        <summary data-explain="Per-system statistics: for every system it shows how many other systems it reaches, how many reach it, and how many distinct users flow out of and into it. Great for spotting hubs and lateral-movement pivots."><b>System Stats</b></summary>
                         <div class="scrollbar-young-passion">
                             <table class="table table-hover">
                                 <thead>
                                 <tr>
-                                    <th scope="col">Name</th>
-                                    <th scope="col">To Systems</th>
-                                    <th scope="col">From Systems</th>
-                                    <th scope="col">Users out</th>
-                                    <th scope="col">Users in</th>
+                                    <th scope="col" data-explain="The name of the system (host).">Name</th>
+                                    <th scope="col" data-explain="Number of distinct systems this system connected TO, followed by the total number of connections to them in brackets. A high value marks a system that reaches many others.">To Systems</th>
+                                    <th scope="col" data-explain="Number of distinct systems that connected TO this system, followed by the total number of those connections in brackets. A high value marks a popular destination/hub.">From Systems</th>
+                                    <th scope="col" data-explain="Number of distinct users observed connecting FROM this system to other systems (outgoing accounts).">Users out</th>
+                                    <th scope="col" data-explain="Number of distinct users observed connecting INTO this system (incoming accounts).">Users in</th>
                                 </tr>
                                 </thead>
                                 <tbody id="sysTable"></tbody>
@@ -637,13 +682,13 @@ Weekends are highlighted in red and the width indicates the number of events wri
                     </details>
                     <div class="container"></div>
                     <br>
-                    <details>
-                        <summary><b>User Stats</b></summary>
+                    <details open>
+                        <summary data-explain="Per-user statistics: for every account it shows how many distinct systems it connected to. Accounts touching many systems are often worth investigating first."><b>User Stats</b></summary>
                         <table class="table table-hover scrollbar-young-passion">
                             <thead>
                             <tr>
-                                <th scope="col">Name</th>
-                                <th scope="col">To Systems</th>
+                                <th scope="col" data-explain="The user account name.">Name</th>
+                                <th scope="col" data-explain="Number of distinct systems this user connected to, followed by the total number of connections in brackets. A high value can indicate an admin account or a compromised account moving laterally.">To Systems</th>
                             </tr>
                             </thead>
                             <tbody id="userTable"></tbody>
@@ -831,6 +876,7 @@ Weekends are highlighted in red and the width indicates the number of events wri
 </script>
 <script src="static/js/script.js"></script>
 <script src="static/js/veloAPI.js"></script>
+<script src="static/js/explain.js"></script>
 </body>
 
 </html>
