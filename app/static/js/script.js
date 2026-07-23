@@ -1935,7 +1935,7 @@ function createHeatmap() {
     let heatmap = document.getElementById("heatmap")
     heatmap.innerHTML = ""
     let heatmapTable = document.createElement("table")
-    heatmapTable.classList.add("table")
+    heatmapTable.classList.add("heatmap-table")
     let tableHead = document.createElement("thead")
     let tableHeadRow = document.createElement("tr")
     let tableHeadUser = document.createElement("th")

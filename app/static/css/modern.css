@@ -315,6 +315,8 @@ body.explain-mode #statsSideBar th[data-explain] {
 #timeline,
 #heatmap {
   overflow: auto;
+  /* Override Bootstrap .d-flex so sticky table headers work inside the pane */
+  display: block !important;
   /* Override Bootstrap .container max-width so they span the full stage width */
   width: 100%;
   max-width: 100%;
@@ -354,6 +356,53 @@ body.explain-mode #statsSideBar th[data-explain] {
 [data-theme="dark"] #timeline::-webkit-scrollbar-thumb,
 [data-theme="dark"] #heatmap::-webkit-scrollbar-thumb {
   background: #414759;
+}
+
+/* Heatmap sticky user column (left) and date header row (top) */
+#heatmap table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* The heatmap uses its own table class (not Bootstrap's .table, whose cell
+   styling prevents position:sticky from working while scrolling). */
+#heatmap .heatmap-table {
+  width: max-content;
+  color: inherit;
+}
+
+#heatmap .heatmap-table td,
+#heatmap .heatmap-table th {
+  padding: 6px 12px;
+  border: 1px solid var(--bh-border);
+  min-width: 44px;
+  text-align: center;
+}
+
+/* Date header row stays at the top while scrolling vertically */
+#heatmap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bh-surface);
+  white-space: pre;
+}
+
+/* User column stays at the left while scrolling horizontally
+   (scrolls vertically together with its row) */
+#heatmap tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bh-surface);
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* Top-left corner cell must stay pinned in both directions */
+#heatmap thead th:first-child {
+  left: 0;
+  z-index: 3;
 }
 
 /* ==========================================================================
