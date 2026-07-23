@@ -310,6 +310,45 @@ body.explain-mode #statsSideBar th[data-explain] {
   border-radius: var(--bh-radius);
 }
 
+/* Timeline & Heatmap can grow beyond the viewport - give them scrollbars.
+   The graph (cytoscape) must stay scrollbar-free since it pans/zooms. */
+#timeline,
+#heatmap {
+  overflow: auto;
+}
+
+#innerStage,
+#cy {
+  overflow: hidden;
+}
+
+#timeline::-webkit-scrollbar,
+#heatmap::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+#timeline::-webkit-scrollbar-thumb,
+#heatmap::-webkit-scrollbar-thumb {
+  background: #c3c9d8;
+  border-radius: 8px;
+}
+
+#timeline::-webkit-scrollbar-thumb:hover,
+#heatmap::-webkit-scrollbar-thumb:hover {
+  background: #a7afc4;
+}
+
+#timeline::-webkit-scrollbar-track,
+#heatmap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-theme="dark"] #timeline::-webkit-scrollbar-thumb,
+[data-theme="dark"] #heatmap::-webkit-scrollbar-thumb {
+  background: #414759;
+}
+
 /* ==========================================================================
    Explain mode
    ========================================================================== */
