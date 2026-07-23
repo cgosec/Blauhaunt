@@ -1,0 +1,549 @@
+/* ==========================================================================
+   Blauhaunt - Modern UI theme
+   Layered on top of Bootstrap + style.css + dark-mode.css.
+   Only visual/UX refinements - no structural or ID changes.
+   ========================================================================== */
+
+:root {
+  --bh-accent: #4f46e5;
+  --bh-accent-hover: #4338ca;
+  --bh-accent-soft: rgba(79, 70, 229, 0.12);
+  --bh-success: #16a34a;
+  --bh-danger: #dc2626;
+  --bh-info: #0ea5e9;
+  --bh-surface: #ffffff;
+  --bh-surface-2: #f4f5fb;
+  --bh-bg: #eef1f8;
+  --bh-border: #e2e5ee;
+  --bh-text: #1f2430;
+  --bh-muted: #6b7280;
+  --bh-radius: 10px;
+  --bh-radius-sm: 8px;
+  --bh-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.10);
+  --bh-shadow-md: 0 4px 12px rgba(16, 24, 40, 0.10), 0 2px 4px rgba(16, 24, 40, 0.06);
+  --bh-shadow-lg: 0 12px 32px rgba(16, 24, 40, 0.18);
+  --bh-transition: 0.18s ease;
+}
+
+/* ---------- Base ---------- */
+body {
+  font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+  background: linear-gradient(160deg, var(--bh-bg) 0%, #e6eaf5 100%);
+  color: var(--bh-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.container-fluid.vh-100 {
+  background: transparent;
+}
+
+/* ---------- Navbar ---------- */
+.navbar.bg-light {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid var(--bh-border);
+  box-shadow: var(--bh-shadow-sm);
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+.navbar .nav-item {
+  display: flex;
+  align-items: center;
+  margin: 0 0.15rem;
+}
+
+#nodesConter,
+#edgesCounter {
+  font-weight: 700;
+  color: var(--bh-accent);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  border-radius: var(--bh-radius-sm);
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  transition: background-color var(--bh-transition), color var(--bh-transition),
+    border-color var(--bh-transition), box-shadow var(--bh-transition),
+    transform var(--bh-transition);
+}
+
+.btn:not(.dropdown-toggle-split):active {
+  transform: translateY(1px);
+}
+
+.btn:focus,
+.btn:focus-visible {
+  box-shadow: 0 0 0 0.2rem var(--bh-accent-soft);
+}
+
+.btn i.fa,
+.btn i.fas,
+.btn i.far,
+.btn i.fa-solid,
+.btn i.fa-regular {
+  margin-right: 0.4rem;
+  opacity: 0.9;
+}
+
+.btn-group > .btn i.fa-only {
+  margin-right: 0;
+}
+
+.btn-primary {
+  background-color: var(--bh-accent);
+  border-color: var(--bh-accent);
+}
+
+.btn-primary:hover {
+  background-color: var(--bh-accent-hover);
+  border-color: var(--bh-accent-hover);
+}
+
+.btn-outline-primary {
+  color: var(--bh-accent);
+  border-color: var(--bh-accent);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--bh-accent);
+  border-color: var(--bh-accent);
+}
+
+.btn-outline-secondary {
+  color: #475069;
+  border-color: #cdd3e0;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #475069;
+  border-color: #475069;
+}
+
+.btn-success {
+  background-color: var(--bh-success);
+  border-color: var(--bh-success);
+}
+
+.btn-info {
+  background-color: var(--bh-info);
+  border-color: var(--bh-info);
+  color: #fff;
+}
+
+.btn-check:checked + .btn-outline-secondary {
+  background-color: var(--bh-accent);
+  border-color: var(--bh-accent);
+  color: #fff;
+}
+
+.btn-check:checked + .btn-outline-danger {
+  background-color: var(--bh-danger);
+  border-color: var(--bh-danger);
+}
+
+/* ---------- Sidebars (filters / stats) ---------- */
+#filterSideBar,
+#statsSideBar {
+  background: var(--bh-surface);
+  border: 1px solid var(--bh-border);
+  border-radius: var(--bh-radius);
+  box-shadow: var(--bh-shadow-lg);
+  padding: 1rem 0.9rem !important;
+  margin-top: 0.6rem;
+}
+
+#filterSideBar.show,
+#statsSideBar.show {
+  display: block;
+}
+
+#filterSideBar hr,
+#statsSideBar hr {
+  border: none;
+  border-top: 1px solid var(--bh-border);
+  opacity: 1;
+  margin: 0.9rem 0;
+}
+
+#filterSideBar .btn-success {
+  width: 100%;
+  padding: 0.55rem;
+  font-weight: 600;
+  box-shadow: var(--bh-shadow-sm);
+}
+
+/* Scrollbar refinement */
+#filterSideBar::-webkit-scrollbar,
+#statsSideBar::-webkit-scrollbar,
+.dropdown-menu::-webkit-scrollbar {
+  width: 9px;
+}
+
+#filterSideBar::-webkit-scrollbar-thumb,
+#statsSideBar::-webkit-scrollbar-thumb,
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: #c3c9d8;
+  border-radius: 8px;
+}
+
+#filterSideBar::-webkit-scrollbar-thumb:hover,
+#statsSideBar::-webkit-scrollbar-thumb:hover {
+  background: #a7afc4;
+}
+
+/* ---------- Inputs ---------- */
+.form-control,
+.form-select {
+  border-radius: var(--bh-radius-sm);
+  border: 1px solid var(--bh-border);
+  transition: border-color var(--bh-transition), box-shadow var(--bh-transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bh-accent);
+  box-shadow: 0 0 0 0.2rem var(--bh-accent-soft);
+}
+
+.input-group .form-control {
+  border-radius: var(--bh-radius-sm) 0 0 var(--bh-radius-sm);
+}
+
+/* ---------- Dropdowns ---------- */
+.dropdown-menu {
+  border: 1px solid var(--bh-border);
+  border-radius: var(--bh-radius);
+  box-shadow: var(--bh-shadow-md);
+  padding: 0.4rem;
+}
+
+.dropdown-item {
+  border-radius: var(--bh-radius-sm);
+  padding: 0.45rem 0.7rem;
+  transition: background-color var(--bh-transition);
+}
+
+.dropdown-item:hover {
+  background-color: var(--bh-accent-soft);
+}
+
+/* ---------- Tables (stats) ---------- */
+.table {
+  border-radius: var(--bh-radius-sm);
+  overflow: hidden;
+}
+
+.table thead th {
+  background: var(--bh-surface-2);
+  border-bottom: 2px solid var(--bh-border);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--bh-muted);
+}
+
+#statsSideBar details > summary {
+  cursor: pointer;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--bh-radius-sm);
+  background: var(--bh-surface-2);
+  list-style: none;
+  transition: background-color var(--bh-transition);
+}
+
+#statsSideBar details > summary:hover {
+  background: var(--bh-accent-soft);
+}
+
+/* Stats intro note - only shown while explain mode is active */
+.stats-intro {
+  display: none;
+  gap: 0.5rem;
+  align-items: flex-start;
+  background: var(--bh-accent-soft);
+  border: 1px solid var(--bh-border);
+  border-left: 3px solid var(--bh-accent);
+  border-radius: var(--bh-radius-sm);
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--bh-text);
+}
+
+body.explain-mode .stats-intro {
+  display: flex;
+}
+
+.stats-intro .fa {
+  color: var(--bh-accent);
+  margin-top: 0.15rem;
+}
+
+/* Reinforce that stat headers are explainable */
+body.explain-mode #statsSideBar th[data-explain] {
+  text-decoration: underline dotted var(--bh-accent);
+  text-underline-offset: 3px;
+}
+
+/* ---------- Modals ---------- */
+.modal-content {
+  border: none;
+  border-radius: var(--bh-radius);
+  box-shadow: var(--bh-shadow-lg);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--bh-border);
+}
+
+/* ---------- Main stage ---------- */
+#stage {
+  border-radius: var(--bh-radius);
+  margin-top: 0.6rem;
+}
+
+#cy {
+  border-radius: var(--bh-radius);
+}
+
+/* ==========================================================================
+   Explain mode
+   ========================================================================== */
+
+/* Toggle in the navbar */
+.explain-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--bh-border);
+  background: var(--bh-surface);
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--bh-transition);
+}
+
+.explain-switch:hover {
+  border-color: var(--bh-accent);
+}
+
+.explain-switch .form-check-input {
+  cursor: pointer;
+  margin: 0;
+}
+
+.explain-switch .form-check-input:checked {
+  background-color: var(--bh-accent);
+  border-color: var(--bh-accent);
+}
+
+.explain-switch label {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.explain-switch .fa {
+  color: var(--bh-accent);
+}
+
+/* When explain mode is active, mark explainable elements */
+body.explain-mode [data-explain]:hover,
+body.explain-mode [data-bh-explain]:hover {
+  outline: 2px dashed var(--bh-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+  cursor: help;
+}
+
+body.explain-mode .explain-active-banner {
+  display: flex;
+}
+
+/* Floating tooltip */
+#bhExplainTip {
+  position: fixed;
+  z-index: 200000;
+  max-width: 320px;
+  background: #111827;
+  color: #f9fafb;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--bh-radius-sm);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  box-shadow: var(--bh-shadow-lg);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+#bhExplainTip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#bhExplainTip .bh-tip-title {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  color: #a5b4fc;
+}
+
+/* Small banner shown while explain mode is active */
+.explain-active-banner {
+  display: none;
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 190000;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bh-accent);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: var(--bh-shadow-md);
+}
+
+/* ==========================================================================
+   Tools / settings menu (collapsed by default)
+   ========================================================================== */
+.tools-menu {
+  display: none;
+  position: fixed;
+  top: 60px;
+  right: 16px;
+  z-index: 150000;
+  width: 300px;
+  max-height: calc(100vh - 80px);
+  overflow: visible;
+  background: var(--bh-surface);
+  border: 1px solid var(--bh-border);
+  border-radius: var(--bh-radius);
+  box-shadow: var(--bh-shadow-lg);
+  padding: 0.9rem;
+}
+
+.tools-menu.show {
+  display: block;
+  animation: bhFadeIn 0.16s ease;
+}
+
+@keyframes bhFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tools-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--bh-border);
+}
+
+.tools-menu-header .fa {
+  color: var(--bh-accent);
+  margin-right: 0.35rem;
+}
+
+.tools-menu-row {
+  margin-bottom: 0.75rem;
+}
+
+.tools-menu-row:last-child {
+  margin-bottom: 0;
+}
+
+.tools-menu-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  color: var(--bh-muted);
+  margin-bottom: 0.3rem;
+}
+
+.tools-menu .btn-group .btn:first-child {
+  flex: 1 1 auto;
+}
+
+.tools-theme-switch {
+  padding-left: 2.4rem;
+}
+
+.tools-theme-switch .form-check-label {
+  font-weight: 500;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .tools-menu {
+  background: var(--bh-surface);
+  border-color: var(--bh-border);
+}
+
+/* ==========================================================================
+   Dark mode overrides
+   ========================================================================== */
+[data-theme="dark"] {
+  --bh-surface: #1c1f27;
+  --bh-surface-2: #23262f;
+  --bh-bg: #14161c;
+  --bh-border: #333844;
+  --bh-text: #e5e7eb;
+  --bh-muted: #9aa1b1;
+}
+
+[data-theme="dark"] body,
+body[data-theme="dark"] {
+  background: linear-gradient(160deg, #14161c 0%, #191c24 100%);
+  color: var(--bh-text);
+}
+
+[data-theme="dark"] .navbar.bg-light {
+  background: rgba(28, 31, 39, 0.85) !important;
+  border-bottom: 1px solid var(--bh-border);
+}
+
+[data-theme="dark"] #filterSideBar,
+[data-theme="dark"] #statsSideBar,
+[data-theme="dark"] .dropdown-menu {
+  background: var(--bh-surface);
+  border-color: var(--bh-border);
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: var(--bh-surface-2);
+  border-color: var(--bh-border);
+  color: var(--bh-text);
+}
+
+[data-theme="dark"] .table thead th,
+[data-theme="dark"] #statsSideBar details > summary {
+  background: var(--bh-surface-2);
+}
+
+[data-theme="dark"] .explain-switch {
+  background: var(--bh-surface-2);
+  border-color: var(--bh-border);
+  color: var(--bh-text);
+}
+
+[data-theme="dark"] .btn-outline-secondary {
+  color: #d6dae4;
+  border-color: #414759;
+}
