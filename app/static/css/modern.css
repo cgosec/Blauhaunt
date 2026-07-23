@@ -315,6 +315,13 @@ body.explain-mode #statsSideBar th[data-explain] {
 #timeline,
 #heatmap {
   overflow: auto;
+  /* Override Bootstrap .container max-width so they span the full stage width */
+  width: 100%;
+  max-width: 100%;
+  left: 0;
+  right: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 #innerStage,

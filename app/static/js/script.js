@@ -1838,7 +1838,7 @@ function createTimelineSystemView(edges) {
             tableDataSourceSystem.innerText = edge.data.source
             tableDataTargetSystem.innerText = edge.data.target
             tableDataEventID.innerText = edge.data.EventID
-            tableDataLogonType.innerText = edge.data.Logontype || "-"
+            tableDataLogonType.innerText = edge.data.LogonType || "-"
             timelineEntries.push(tableRow)
         }
     }
