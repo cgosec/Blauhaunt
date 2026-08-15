@@ -13,12 +13,6 @@
   display: none;
 }
 
-/* d-flex is defined after d-none in Bootstrap (both !important), so d-none alone
-   cannot hide dynamic-display elements that also carry d-flex */
-.dynamic-display.d-none {
-  display: none !important;
-}
-
 table.floatThead-table {
   border-top: none;
   border-bottom: none;

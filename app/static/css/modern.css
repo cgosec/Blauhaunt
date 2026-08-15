@@ -311,9 +311,11 @@ body.explain-mode #statsSideBar th[data-explain] {
 }
 
 /* Timeline & Heatmap can grow beyond the viewport - give them scrollbars.
-   The graph (cytoscape) must stay scrollbar-free since it pans/zooms. */
-#timeline,
-#heatmap {
+   The graph (cytoscape) must stay scrollbar-free since it pans/zooms.
+   The :not(.d-none) is required so the view can still be hidden when
+   switching to another render view (ID + !important would beat .d-none). */
+#timeline:not(.d-none),
+#heatmap:not(.d-none) {
   overflow: auto;
   /* Override Bootstrap .d-flex so sticky table headers work inside the pane */
   display: block !important;
