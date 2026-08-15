@@ -3,6 +3,7 @@ let monitoringArtifact = "Custom.Windows.Events.Blauhaunt"
 let velo_url = window.location.origin
 let BLAUHAUNT_TAG = "Blauhaunt"
 let header = {}
+let orgList = []
 checkForVelociraptor()
 
 function selectionModal(title, selectionList) {
@@ -414,8 +415,12 @@ function getFromMonitoringArtifact() {
 function changeBtn(replaceBtn, text, ordID) {
     let newBtn = document.createElement("button");
     // get child btn from replaceBtn and copy the classes to the new btn
-    newBtn.className = replaceBtn.children[0].className;
-    replaceBtn.innerHTML = ""
+    let oldBtn = replaceBtn.querySelector("button");
+    newBtn.className = oldBtn ? oldBtn.className : "btn btn-secondary w-100";
+    // only remove the old button so other elements (e.g. the org selection) stay intact
+    if (oldBtn) {
+        oldBtn.remove();
+    }
     newBtn.innerText = text;
     newBtn.addEventListener("click", evt => {
         evt.preventDefault()
@@ -423,6 +428,35 @@ function changeBtn(replaceBtn, text, ordID) {
         getHunts(ordID);
     });
     replaceBtn.appendChild(newBtn)
+}
+
+function createOrgSelection(replaceBtn, currentOrgID) {
+    // only shown when connected to velociraptor (called from checkForVelociraptor)
+    if (orgList.length === 0) {
+        return;
+    }
+    let select = document.createElement("select");
+    select.className = "form-select mb-2";
+    select.id = "orgSelection";
+    orgList.forEach(org => {
+        let option = document.createElement("option");
+        option.value = org.id;
+        option.innerText = org.name;
+        if (org.id === currentOrgID) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+    select.addEventListener("change", evt => {
+        let orgID = evt.target.value;
+        let orgName = evt.target.options[evt.target.selectedIndex].text;
+        header["Grpc-Metadata-Orgid"] = orgID;
+        changeBtn(replaceBtn, "Load " + orgName, orgID);
+        loadDataFromDB(orgID);
+        getClientInfoFromVelo();
+        getHunts(orgID);
+    });
+    replaceBtn.parentNode.insertBefore(select, replaceBtn);
 }
 
 function loadDataFromDB(orgID) {
@@ -477,10 +511,21 @@ function checkForVelociraptor() {
     fetch(velo_url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
         return response.json()
     }).then(data => {
+        console.log("Velociraptor is connected. Loading case..:")
+        console.info("Please note that the Velociraptor REST API is not officially documented and may change in future versions. Use at your own risk. If this does not work, you need to adapt the workflows in veloAPI.js to the REST API of your Velociraptor version. The code is available on GitHub:")
+        console.log("Org in UserUITraids", data.interface_traits.org);
         let orgID = data.interface_traits.org || 'root';
+        // collect all orgs (id + name) the user has access to
+        orgList = (data.interface_traits.orgs || []).map(org => {
+            return {id: org.id || 'root', name: org.name || org.id || 'root'};
+        });
+        if (!orgList.some(org => org.id === orgID)) {
+            orgList.push({id: orgID, name: orgID});
+        }
         header = {"Grpc-Metadata-Orgid": orgID}
         // hide the Upload button
         let replaceBtn = document.getElementById("dataBtnWrapper");
+        createOrgSelection(replaceBtn, orgID);
         changeBtn(replaceBtn, "Load " + orgID, orgID);
         loadDataFromDB(orgID);
         createSyncBtn()
