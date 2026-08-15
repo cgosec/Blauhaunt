@@ -253,7 +253,7 @@ async function getClientInfoFromVelo() {
     let noteBookID = await getClientInfoNotebook();
     if (!noteBookID) {
             createClientinfoNotebook();
-            noteBookID = getClientInfoNotebook();
+            noteBookID = await getClientInfoNotebook();
         }
     try {
         fetch(velo_url + `/api/v1/GetNotebooks?notebook_id=${noteBookID}`, {headers: header}).then(response => {
