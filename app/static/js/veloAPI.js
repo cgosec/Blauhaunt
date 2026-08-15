@@ -514,11 +514,11 @@ function checkForVelociraptor() {
         console.log("Velociraptor is connected. Loading case..:")
         console.info("Please note that the Velociraptor REST API is not officially documented and may change in future versions. Use at your own risk. If this does not work, you need to adapt the workflows in veloAPI.js to the REST API of your Velociraptor version. The code is available on GitHub:")
         console.log("Org in UserUITraits", data.interface_traits.org);
-        console.log("Orgs in UserUITraits", data.interface_traits.orgs);
-        console.debug("UserUITraits:", data.interface_traits);
+        console.log("Orgs in UserUITraits", data.orgs);
+        console.debug("UserUITraits:", data);
         let orgID = data.interface_traits.org || 'root';
         // collect all orgs (id + name) the user has access to
-        orgList = (data.interface_traits.orgs || []).map(org => {
+        orgList = (data.orgs || []).map(org => {
             return {id: org.id || 'root', name: org.name || org.id || 'root'};
         });
         if (!orgList.some(org => org.id === orgID)) {
