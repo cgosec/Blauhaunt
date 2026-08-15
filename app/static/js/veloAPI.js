@@ -530,6 +530,7 @@ function checkForVelociraptor() {
         loadDataFromDB(orgID);
         createSyncBtn()
         //getHunts(orgID);
+
     }).catch(error => {
         console.debug(error)
         console.debug("seems to be not connected to Velociraptor.");
