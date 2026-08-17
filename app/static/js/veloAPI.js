@@ -8,7 +8,7 @@ checkForVelociraptor()
 
 // wraps fetch to retry on 429 (rate limit) with exponential backoff,
 // honoring the Retry-After header when the server sends one
-function fetchWithRetry(url, options, retries = 5, delay = 1000) {
+function fetchWithRetry(url, options, retries = 10, delay = 20000) {
     return fetch(url, options).then(response => {
         if (response.status === 429 && retries > 0) {
             let retryAfter = parseInt(response.headers.get("Retry-After"));
