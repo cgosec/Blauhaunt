@@ -6,6 +6,22 @@ let header = {}
 let orgList = []
 checkForVelociraptor()
 
+// wraps fetch to retry on 429 (rate limit) with exponential backoff,
+// honoring the Retry-After header when the server sends one
+function fetchWithRetry(url, options, retries = 5, delay = 1000) {
+    return fetch(url, options).then(response => {
+        if (response.status === 429 && retries > 0) {
+            let retryAfter = parseInt(response.headers.get("Retry-After"));
+            let wait = isNaN(retryAfter) ? delay : retryAfter * 1000;
+            console.debug(`Rate limited (429). Retrying in ${wait}ms... (${retries} retries left)`);
+            return new Promise(resolve => setTimeout(resolve, wait)).then(() =>
+                fetchWithRetry(url, options, retries - 1, delay * 2)
+            );
+        }
+        return response;
+    });
+}
+
 function selectionModal(title, selectionList) {
     // remove duplicates from selectionList
     selectionList = [...new Set(selectionList)]
@@ -48,7 +64,7 @@ function selectionModal(title, selectionList) {
 
 function getNotebook(huntID) {
     let notebooks = []
-    fetch(velo_url + '/api/v1/GetHunt?hunt_id=' + huntID, {headers: header}).then(response => {
+    fetchWithRetry(velo_url + '/api/v1/GetHunt?hunt_id=' + huntID, {headers: header}).then(response => {
         return response.json()
     }).then(data => {
         let artifacts = data.artifacts;
@@ -77,7 +93,7 @@ function getNotebook(huntID) {
 }
 
 function getCells(notebookID) {
-    fetch(velo_url + `/api/v1/GetNotebooks?notebook_id=${notebookID}&include_uploads=true`, {headers: header}).then(response => {
+    fetchWithRetry(velo_url + `/api/v1/GetNotebooks?notebook_id=${notebookID}&include_uploads=true`, {headers: header}).then(response => {
         // get the X-Csrf-Token form the header of the response
         localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
         return response.json()
@@ -115,7 +131,7 @@ function getCells(notebookID) {
 function updateData(notebookID, cellID, version, csrf_token) {
     header["X-Csrf-Token"] = csrf_token
     // fetch the current cell content first, so the existing VQL is kept
-    fetch(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+    fetchWithRetry(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
         return response.json()
     }).then(cellData => {
         let input = cellData.input;
@@ -123,7 +139,7 @@ function updateData(notebookID, cellID, version, csrf_token) {
         if (!input || !input.trim()) {
             input = "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n";
         }
-        return fetch(velo_url + '/api/v1/UpdateNotebookCell', {
+        return fetchWithRetry(velo_url + '/api/v1/UpdateNotebookCell', {
             method: 'POST',
             headers: header,
             body: JSON.stringify({
@@ -146,7 +162,7 @@ function updateData(notebookID, cellID, version, csrf_token) {
 let dataRows = []
 
 function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
-    fetch(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
+    fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
@@ -183,7 +199,7 @@ function getHunts(orgID) {
     velo_url = window.location.origin
     const oldAPI = '/api/v1/ListHunts?count=2000&offset=0&summary=true&user_filter=';
     const newAPI = "/api/v1/GetHuntTable?version=1&start_row=0&rows=20000&sort_direction=false"
-    fetch(velo_url + newAPI, {headers: header}).then(response => {
+    fetchWithRetry(velo_url + newAPI, {headers: header}).then(response => {
         return response.json()
     }).then(data => {
         try {
@@ -217,7 +233,7 @@ function getHunts(orgID) {
 
 function updateClientInfoData(clientInfoNotebook, cellID, version) {
     header["X-Csrf-Token"] = localStorage.getItem('csrf-token')
-    fetch(velo_url + '/api/v1/UpdateNotebookCell', {
+    fetchWithRetry(velo_url + '/api/v1/UpdateNotebookCell', {
         method: 'POST',
         headers: header,
         body: JSON.stringify({
@@ -241,7 +257,7 @@ function updateClientInfoData(clientInfoNotebook, cellID, version) {
 
 async function getClientInfoNotebook(){
     try {
-    let response = await fetch(velo_url + '/api/v1/GetTable?type=NOTEBOOKS&start_row=0&rows=1000&sort_direction=false', {headers: header})
+    let response = await fetchWithRetry(velo_url + '/api/v1/GetTable?type=NOTEBOOKS&start_row=0&rows=1000&sort_direction=false', {headers: header})
     localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
     let data = await response.json()
     let notebookIDCol = data.columns.indexOf("NotebookId");
@@ -266,7 +282,7 @@ async function getClientInfoFromVelo() {
             noteBookID = await getClientInfoNotebook();
         }
     try {
-        fetch(velo_url + `/api/v1/GetNotebooks?notebook_id=${noteBookID}`, {headers: header}).then(response => {
+        fetchWithRetry(velo_url + `/api/v1/GetNotebooks?notebook_id=${noteBookID}`, {headers: header}).then(response => {
             localStorage.setItem('csrf-token', response.headers.get("X-Csrf-Token"))
             return response.json()
         }).then(data => {
@@ -276,7 +292,7 @@ async function getClientInfoFromVelo() {
                     let notebookID = notebook.notebook_id;
                     notebook.cell_metadata.forEach(metadata => {
                         let cellID = metadata.cell_id;
-                        fetch(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+                        fetchWithRetry(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
                             return response.json()
                         }).then(data => {
                             let query = data.input;
@@ -297,7 +313,7 @@ async function getClientInfoFromVelo() {
 
 function createClientinfoNotebook() {
     header["X-Csrf-Token"] = localStorage.getItem('csrf-token')
-    fetch("/api/v1/NewNotebook", {
+    fetchWithRetry("/api/v1/NewNotebook", {
         headers: header,
         "referrerPolicy": "strict-origin-when-cross-origin",
         "body": "{\"name\":\"Blauhaunt Clientinfo\",\"description\":\"Auto created\",\"public\":true,\"artifacts\":[\"Notebooks.Default\"],\"specs\":[]}",
@@ -311,7 +327,7 @@ function createClientinfoNotebook() {
             let clientInfoNotebook = data.notebook_id;
             let cellID = data.cell_metadata[0].cell_id;
             let version = data.cell_metadata[0].current_version;
-            fetch("/api/v1/UpdateNotebookCell", {
+            fetchWithRetry("/api/v1/UpdateNotebookCell", {
                 headers: header,
                 "body": `{"notebook_id":"${clientInfoNotebook}","cell_id":"${cellID}","type":"vql","currently_editing":false,"input":"select * from clients()"}`,
                 "method": "POST",
@@ -332,7 +348,7 @@ function createClientinfoNotebook() {
 }
 
 function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow = 0, toRow = 1000) {
-    fetch(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${timestamp}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
+    fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${timestamp}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
@@ -376,7 +392,7 @@ function getFromMonitoringArtifact() {
         caseData.clientIDs.forEach(clientID => {
             console.debug("checking monitoring artifact for clientID: " + clientID)
             let latestUpdate = caseData.clientMonitoringLatestUpdate[clientID] || 0;
-            fetch(velo_url + `/api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=${latestUpdate}&end_time=9999999999&rows=10000`, {
+            fetchWithRetry(velo_url + `/api/v1/GetTable?client_id=${clientID}&artifact=${monitoringArtifact}&type=CLIENT_EVENT&start_time=${latestUpdate}&end_time=9999999999&rows=10000`, {
                 headers: header
             }).then(response => {
                 return response.json()
@@ -518,7 +534,7 @@ function createSyncBtn() {
 }
 
 function checkForVelociraptor() {
-    fetch(velo_url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
+    fetchWithRetry(velo_url + '/api/v1/GetUserUITraits', {headers: header}).then(response => {
         return response.json()
     }).then(data => {
         console.log("Velociraptor is connected. Loading case..:")
