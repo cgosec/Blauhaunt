@@ -13,6 +13,32 @@
   display: none;
 }
 
+#loadingProgress {
+  width: 40%;
+  margin: 0.4em auto 0 auto;
+  font-size: 1.5rem;
+}
+
+#loadingProgressTrack {
+  width: 100%;
+  height: 1.2em;
+  background-color: #e0e0e0;
+  border-radius: 0.6em;
+  overflow: hidden;
+}
+
+#loadingProgressBar {
+  height: 100%;
+  width: 0%;
+  background-color: #61bffc;
+  transition: width 0.3s ease;
+}
+
+#loadingProgressText {
+  margin-top: 0.3em;
+  color: #000;
+}
+
 table.floatThead-table {
   border-top: none;
   border-bottom: none;

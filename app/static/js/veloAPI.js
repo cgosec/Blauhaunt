@@ -184,6 +184,27 @@ function updateData(notebookID, cellID, version, csrf_token) {
 
 let dataRows = []
 
+function setLoadingProgress(loaded, total) {
+    document.getElementById("loading").style.display = "block";
+    let bar = document.getElementById("loadingProgressBar");
+    let text = document.getElementById("loadingProgressText");
+    if (total > 0) {
+        let percent = Math.min(100, Math.round(loaded / total * 100));
+        bar.style.width = percent + "%";
+        text.innerText = `${loaded.toLocaleString()} / ${total.toLocaleString()} rows (${percent}%)`;
+    } else {
+        // total unknown - fall back to a simple counter next to the spinner
+        bar.style.width = "0%";
+        text.innerText = `${loaded.toLocaleString()} rows loaded`;
+    }
+}
+
+function hideLoading() {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("loadingProgressBar").style.width = "0%";
+    document.getElementById("loadingProgressText").innerText = "";
+}
+
 function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
     fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${rows}&sort_direction=false`,
         {headers: header}
@@ -205,14 +226,17 @@ function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
             }
             dataRows.push(JSON.stringify(entry));
         });
-        // show loading spinner
-        document.getElementById("loading").style.display = "block";
+        // show progress while loading
+        let nextRow = startRow + data.rows.length;
+        let hasMore = data.total_rows > nextRow;
+        setLoadingProgress(nextRow, data.total_rows);
         processJSONUpload(dataRows.join("\n")).then(() => {
-            document.getElementById("loading").style.display = "none";
+            if (!hasMore) {
+                hideLoading();
+            }
         });
         // if there are more rows, load them
-        let nextRow = startRow + data.rows.length;
-        if (data.total_rows > nextRow) {
+        if (hasMore) {
             loadData(notebookID, cellID, version, nextRow, rows);
         }
         storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
