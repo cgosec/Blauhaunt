@@ -114,16 +114,26 @@ function getCells(notebookID) {
 
 function updateData(notebookID, cellID, version, csrf_token) {
     header["X-Csrf-Token"] = csrf_token
-    fetch(velo_url + '/api/v1/UpdateNotebookCell', {
-        method: 'POST',
-        headers: header,
-        body: JSON.stringify({
-            "notebook_id": notebookID,
-            "cell_id": cellID,
-            "env": [{"key": "ArtifactName", "value": artifactName}],
-            "input": "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n",
-            "type": "vql"
-        })
+    // fetch the current cell content first, so the existing VQL is kept
+    fetch(velo_url + `/api/v1/GetNotebookCell?notebook_id=${notebookID}&cell_id=${cellID}`, {headers: header}).then(response => {
+        return response.json()
+    }).then(cellData => {
+        let input = cellData.input;
+        // fall back to the default query if the cell has no VQL yet
+        if (!input || !input.trim()) {
+            input = "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n";
+        }
+        return fetch(velo_url + '/api/v1/UpdateNotebookCell', {
+            method: 'POST',
+            headers: header,
+            body: JSON.stringify({
+                "notebook_id": notebookID,
+                "cell_id": cellID,
+                "env": [{"key": "ArtifactName", "value": artifactName}],
+                "input": input,
+                "type": "vql"
+            })
+        });
     }).then(response => {
         return response.json()
     }).then(data => {
