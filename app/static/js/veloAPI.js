@@ -6,19 +6,42 @@ let header = {}
 let orgList = []
 checkForVelociraptor()
 
-// wraps fetch to retry on 429 (rate limit) with exponential backoff,
-// honoring the Retry-After header when the server sends one
-function fetchWithRetry(url, options, retries = 10, delay = 20000) {
+// wraps fetch to handle HTTP 429 from the Velociraptor API.
+// Velociraptor returns 429 in two situations:
+//   1. gRPC message size limit exceeded ("received message larger than max") -
+//      this is NOT a rate limit and never resolves by waiting. We retry with
+//      half the requested rows instead.
+//   2. genuine rate limiting (e.g. by a reverse proxy) - we honor Retry-After
+//      or fall back to exponential backoff.
+function fetchWithRetry(url, options, retries = 8, delay = 1000) {
     return fetch(url, options).then(response => {
-        if (response.status === 429 && retries > 0) {
+        if (response.status !== 429 || retries === 0) {
+            return response;
+        }
+        // clone so the original body stays readable for the caller
+        return response.clone().text().then(body => {
+            if (body.includes("larger than max")) {
+                // gRPC size limit: halve the page size and retry
+                let match = url.match(/([?&]rows=)(\d+)/);
+                if (match) {
+                    let rows = parseInt(match[2]);
+                    let halved = Math.floor(rows / 2);
+                    if (halved >= 50) {
+                        console.debug(`Response too large for gRPC limit. Retrying with rows=${halved}`);
+                        return fetchWithRetry(url.replace(/([?&]rows=)\d+/, "$1" + halved), options, retries - 1, delay);
+                    }
+                }
+                console.error("gRPC message size limit exceeded (429). Even small pages are too large - check the row size.");
+                return response;
+            }
+            // genuine rate limit: honor Retry-After, else exponential backoff
             let retryAfter = parseInt(response.headers.get("Retry-After"));
             let wait = isNaN(retryAfter) ? delay : retryAfter * 1000;
             console.debug(`Rate limited (429). Retrying in ${wait}ms... (${retries} retries left)`);
             return new Promise(resolve => setTimeout(resolve, wait)).then(() =>
                 fetchWithRetry(url, options, retries - 1, delay * 2)
             );
-        }
-        return response;
+        });
     });
 }
 
@@ -161,8 +184,8 @@ function updateData(notebookID, cellID, version, csrf_token) {
 
 let dataRows = []
 
-function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
-    fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
+function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
+    fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${rows}&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
@@ -188,8 +211,9 @@ function loadData(notebookID, cellID, version, startRow = 0, toRow = 1000) {
             document.getElementById("loading").style.display = "none";
         });
         // if there are more rows, load them
-        if (data.total_rows > toRow) {
-            loadData(notebookID, cellID, version, startRow + toRow, toRow + 1000);
+        let nextRow = startRow + data.rows.length;
+        if (data.total_rows > nextRow) {
+            loadData(notebookID, cellID, version, nextRow, rows);
         }
         storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
     });
@@ -347,8 +371,8 @@ function createClientinfoNotebook() {
     });
 }
 
-function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow = 0, toRow = 1000) {
-    fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${timestamp}&start_row=${startRow}&rows=${toRow}&sort_direction=false`,
+function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow = 0, rows = 1000) {
+    fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${timestamp}&start_row=${startRow}&rows=${rows}&sort_direction=false`,
         {headers: header}
     ).then(response => {
         return response.json()
@@ -372,8 +396,9 @@ function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow
         loadClientInfo(clientRows.join("\n"))
         caseData.clientIDs = clientIDs;
         // if there are more rows, load them
-        if (data.total_rows > toRow) {
-            loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow + toRow, toRow + 1000);
+        let nextRow = startRow + data.rows.length;
+        if (data.total_rows > nextRow) {
+            loadFromClientInfoCell(notebookID, cellID, version, timestamp, nextRow, rows);
         }
     });
 
