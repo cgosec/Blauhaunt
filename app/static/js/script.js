@@ -2904,7 +2904,11 @@ async function createNodesAndEdges(objects) {
                 logontimes = []
                 edgeTimeMap.set(edgeid, logontimes)
             }
-            logontimes.push(...data.LogonTimes)
+            // no spread-push: LogonTimes can be huge and push(...arr) would
+            // exceed the maximum call stack size
+            for (const t of data.LogonTimes) {
+                logontimes.push(t)
+            }
             if (!hostEdgeById.has(edgeid)) {
                 let edge = {
                     "data": {
@@ -2947,7 +2951,11 @@ async function createNodesAndEdges(objects) {
                 times = []
                 caseData.userEdgesLogonTimes.set(uedgeid, times)
             }
-            times.push(...data.LogonTimes)
+            // no spread-push: LogonTimes can be huge and push(...arr) would
+            // exceed the maximum call stack size
+            for (const t of data.LogonTimes) {
+                times.push(t)
+            }
             if (!userEdgeById.has(uedgeid)) {
                 let userEdge = {
                     "data": {
