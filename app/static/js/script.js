@@ -301,23 +301,41 @@ function resetScene() {
     }
 }
 
+// Opens the BlauHaunt IndexedDB and guarantees the BlauHauntCases object store
+// exists. If the database already exists without the store (e.g. created by an
+// older version), the version is bumped so onupgradeneeded fires and creates it.
+function openCaseDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open("BlauHaunt", 1);
+        request.onupgradeneeded = function (event) {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains("BlauHauntCases")) {
+                db.createObjectStore("BlauHauntCases");
+            }
+        };
+        request.onsuccess = function (event) {
+            const db = event.target.result;
+            if (db.objectStoreNames.contains("BlauHauntCases")) {
+                resolve(db);
+                return;
+            }
+            // store is missing - bump the version to trigger another upgrade
+            const version = db.version + 1;
+            db.close();
+            const upgradeRequest = indexedDB.open("BlauHaunt", version);
+            upgradeRequest.onupgradeneeded = function (event) {
+                event.target.result.createObjectStore("BlauHauntCases");
+            };
+            upgradeRequest.onsuccess = event => resolve(event.target.result);
+            upgradeRequest.onerror = event => reject(event.target.error);
+        };
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
 // Function to store data in IndexedDB. this is where all the data is stored for the case to be able to load it later again
 function storeDataToIndexDB(caseName) {
-    // Open the IndexedDB database
-    const request = indexedDB.open("BlauHaunt", 1);
-
-    request.onerror = function (event) {
-        console.error('Error opening database:', event.target.error);
-    };
-
-    request.onupgradeneeded = function (event) {
-        const db = event.target.result;
-        // Create an object store (table) in the database
-        const objectStore = db.createObjectStore("BlauHauntCases");
-    };
-
-    request.onsuccess = function (event) {
-        const db = event.target.result;
+    openCaseDB().then(db => {
         const transaction = db.transaction("BlauHauntCases", 'readwrite');
         const objectStore = transaction.objectStore("BlauHauntCases");
         // Store the data object with the given case name
@@ -328,25 +346,14 @@ function storeDataToIndexDB(caseName) {
         transaction.onerror = function (event) {
             console.error('Error storing data:', event.target.error);
         };
-    };
+    }).catch(error => {
+        console.error('Error opening database:', error);
+    });
 }
 
 // function to load stored case data from indexedDB
 function getCases() {
-    const request = indexedDB.open('BlauHaunt', 1);
-
-    request.onupgradeneeded = function (event) {
-        const db = event.target.result;
-        // Create an object store (table) in the database
-        const objectStore = db.createObjectStore("BlauHauntCases");
-        console.debug("BlauHaunt IndexDB created or updated")
-    };
-    request.onerror = function (event) {
-        console.error('Error opening database:', event.target.error);
-    };
-    request.onsuccess = function (event) {
-        const db = event.target.result;
-
+    openCaseDB().then(db => {
         const transaction = db.transaction('BlauHauntCases', 'readonly');
         const objectStore = transaction.objectStore('BlauHauntCases');
 
@@ -397,14 +404,13 @@ function getCases() {
 
             }
         };
-    }
+    }).catch(error => {
+        console.error('Error opening database:', error);
+    });
 }
 
 function deleteCasefromIdexDB(caseName) {
-    const request = indexedDB.open('BlauHaunt', 1);
-
-    request.onsuccess = function (event) {
-        const db = event.target.result;
+    openCaseDB().then(db => {
         const transaction = db.transaction('BlauHauntCases', 'readwrite');
         const objectStore = transaction.objectStore('BlauHauntCases');
 
@@ -425,25 +431,17 @@ function deleteCasefromIdexDB(caseName) {
         transaction.onerror = function (event) {
             console.error('Transaction error:', event.target.error);
         };
-    };
-
-    request.onerror = function (event) {
-        console.error('Error opening database:', event.target.error);
-    };
+    }).catch(error => {
+        console.error('Error opening database:', error);
+    });
 }
 
 // list cases: const transaction = db.transaction(db.objectStoreNames);
 // Function to retrieve data from IndexedDB this is called in getCases()
 function retrieveDataFromIndexDB(caseName, callback) {
-    const request = indexedDB.open('BlauHaunt', 1);
     resetScene()
 
-    request.onerror = function (event) {
-        console.error('Error opening database:', event.target.error);
-    };
-
-    request.onsuccess = function (event) {
-        const db = event.target.result;
+    openCaseDB().then(db => {
         const transaction = db.transaction("BlauHauntCases", 'readonly');
         const objectStore = transaction.objectStore("BlauHauntCases");
         const getRequest = objectStore.get(caseName);
@@ -499,7 +497,10 @@ function retrieveDataFromIndexDB(caseName, callback) {
             console.error('Error retrieving data:', event.target.error);
             generateBlankCaseData()
         }
-    }
+    }).catch(error => {
+        console.error('Error opening database:', error);
+        generateBlankCaseData()
+    });
 }
 
 // #####################################################################################################################

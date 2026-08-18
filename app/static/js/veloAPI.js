@@ -13,25 +13,39 @@ checkForVelociraptor()
 //      half the requested rows instead.
 //   2. genuine rate limiting (e.g. by a reverse proxy) - we honor Retry-After
 //      or fall back to exponential backoff.
+// remembers the page size of the last successful GetTable request, so paged
+// loads can start near it instead of halving down from the top on every page
+let lastGoodPageSize = null;
+
 function fetchWithRetry(url, options, retries = 8, delay = 1000) {
     return fetch(url, options).then(response => {
+        if (response.ok) {
+            let match = url.match(/([?&]rows=)(\d+)/);
+            if (match) {
+                lastGoodPageSize = parseInt(match[2]);
+            }
+            return response;
+        }
         if (response.status !== 429 || retries === 0) {
             return response;
         }
         // clone so the original body stays readable for the caller
         return response.clone().text().then(body => {
             if (body.includes("larger than max")) {
-                // gRPC size limit: halve the page size and retry
+                // gRPC size limit: halve the page size and retry. This is a
+                // deterministic condition, not a transient error, so it does
+                // not consume the retry budget. Halving goes down to a single
+                // row - if even that is too large, the caller handles it.
                 let match = url.match(/([?&]rows=)(\d+)/);
                 if (match) {
                     let rows = parseInt(match[2]);
                     let halved = Math.floor(rows / 2);
-                    if (halved >= 50) {
+                    if (halved >= 1) {
                         console.debug(`Response too large for gRPC limit. Retrying with rows=${halved}`);
-                        return fetchWithRetry(url.replace(/([?&]rows=)\d+/, "$1" + halved), options, retries - 1, delay);
+                        return fetchWithRetry(url.replace(/([?&]rows=)\d+/, "$1" + halved), options, retries, delay);
                     }
                 }
-                console.error("gRPC message size limit exceeded (429). Even small pages are too large - check the row size.");
+                console.error("gRPC message size limit exceeded (429) - even a single row is too large.");
                 return response;
             }
             // genuine rate limit: honor Retry-After, else exponential backoff
@@ -282,11 +296,37 @@ function hideLoading() {
 }
 
 function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
+    // start near the page size that worked before instead of triggering the
+    // gRPC size limit halving on every page
+    if (lastGoodPageSize) {
+        rows = Math.min(rows, lastGoodPageSize);
+    }
     fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${version}&start_row=${startRow}&rows=${rows}&sort_direction=false`,
         {headers: header}
     ).then(response => {
-        return response.json()
+        if (response.status === 429) {
+            return response.text().then(body => {
+                if (body.includes("larger than max")) {
+                    // the single row at startRow exceeds the gRPC message size
+                    // limit and can never be fetched - skip it so one poison
+                    // row does not kill the whole load
+                    console.warn(`Row ${startRow} is too large for the gRPC message limit - skipping it.`);
+                    let state = getVeloCellState(notebookID, cellID);
+                    state.loadedRows = startRow + 1;
+                    loadData(notebookID, cellID, version, startRow + 1, rows);
+                    return null;
+                }
+                throw new Error(`Rate limited by the server (429) at row ${startRow}`);
+            });
+        }
+        if (!response.ok) {
+            throw new Error(`Failed to load rows starting at ${startRow}: HTTP ${response.status}`);
+        }
+        return response.json();
     }).then(data => {
+        if (!data) {
+            return; // a poison row was skipped - the recursive call already continues
+        }
         console.debug("Cell Data:")
         console.debug(data)
         let state = getVeloCellState(notebookID, cellID);
@@ -326,6 +366,12 @@ function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
         if (hasMore) {
             loadData(notebookID, cellID, version, nextRow, rows);
         }
+        storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
+    }).catch(error => {
+        // the progress up to the last successful page is persisted, so the
+        // next sync resumes there instead of starting over
+        console.error(`Loading stopped at row ${startRow}:`, error);
+        hideLoading();
         storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
     });
 }
@@ -483,13 +529,22 @@ function createClientinfoNotebook() {
 }
 
 function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow = 0, rows = 1000) {
+    if (lastGoodPageSize) {
+        rows = Math.min(rows, lastGoodPageSize);
+    }
     fetchWithRetry(velo_url + `/api/v1/GetTable?notebook_id=${notebookID}&client_id=&cell_id=${cellID}-${version}&table_id=1&TableOptions=%7B%7D&Version=${timestamp}&start_row=${startRow}&rows=${rows}&sort_direction=false`,
         {headers: header}
     ).then(response => {
+        if (!response.ok) {
+            throw new Error(`Failed to load client info from row ${startRow}: HTTP ${response.status}`);
+        }
         return response.json()
     }).then(data => {
         console.debug("Client Data:")
         console.debug(data)
+        if (!data.rows || data.rows.length === 0) {
+            return;
+        }
         let clientIDs = []
         let keys = data.columns;
         let clientRows = []
@@ -511,6 +566,8 @@ function loadFromClientInfoCell(notebookID, cellID, version, timestamp, startRow
         if (data.total_rows > nextRow) {
             loadFromClientInfoCell(notebookID, cellID, version, timestamp, nextRow, rows);
         }
+    }).catch(error => {
+        console.error("Loading client info failed:", error);
     });
 
 }
