@@ -286,7 +286,8 @@ function generateBlankCaseData() {
         srcHostSearchHistory: [],
         dstHostSearchHistory: [],
         permanentHighlightedEdges: new Set(),
-        timezoneSelection: 14
+        timezoneSelection: 14,
+        veloSyncState: {}
     }
 }
 

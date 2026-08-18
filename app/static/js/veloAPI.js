@@ -162,6 +162,21 @@ function updateData(notebookID, cellID, version, csrf_token) {
         if (!input || !input.trim()) {
             input = "\n/*\n# BLAUHAUNT\n*/\nSELECT * FROM source(artifact=\"" + artifactName + "\")\n";
         }
+        // if the VQL changed, the stored row offset is meaningless -> refetch
+        // everything and offer to flush the stored case data
+        let state = getVeloCellState(notebookID, cellID);
+        if (state.query !== undefined && state.query !== input) {
+            console.debug("VQL query changed - refetching all data")
+            state.loadedRows = 0;
+            if (confirm("The VQL query in the Velociraptor notebook cell has changed.\n\n" +
+                "Do you want to flush the stored case data and start fresh?\n\n" +
+                "OK = flush case data\nCancel = keep existing data and merge the new results")) {
+                flushCaseData();
+            }
+            // re-fetch the state in case the flush reset it
+            state = getVeloCellState(notebookID, cellID);
+        }
+        state.query = input;
         return fetchWithRetry(velo_url + '/api/v1/UpdateNotebookCell', {
             method: 'POST',
             headers: header,
@@ -178,11 +193,37 @@ function updateData(notebookID, cellID, version, csrf_token) {
     }).then(data => {
         console.debug("Notebook Data:")
         console.debug(data)
-        loadData(notebookID, data.cell_id, data.current_version);
+        // continue where the last sync stopped - only new rows are fetched
+        let state = getVeloCellState(notebookID, data.cell_id);
+        loadData(notebookID, data.cell_id, data.current_version, state.loadedRows);
     });
 }
 
-let dataRows = []
+// resets the whole case (in-memory data and UI). The flushed state is
+// persisted to IndexedDB once the refetched data is stored.
+function flushCaseData() {
+    generateBlankCaseData();
+    resetScene();
+    processEdgesToNodes();
+}
+
+// tracks per notebook cell how many rows were already loaded, so returning
+// to a case only fetches new data. Hunt result tables are append-only, so a
+// row offset is stable. Persisted in IndexedDB as part of caseData.
+function getVeloCellState(notebookID, cellID) {
+    if (typeof caseData === "undefined" || !caseData) {
+        // case not loaded yet - fall back to a full load
+        return {loadedRows: 0};
+    }
+    if (!caseData.veloSyncState) {
+        caseData.veloSyncState = {}
+    }
+    let key = notebookID + "/" + cellID;
+    if (!caseData.veloSyncState[key]) {
+        caseData.veloSyncState[key] = {loadedRows: 0};
+    }
+    return caseData.veloSyncState[key];
+}
 
 function setLoadingProgress(loaded, total) {
     document.getElementById("loading").style.display = "block";
@@ -213,24 +254,35 @@ function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
     }).then(data => {
         console.debug("Cell Data:")
         console.debug(data)
-        if (!data.rows) {
-            console.debug("no data found")
+        let state = getVeloCellState(notebookID, cellID);
+        // the table shrank since the last sync (e.g. the cell was rebuilt) -> load everything again
+        if (startRow > 0 && data.total_rows !== undefined && data.total_rows < startRow) {
+            console.debug("table shrank since last sync - reloading all rows")
+            state.loadedRows = 0;
+            loadData(notebookID, cellID, version, 0, rows);
+            return;
+        }
+        if (!data.rows || data.rows.length === 0) {
+            console.debug("no new data found")
+            hideLoading();
             return;
         }
         let keys = data.columns;
+        let pageRows = []
         data.rows.forEach(row => {
             let rowData = JSON.parse(row.json)
             let entry = {}
             for (i = 0; i < rowData.length; i++) {
                 entry[keys[i]] = rowData[i];
             }
-            dataRows.push(JSON.stringify(entry));
+            pageRows.push(JSON.stringify(entry));
         });
         // show progress while loading
         let nextRow = startRow + data.rows.length;
         let hasMore = data.total_rows > nextRow;
+        state.loadedRows = nextRow;
         setLoadingProgress(nextRow, data.total_rows);
-        processJSONUpload(dataRows.join("\n")).then(() => {
+        processJSONUpload(pageRows.join("\n")).then(() => {
             if (!hasMore) {
                 hideLoading();
             }
@@ -503,6 +555,26 @@ function changeBtn(replaceBtn, text, ordID) {
         getHunts(ordID);
     });
     replaceBtn.appendChild(newBtn)
+    // button to force a complete reload: discards the sync state so all data
+    // is fetched from velociraptor again (already known data is deduplicated)
+    let oldReloadBtn = document.getElementById("veloReloadBtn");
+    if (oldReloadBtn) {
+        oldReloadBtn.remove();
+    }
+    let reloadBtn = document.createElement("button");
+    reloadBtn.className = "btn btn-warning w-100 mt-1";
+    reloadBtn.id = "veloReloadBtn";
+    reloadBtn.innerText = "Reload all data";
+    reloadBtn.title = "Fetch all data from Velociraptor again, not just new rows";
+    reloadBtn.addEventListener("click", evt => {
+        evt.preventDefault()
+        if (caseData) {
+            caseData.veloSyncState = {};
+        }
+        getClientInfoFromVelo();
+        getHunts(ordID);
+    });
+    replaceBtn.appendChild(reloadBtn)
 }
 
 function createOrgSelection(replaceBtn, currentOrgID) {
