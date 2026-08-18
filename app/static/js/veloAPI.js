@@ -225,7 +225,41 @@ function getVeloCellState(notebookID, cellID) {
     return caseData.veloSyncState[key];
 }
 
+// keep the screen awake while large datasets are loading, so the PC does
+// not sleep during long fetches without user interaction
+let wakeLock = null;
+
+async function acquireWakeLock() {
+    if (!("wakeLock" in navigator)) {
+        return; // not supported (e.g. insecure context or old browser)
+    }
+    if (wakeLock && !wakeLock.released) {
+        return; // already held
+    }
+    try {
+        wakeLock = await navigator.wakeLock.request("screen");
+    } catch (e) {
+        console.debug("could not acquire wake lock:", e);
+    }
+}
+
+function releaseWakeLock() {
+    if (wakeLock) {
+        wakeLock.release().catch(() => {});
+        wakeLock = null;
+    }
+}
+
+// the browser auto-releases the lock when the tab is hidden - re-acquire it
+// when the user comes back and a load is still running
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && wakeLock && wakeLock.released) {
+        acquireWakeLock();
+    }
+});
+
 function setLoadingProgress(loaded, total) {
+    acquireWakeLock();
     document.getElementById("loading").style.display = "block";
     let bar = document.getElementById("loadingProgressBar");
     let text = document.getElementById("loadingProgressText");
@@ -244,6 +278,7 @@ function hideLoading() {
     document.getElementById("loading").style.display = "none";
     document.getElementById("loadingProgressBar").style.width = "0%";
     document.getElementById("loadingProgressText").innerText = "";
+    releaseWakeLock();
 }
 
 function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
