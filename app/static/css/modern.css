@@ -593,6 +593,110 @@ body.explain-mode .explain-active-banner {
 }
 
 /* ==========================================================================
+   Graph popups (qtip2 node/edge details)
+   ========================================================================== */
+.qtip.qtip-bootstrap {
+  background: var(--bh-surface);
+  border: 1px solid var(--bh-border);
+  border-radius: var(--bh-radius);
+  box-shadow: var(--bh-shadow-lg);
+  color: var(--bh-text);
+  font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-width: 380px;
+}
+
+.qtip.qtip-bootstrap .qtip-titlebar {
+  background: var(--bh-surface-2);
+  border-bottom: 1px solid var(--bh-border);
+  border-radius: var(--bh-radius) var(--bh-radius) 0 0;
+  padding: 0.45rem 0.8rem;
+  color: var(--bh-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.qtip.qtip-bootstrap .qtip-close {
+  border-color: var(--bh-border);
+}
+
+.qtip.qtip-bootstrap .qtip-content {
+  padding: 0.65rem 0.85rem;
+  /* Safety cap so a popup never grows beyond the viewport */
+  max-height: min(60vh, 480px);
+  overflow-y: auto;
+  word-break: break-word;
+}
+
+/* Long lists (event times, tags, users) become scrollable */
+.qtip.qtip-bootstrap .list-group {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--bh-border);
+  border-radius: var(--bh-radius-sm);
+  margin-top: 0.35rem;
+}
+
+.qtip.qtip-bootstrap .list-group-item {
+  background: var(--bh-surface-2);
+  color: var(--bh-text);
+  border-color: var(--bh-border);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+/* Nested lists (joined edges) get a tighter frame */
+.qtip.qtip-bootstrap .list-group .list-group {
+  max-height: 160px;
+  margin-top: 0.25rem;
+}
+
+.qtip.qtip-bootstrap details > summary {
+  cursor: pointer;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--bh-radius-sm);
+  background: var(--bh-surface-2);
+  transition: background-color var(--bh-transition);
+}
+
+.qtip.qtip-bootstrap details > summary:hover {
+  background: var(--bh-accent-soft);
+}
+
+/* Compact "filter for" button (btn-xs no longer exists in Bootstrap 5) */
+.qtip.qtip-bootstrap .btn-xs {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+  border-radius: var(--bh-radius-sm);
+  margin-top: 0.4rem;
+}
+
+/* Themed scrollbars inside popups */
+.qtip.qtip-bootstrap .qtip-content::-webkit-scrollbar,
+.qtip.qtip-bootstrap .list-group::-webkit-scrollbar {
+  width: 8px;
+}
+
+.qtip.qtip-bootstrap .qtip-content::-webkit-scrollbar-thumb,
+.qtip.qtip-bootstrap .list-group::-webkit-scrollbar-thumb {
+  background: #c3c9d8;
+  border-radius: 8px;
+}
+
+.qtip.qtip-bootstrap .qtip-content::-webkit-scrollbar-thumb:hover,
+.qtip.qtip-bootstrap .list-group::-webkit-scrollbar-thumb:hover {
+  background: #a7afc4;
+}
+
+[data-theme="dark"] .qtip.qtip-bootstrap .qtip-content::-webkit-scrollbar-thumb,
+[data-theme="dark"] .qtip.qtip-bootstrap .list-group::-webkit-scrollbar-thumb {
+  background: #414759;
+}
+
+/* ==========================================================================
    Dark mode overrides
    ========================================================================== */
 [data-theme="dark"] {

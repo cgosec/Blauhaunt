@@ -14,8 +14,11 @@ checkForVelociraptor()
 //   2. genuine rate limiting (e.g. by a reverse proxy) - we honor Retry-After
 //      or fall back to exponential backoff.
 // remembers the page size of the last successful GetTable request, so paged
-// loads can start near it instead of halving down from the top on every page
+// loads can start near it instead of halving down from the top on every page.
+// After each successful page the size grows back towards DEFAULT_PAGE_SIZE,
+// so a rare one-off size error does not throttle the rest of the load.
 let lastGoodPageSize = null;
+const DEFAULT_PAGE_SIZE = 1000;
 
 function fetchWithRetry(url, options, retries = 8, delay = 1000) {
     return fetch(url, options).then(response => {
@@ -295,7 +298,7 @@ function hideLoading() {
     releaseWakeLock();
 }
 
-function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
+function loadData(notebookID, cellID, version, startRow = 0, rows = DEFAULT_PAGE_SIZE) {
     // start near the page size that worked before instead of triggering the
     // gRPC size limit halving on every page
     if (lastGoodPageSize) {
@@ -355,18 +358,30 @@ function loadData(notebookID, cellID, version, startRow = 0, rows = 1000) {
         // show progress while loading
         let nextRow = startRow + data.rows.length;
         let hasMore = data.total_rows > nextRow;
-        state.loadedRows = nextRow;
         setLoadingProgress(nextRow, data.total_rows);
         processJSONUpload(pageRows.join("\n")).then(() => {
+            // only advance the stored offset after the page's rows are merged
+            // into caseData and persisted - otherwise an interrupted load
+            // (e.g. page reload) would resume past rows that were never stored
+            state.loadedRows = nextRow;
+            storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
             if (!hasMore) {
                 hideLoading();
+                return;
             }
+            // grow the page size back towards the default after each
+            // successful page, so a rare one-off gRPC size error does not
+            // throttle the rest of the load
+            let nextRows = Math.min(DEFAULT_PAGE_SIZE, rows * 2);
+            if (nextRows > rows) {
+                lastGoodPageSize = nextRows;
+            }
+            loadData(notebookID, cellID, version, nextRow, nextRows);
+        }).catch(error => {
+            console.error(`Processing rows starting at ${startRow} failed:`, error);
+            hideLoading();
+            storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
         });
-        // if there are more rows, load them
-        if (hasMore) {
-            loadData(notebookID, cellID, version, nextRow, rows);
-        }
-        storeDataToIndexDB(header["Grpc-Metadata-Orgid"]);
     }).catch(error => {
         // the progress up to the last successful page is persisted, so the
         // next sync resumes there instead of starting over
