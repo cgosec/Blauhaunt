@@ -2824,9 +2824,38 @@ function mappingFromData(objects) {
 // #####################################################################################################################
 // ###################################### DATA PROCESSING ###############################################################
 
+function sortAndDedupeTimes(times) {
+    /*
+    Dedupes timestamp strings and sorts them chronologically.
+    Each unique value is parsed only once instead of parsing on every comparison.
+    Unparseable values are placed at the end.
+     */
+    let parsed = [...new Set(times)].map(t => {
+        let ms = new Date(t).getTime()
+        return {value: t, ms: isNaN(ms) ? Number.POSITIVE_INFINITY : ms}
+    })
+    parsed.sort((a, b) => a.ms - b.ms)
+    return parsed.map(p => p.value)
+}
+
 async function createNodesAndEdges(objects) {
-    let nodeTranslation = caseData["nodeTranslation"] || new Map()
-    let edgeTimeMap = caseData["hostEdgesLogonTimes"] || new Map()
+    // robustness for legacy cases that might miss these structures
+    caseData.nodeTranslation = caseData.nodeTranslation || new Map()
+    caseData.hostEdgesLogonTimes = caseData.hostEdgesLogonTimes || new Map()
+    caseData.userEdgesLogonTimes = caseData.userEdgesLogonTimes || new Map()
+    caseData.hostEdges = caseData.hostEdges || new Set()
+    caseData.userEdges = caseData.userEdges || new Set()
+    let nodeTranslation = caseData.nodeTranslation
+    let edgeTimeMap = caseData.hostEdgesLogonTimes
+
+    // lookup maps so existing edges can be updated in place
+    // instead of rebuilding the whole Set for every row
+    let hostEdgeById = new Map()
+    for (const edge of caseData.hostEdges) hostEdgeById.set(edge.data.id, edge)
+    let userEdgeById = new Map()
+    for (const edge of caseData.userEdges) userEdgeById.set(edge.data.id, edge)
+    let dirtyHostEdges = new Set()
+    let dirtyUserEdges = new Set()
 
     for (const data of objects) {
         if (!data.Destination) {
@@ -2834,6 +2863,7 @@ async function createNodesAndEdges(objects) {
             console.error(data)
             continue
         }
+        data.LogonTimes = data.LogonTimes || []
         let ipAddress = localIPs.includes(data.SourceIP) ? data.Destination : data.SourceIP.trim()
         if (bad_hostnames.includes(ipAddress))
             ipAddress = null
@@ -2868,86 +2898,104 @@ async function createNodesAndEdges(objects) {
         if (source) {
 
             let edgeid = source + ipAddress + dest + user + sid + data.EventID + logonType + distinction + description
-            let logontimes = edgeTimeMap.get(edgeid) || []
-            data.LogonTimes = data.LogonTimes || []
-            logontimes.push(...data.LogonTimes)
-            logontimes = logontimes.sort((a, b) => {
-                return new Date(a).getTime() - new Date(b).getTime()
-            })
-            logontimes = [...new Set(logontimes)] // remove duplicates
-            edgeTimeMap.set(edgeid, logontimes)
-            let edge = {
-                "data": {
-                    "id": edgeid,
-                    "source": source,
-                    "target": dest,
-                    "objid": edgeid,
-                    "elabel": user,
-                    "label": "Event",
-                    "mod": "System",
-                    "distance": 15,
-                    "ntype": "edge",
-                    "eid": data.EventID,
-                    "count": caseData.hostEdgesLogonTimes.get(edgeid).length,
-                    "eventSource": source,
-                    "Distinction": distinction,
-                    "edge_color": edge_color,
-                    "ecolor": ecolor,
-                    "EventTimes": caseData.hostEdgesLogonTimes.get(edgeid) || [],
-                    "UserName": user,
-                    "SID": sid || "-",
-                    "IP": data.SourceIP || "-",
-                    "EventID": data.EventID,
-                    "LogonType": logonType,
-                    "Description": description,
-                }
+            let logontimes = edgeTimeMap.get(edgeid)
+            if (!logontimes) {
+                logontimes = []
+                edgeTimeMap.set(edgeid, logontimes)
             }
-            caseData.hostEdges = new Set([...caseData.hostEdges].filter(e => {
-                return e.data.id !== edgeid
-            }))
-            caseData.hostEdges.add(edge)
+            logontimes.push(...data.LogonTimes)
+            if (!hostEdgeById.has(edgeid)) {
+                let edge = {
+                    "data": {
+                        "id": edgeid,
+                        "source": source,
+                        "target": dest,
+                        "objid": edgeid,
+                        "elabel": user,
+                        "label": "Event",
+                        "mod": "System",
+                        "distance": 15,
+                        "ntype": "edge",
+                        "eid": data.EventID,
+                        "count": 0,
+                        "eventSource": source,
+                        "Distinction": distinction,
+                        "edge_color": edge_color,
+                        "ecolor": ecolor,
+                        "EventTimes": [],
+                        "UserName": user,
+                        "SID": sid || "-",
+                        "IP": data.SourceIP || "-",
+                        "EventID": data.EventID,
+                        "LogonType": logonType,
+                        "Description": description,
+                    }
+                }
+                hostEdgeById.set(edgeid, edge)
+                caseData.hostEdges.add(edge)
+            }
+            dirtyHostEdges.add(edgeid)
         }
 //############################## USER EDGES ############################################
         if (user) {
             sid = data.SID || "-"
             let uedgeid = user + source + dest + data.EventID + logonType + distinction + sid + data.Description
 
-            let times = caseData.userEdgesLogonTimes.get(uedgeid) || []
-            times.push(...data.LogonTimes)
-            times = times.sort((a, b) => {
-                return new Date(a).getTime() - new Date(b).getTime()
-            })
-            times = [...new Set(times)] // remove duplicates
-            caseData.userEdgesLogonTimes.set(uedgeid, times)
-            let userEdge = {
-                "data": {
-                    "id": uedgeid,
-                    "source": user,
-                    "target": dest,
-                    "objid": uedgeid,
-                    "elabel": data.EventID,
-                    "label": "Event",
-                    "mod": "User",
-                    "distance": 5,
-                    "ewidth": 0.1,
-                    "ntype": "edge",
-                    "eventSource": source,
-                    "eid": data.EventID,
-                    "count": times.length,
-                    "Distinction": distinction,
-                    "edge_color": edge_color,
-                    "ecolor": ecolor,
-                    "EventTimes": caseData.userEdgesLogonTimes.get(uedgeid) || [],
-                    "UserName": user,
-                    "SID": sid || "-",
-                    "EventID": data.EventID,
-                    "LogonType": logonType,
-                    "Description": description,
-                }
+            let times = caseData.userEdgesLogonTimes.get(uedgeid)
+            if (!times) {
+                times = []
+                caseData.userEdgesLogonTimes.set(uedgeid, times)
             }
-            caseData.userEdges = new Set([...caseData.userEdges].filter(e => e.data.id !== uedgeid))
-            caseData.userEdges.add(userEdge)
+            times.push(...data.LogonTimes)
+            if (!userEdgeById.has(uedgeid)) {
+                let userEdge = {
+                    "data": {
+                        "id": uedgeid,
+                        "source": user,
+                        "target": dest,
+                        "objid": uedgeid,
+                        "elabel": data.EventID,
+                        "label": "Event",
+                        "mod": "User",
+                        "distance": 5,
+                        "ewidth": 0.1,
+                        "ntype": "edge",
+                        "eventSource": source,
+                        "eid": data.EventID,
+                        "count": 0,
+                        "Distinction": distinction,
+                        "edge_color": edge_color,
+                        "ecolor": ecolor,
+                        "EventTimes": [],
+                        "UserName": user,
+                        "SID": sid || "-",
+                        "EventID": data.EventID,
+                        "LogonType": logonType,
+                        "Description": description,
+                    }
+                }
+                userEdgeById.set(uedgeid, userEdge)
+                caseData.userEdges.add(userEdge)
+            }
+            dirtyUserEdges.add(uedgeid)
         }
+    }
+
+    // finalize once per batch: sort and dedupe the collected timestamps
+    // and refresh the affected edges instead of doing this for every single row
+    for (const edgeid of dirtyHostEdges) {
+        let times = sortAndDedupeTimes(edgeTimeMap.get(edgeid))
+        edgeTimeMap.set(edgeid, times)
+        let edge = hostEdgeById.get(edgeid)
+        edge.data.count = times.length
+        edge.data.EventTimes = times
+    }
+    for (const uedgeid of dirtyUserEdges) {
+        let times = sortAndDedupeTimes(caseData.userEdgesLogonTimes.get(uedgeid))
+        caseData.userEdgesLogonTimes.set(uedgeid, times)
+        let edge = userEdgeById.get(uedgeid)
+        edge.data.count = times.length
+        edge.data.EventTimes = times
     }
 }
 
